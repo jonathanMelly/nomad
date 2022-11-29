@@ -1,4 +1,4 @@
-package goappmation
+package installer
 
 import (
 	"io/ioutil"
@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-// writeScripts creates files from the config file
+// writeScripts creates files from the app-definitions file
 func writeScripts(scripts map[string]string, workingFolder string) error {
 	// Loop through each script
 	for name, body := range scripts {

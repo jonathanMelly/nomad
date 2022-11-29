@@ -1,7 +1,8 @@
-package goappmation
+package installer
 
 import (
 	"fmt"
+	"github.com/jonathanMelly/portable-app-installer/lib/bytesize"
 	"log"
 	"os"
 	"os/exec"
@@ -9,8 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
-
-	"github.com/josephspurrier/goappmation/bytesize"
 )
 
 func init() {
@@ -21,16 +20,16 @@ func init() {
 var ForceExtract = true
 var SkipDownload = true
 
-// Run will execute commands from a config file
+// Run will execute commands from a app-definitions file
 func Run(configFile string, versionOverwrite string) {
 
-	// Set the name of the config file
+	// Set the name of the app-definitions file
 	configFileName := path.Base(configFile)
 
-	// Output the name of the config file
+	// Output the name of the app-definitions file
 	log.Println("*** Loading: " + configFileName)
 
-	// Load the config file
+	// Load the app-definitions file
 	pi, err := LoadConfig(configFile)
 	if err != nil {
 		log.Println(err)

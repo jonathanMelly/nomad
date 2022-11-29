@@ -1,0 +1,21 @@
+{
+	"Version": "8.4.6",
+	"ApplicationName": "apps/Notepad++",
+	"DownloadExtension": ".zip",
+	"DownloadUrl": "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v{{VERSION}}/npp.{{VERSION}}.portable.x64.zip",
+	"VersionCheck":
+	{
+		"Url":"https://github.com/notepad-plus-plus/notepad-plus-plus/releases/latest",
+		"RegEx":"<title>Release Notepad\\+\\+ release (\\d[\\.\\d]*)",
+		"UseLatestVersion": true
+	},
+	"RemoveRootFolder": false,
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"version.txt":"{{VERSION}}"
+	}
+}

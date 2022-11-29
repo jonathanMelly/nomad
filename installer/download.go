@@ -1,4 +1,4 @@
-package goappmation
+package installer
 
 import (
 	"io"

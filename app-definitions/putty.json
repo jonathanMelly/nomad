@@ -1,0 +1,11 @@
+{
+	"Version": "1.2.3",
+	"ApplicationName": "apps/Putty",
+	"DownloadExtension": ".zip",
+	"DownloadUrl": "https://the.earth.li/~sgtatham/putty/latest/w64/putty.zip",
+	"RemoveRootFolder": false,
+	"ExtractRegExList":
+	[
+		"(.*)"
+	]
+}

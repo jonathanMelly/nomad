@@ -1,6 +1,9 @@
+// Initial Author
 // Copyright 2015 Joseph Spurrier
 // Author: Joseph Spurrier (http://josephspurrier.com)
 // License: http://www.apache.org/licenses/LICENSE-2.0.html
+
+// New version J. Melly
 
 package main
 
@@ -9,13 +12,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/josephspurrier/goappmation"
+	"github.com/jonathanMelly/portable-app-installer/installer"
 )
 
 func main() {
 
 	// Overwrite version
-	flagVersion := flag.String("version", "", "Overwrites the version in the config file")
+	flagVersion := flag.String("version", "", "Overwrites the version in the app-definitions file")
 
 	flag.Parse()
 
@@ -27,5 +30,5 @@ func main() {
 	}
 
 	// Run the automation
-	goappmation.Run(configFile, *flagVersion)
+	installer.Run(configFile, *flagVersion)
 }

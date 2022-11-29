@@ -1,4 +1,4 @@
-package goappmation
+package installer
 
 import (
 	"encoding/json"
@@ -33,7 +33,7 @@ func (pi *PortableInfo) parseJSON(jsonBytes []byte) error {
 	return json.Unmarshal([]byte(jsonBytes), &pi)
 }
 
-// LoadConfig returns the struct from the config file
+// LoadConfig returns the struct from the app-definitions file
 func LoadConfig(configFile string) (*PortableInfo, error) {
 	var err error
 	var input = io.ReadCloser(os.Stdin)
@@ -41,7 +41,7 @@ func LoadConfig(configFile string) (*PortableInfo, error) {
 		return nil, err
 	}
 
-	// Read the config file
+	// Read the app-definitions file
 	jsonBytes, err := ioutil.ReadAll(input)
 	input.Close()
 	if err != nil {
@@ -51,7 +51,7 @@ func LoadConfig(configFile string) (*PortableInfo, error) {
 	// Create a new container
 	pi := &PortableInfo{}
 
-	// Parse the config
+	// Parse the app-definitions
 	if err := pi.parseJSON(jsonBytes); err != nil {
 		return nil, err
 	}

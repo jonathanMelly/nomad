@@ -1,0 +1,21 @@
+{
+	"Version": "1.2.3",
+	"ApplicationName": "apps/Filezilla",
+	"DownloadExtension": ".zip",
+	"DownloadUrl": "https://dl1.cdn.filezilla-project.org/client/FileZilla_3.62.2_win64.zip?h=hrFYCfrswfH90YLeSWyG5A&x=1669710894",
+	"VersionCheck":
+	{
+		"Url":"https://filezilla-project.org/versions.php",
+		"RegEx":"name=\"(\\d[\\.\\d]*)\"",
+		"UseLatestVersion": true
+	},
+	"RemoveRootFolder": false,
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"version.txt":"{{VERSION}}"
+	}
+}
