@@ -30,7 +30,7 @@ func extractFromRequest(url string, regExp string) (string, error) {
 		return version, nil
 	}
 
-	return "", errors.New("Could not find string on page:" + url)
+	return "", errors.New("Could not find " + regExp + " on page:" + url)
 }
 
 var msiDstFolder string
