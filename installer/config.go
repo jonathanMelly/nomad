@@ -7,19 +7,22 @@ import (
 	"os"
 )
 
-// PortableInfo contains the settings for the portable application
-type PortableInfo struct {
+// AppInfo contains the settings for the portable application
+type AppInfo struct {
 	ApplicationName   string            `json:"ApplicationName"`
 	DownloadExtension string            `json:"DownloadExtension"`
 	Version           string            `json:"Version"`
 	VersionCheck      VersionCheck      `json:"VersionCheck"`
 	RemoveRootFolder  bool              `json:"RemoveRootFolder"`
 	RootFolderName    string            `json:"RootFolderName"`
+	Symlink           string            `json:"Symlink"` //if specified add/update symlink to point to appname folder
+	Shortcut          string            `json:"Shortcut"`
 	DownloadUrl       string            `json:"DownloadUrl"`
 	ExtractRegExList  []string          `json:"ExtractRegExList"`
 	CreateFolders     []string          `json:"CreateFolders"`
 	CreateFiles       map[string]string `json:"CreateFiles"`
 	MoveObjects       map[string]string `json:"MoveObjects"`
+	RestoreFiles      []string          `json:"RestoreFiles"` //Copy/Paste (overwrite) files from previous symlinked directory (needs symlink)
 }
 
 type VersionCheck struct {
@@ -29,12 +32,12 @@ type VersionCheck struct {
 }
 
 // ParseJSON parses the given bytes
-func (pi *PortableInfo) parseJSON(jsonBytes []byte) error {
-	return json.Unmarshal([]byte(jsonBytes), &pi)
+func (appInfo *AppInfo) parseJSON(jsonBytes []byte) error {
+	return json.Unmarshal([]byte(jsonBytes), &appInfo)
 }
 
 // LoadConfig returns the struct from the app-definitions file
-func LoadConfig(configFile string) (*PortableInfo, error) {
+func LoadConfig(configFile string) (*AppInfo, error) {
 	var err error
 	var input = io.ReadCloser(os.Stdin)
 	if input, err = os.Open(configFile); err != nil {
@@ -49,7 +52,7 @@ func LoadConfig(configFile string) (*PortableInfo, error) {
 	}
 
 	// Create a new container
-	pi := &PortableInfo{}
+	pi := &AppInfo{}
 
 	// Parse the app-definitions
 	if err := pi.parseJSON(jsonBytes); err != nil {

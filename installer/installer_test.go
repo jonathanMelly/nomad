@@ -9,7 +9,7 @@ import (
 // for a valid return value.
 func TestHelloName(t *testing.T) {
 
-	Run("app-definitions/filezilla.json", "")
+	Run("../app-definitions/putty.json", "", false, true, "")
 	/*name := "Gladys"
 	want := regexp.MustCompile(`\b` + name + `\b`)
 	msg, err := Hello("Gladys")

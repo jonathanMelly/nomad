@@ -37,7 +37,7 @@ var msiDstFolder string
 var msiSrcFolder string
 var msiAllowRegExp *regexp.Regexp
 
-// copyMsiRegex will copy certain files from a directory to another folder based on a regular expression
+// copyMsiRegex will restore certain files from a directory to another folder based on a regular expression
 func copyMsiRegex(srcFolder string, dstFolder string, allowRegExp *regexp.Regexp) (bool, error) {
 	// Create folder to extract files
 	if !isExist(dstFolder) {

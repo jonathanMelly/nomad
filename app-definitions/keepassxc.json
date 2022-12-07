@@ -1,0 +1,28 @@
+{
+	"Version": "2.7.4",
+	"ApplicationName": "keepassxc-{{VERSION}}",
+	"Symlink": "keepassxc",
+	"Shortcut": "KeePassXC.exe",
+	"DownloadExtension": ".zip",
+	"DownloadUrl": "https://github.com/keepassxreboot/keepassxc/releases/download/{{VERSION}}/KeePassXC-{{VERSION}}-Win64.zip",
+	"RemoveRootFolder": true,
+	"VersionCheck":
+	{
+		"Url":"https://keepassxc.org/blog/",
+		"RegEx":"KeePassXC (\\d[\\.\\d]*) released",
+		"UseLatestVersion": true
+	},
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	},
+	"RestoreFiles":
+	[
+		"config/keepassxc.ini",
+		"config/keepassxc_local.ini"
+	]
+}

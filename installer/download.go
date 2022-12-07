@@ -42,13 +42,23 @@ func downloadFile(url string, fileName string) (int64, error) {
 		return 0, err
 	}
 
-	resp, err := http.Get(url)
-	defer resp.Body.Close()
+	r, err := http.NewRequest("GET", url, nil)
+
+	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
+	r.Header.Add("User-Agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`)
+
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
 
-	n, err := io.Copy(out, resp.Body)
+	client, err := http.DefaultClient.Do(r)
+	defer client.Body.Close()
+
+	if err != nil {
+		return -1, err
+	}
+
+	n, err := io.Copy(out, client.Body)
 
 	return n, err
 }

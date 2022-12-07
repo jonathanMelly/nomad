@@ -1,11 +1,23 @@
 {
-	"Version": "1.2.3",
-	"ApplicationName": "apps/Putty",
+	"Version": "0.78",
+	"ApplicationName": "putty-{{VERSION}}",
+	"Symlink": "putty",
+	"Shortcut": "PUTTY.EXE",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://the.earth.li/~sgtatham/putty/latest/w64/putty.zip",
 	"RemoveRootFolder": false,
+	"VersionCheck":
+	{
+		"Url":"https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html",
+		"RegEx":"Currently this is (\\d[\\.\\d]*),",
+		"UseLatestVersion": true
+	},
 	"ExtractRegExList":
 	[
 		"(.*)"
-	]
+	],
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	}
 }

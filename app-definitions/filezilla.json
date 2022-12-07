@@ -1,21 +1,28 @@
 {
-	"Version": "1.2.3",
-	"ApplicationName": "apps/Filezilla",
+	"Version": "3.62.2",
+	"ApplicationName": "filezilla-{{VERSION}}",
+	"Symlink": "filezilla",
+	"Shortcut": "filezilla.exe",
 	"DownloadExtension": ".zip",
-	"DownloadUrl": "https://dl1.cdn.filezilla-project.org/client/FileZilla_3.62.2_win64.zip?h=hrFYCfrswfH90YLeSWyG5A&x=1669710894",
+	"DownloadUrl": "https://download.filezilla-project.org/client/FileZilla_{{VERSION}}_win64.zip",
 	"VersionCheck":
 	{
 		"Url":"https://filezilla-project.org/versions.php",
 		"RegEx":"name=\"(\\d[\\.\\d]*)\"",
 		"UseLatestVersion": true
 	},
-	"RemoveRootFolder": false,
+	"RemoveRootFolder": true,
 	"ExtractRegExList":
 	[
 		"(.*)"
 	],
 	"CreateFiles":
 	{
-		"version.txt":"{{VERSION}}"
-	}
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}",
+		"fzdefaults.xml":"<FileZilla3><Settings><Setting name=\"Config Location\">./config</Setting><Setting name=\"Kiosk mode\">0</Setting><Setting name=\"Disable update check\">1</Setting><Setting name=\"Cache directory\">$USERPROFILE/Documents</Setting></Settings>"
+	},
+	"RestoreFiles":
+	[
+		"config/"
+	]
 }

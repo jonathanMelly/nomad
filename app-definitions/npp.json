@@ -1,6 +1,8 @@
 {
-	"Version": "8.4.6",
-	"ApplicationName": "apps/Notepad++",
+	"Version": "8.4.7",
+	"ApplicationName": "notepad++-{{VERSION}}",
+	"Symlink": "notepad++",
+	"Shortcut": "notepad++.exe",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v{{VERSION}}/npp.{{VERSION}}.portable.x64.zip",
 	"VersionCheck":
@@ -16,6 +18,6 @@
 	],
 	"CreateFiles":
 	{
-		"version.txt":"{{VERSION}}"
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
 	}
 }

@@ -1,0 +1,21 @@
+{
+	"Version": "1.0.1",
+	"ApplicationName": "dummy-{{VERSION}}",
+	"Symlink": "dummy",
+	"Shortcut": "dummy.txt",
+	"DownloadExtension": ".zip",
+	"DownloadUrl": "https://bad.zip",
+	"RemoveRootFolder": false,
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	},
+	"RestoreFiles":
+	[
+		"config/","test.txt"
+	]
+}
