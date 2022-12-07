@@ -54,8 +54,9 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 
 	// If Version Check parameters are specified
 	if appInfo.VersionCheck.Url != "" && appInfo.VersionCheck.RegEx != "" {
+		re := strings.Replace(appInfo.VersionCheck.RegEx, "{{VERSION}}", `(\d+(?:\.\d+)+)`, 1)
 		// Extract the version from the webpage
-		newVersion, err := extractFromRequest(appInfo.VersionCheck.Url, appInfo.VersionCheck.RegEx)
+		newVersion, err := extractFromRequest(appInfo.VersionCheck.Url, re)
 		if err != nil {
 			log.Println("Error retrieving page |", err)
 			unifiedExit(1)

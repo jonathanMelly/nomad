@@ -9,7 +9,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html",
-		"RegEx":"Currently this is (\\d[\\.\\d]*),",
+		"RegEx":"Currently this is ({{VERSION}}),",
 		"UseLatestVersion": true
 	},
 	"ExtractRegExList":

@@ -9,7 +9,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://keepassxc.org/blog/",
-		"RegEx":"KeePassXC (\\d[\\.\\d]*) released",
+		"RegEx":"KeePassXC ({{VERSION}}) released",
 		"UseLatestVersion": true
 	},
 	"ExtractRegExList":
