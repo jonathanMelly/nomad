@@ -1,0 +1,26 @@
+{
+	"Version": "12.3",
+	"ApplicationName": "heidisql-{{VERSION}}",
+	"Symlink": "heidisql",
+	"Shortcut": "heidisql.exe",
+	"DownloadExtension": ".zip",
+	"DownloadUrl": "https://www.heidisql.com/downloads/releases/HeidiSQL_{{VERSION}}_64_Portable.zip",
+	"VersionCheck":
+	{
+		"Url":"https://www.heidisql.com/download.php",
+		"RegEx":"<h1>Download HeidiSQL {{VERSION}},",
+		"UseLatestVersion": true
+	},
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	},
+	"RestoreFiles":
+	[
+		"portable_settings.txt"
+	]
+}

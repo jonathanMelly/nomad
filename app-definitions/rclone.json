@@ -1,0 +1,26 @@
+{
+	"Version": "1.60.1",
+	"ApplicationName": "rclone-{{VERSION}}",
+	"Symlink": "rclone",
+	"DownloadExtension": ".zip",
+	"DownloadUrl": "https://github.com/rclone/rclone/releases/download/v{{VERSION}}/rclone-v{{VERSION}}-windows-amd64.zip",
+	"RemoveRootFolder": true,
+	"VersionCheck":
+	{
+		"Url":"https://api.github.com/repos/rclone/rclone/releases/latest",
+		"RegEx":"\"tag_name\": \"v{{VERSION}}",
+		"UseLatestVersion": true
+	},
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	},
+	"RestoreFiles":
+	[
+		"rclone.conf"
+	]
+}

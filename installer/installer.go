@@ -18,7 +18,7 @@ func init() {
 }
 
 // Run will execute commands from a app-definitions file
-func Run(configFile string, versionOverwrite string, forceExtract bool, skipDownload bool, envVarForAppsLocation string) {
+func Run(configFile string, versionOverwrite string, forceExtract bool, skipDownload bool, envVarForAppsLocation string, archivesSubDir string) {
 
 	if !strings.HasSuffix(configFile, ".json") {
 		configFile += ".json"
@@ -87,12 +87,17 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 
 	// Set the zip name based off the folder
 	// Note: The original file download name will be changed
-	var zip = folderName + appInfo.DownloadExtension
+	var zip = path.Join(DefaultAppPath, archivesSubDir, applicationName+appInfo.DownloadExtension)
 
 	// If the zip file DOES exist on disk
 	if isExist(zip) {
 		// Output the filename of the folder
 		log.Println("Download Exists:", zip)
+	} else {
+		zipDir := filepath.Dir(zip)
+		if !isExist(zipDir) {
+			os.MkdirAll(zipDir, os.ModePerm)
+		}
 	}
 
 	// If SkipDownload is true
@@ -334,13 +339,19 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 
 			absShortcutsDir, _ := filepath.Abs(DefaultShortcutsDir)
 
+			icon := ""
+			if appInfo.ShortcutIcon != "" {
+				icon = path.Join(path.Dir(target), appInfo.ShortcutIcon)
+			}
+
 			createShortcut(
 				appInfo.Shortcut,
 				target,
 				"",
 				filepath.Dir(target),
 				"portable-"+appInfo.Shortcut,
-				absShortcutsDir)
+				absShortcutsDir,
+				icon)
 		}
 	}
 

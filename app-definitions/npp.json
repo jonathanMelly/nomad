@@ -19,5 +19,9 @@
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
-	}
+	},
+	"RestoreFiles":
+	[
+		"userDefineLangs/userDefineLang_AHK.xml"
+	]
 }

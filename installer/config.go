@@ -17,6 +17,7 @@ type AppInfo struct {
 	RootFolderName    string            `json:"RootFolderName"`
 	Symlink           string            `json:"Symlink"` //if specified add/update symlink to point to appname folder
 	Shortcut          string            `json:"Shortcut"`
+	ShortcutIcon      string            `json:"ShortcutIcon"`
 	DownloadUrl       string            `json:"DownloadUrl"`
 	ExtractRegExList  []string          `json:"ExtractRegExList"`
 	CreateFolders     []string          `json:"CreateFolders"`

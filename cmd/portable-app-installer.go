@@ -28,6 +28,8 @@ func main() {
 	flagForceExtract := flag.Bool("force", false, "Remove any similar existing version")
 	flagSkipDownload := flag.Bool("skip", true, "Skip download if corresponding archive is already present")
 
+	flagArchivesSubDir := flag.String("archives", "archives", "Set archives subdir")
+
 	flag.Parse()
 
 	configFile := flag.Arg(0)
@@ -40,7 +42,7 @@ func main() {
 			}
 			for _, f := range files {
 				if !f.IsDir() && strings.HasSuffix(f.Name(), ".json") {
-					installer.Run(path.Join(*flagConfig, f.Name()), *flagVersion, *flagForceExtract, *flagSkipDownload, *flagEnvVarForAppsLocation)
+					installer.Run(path.Join(*flagConfig, f.Name()), *flagVersion, *flagForceExtract, *flagSkipDownload, *flagEnvVarForAppsLocation, *flagArchivesSubDir)
 					log.Println("")
 				}
 			}
@@ -51,7 +53,7 @@ func main() {
 
 	} else {
 		// Run the automation
-		installer.Run(configFile, *flagVersion, *flagForceExtract, *flagSkipDownload, *flagEnvVarForAppsLocation)
+		installer.Run(configFile, *flagVersion, *flagForceExtract, *flagSkipDownload, *flagEnvVarForAppsLocation, *flagArchivesSubDir)
 	}
 
 }
