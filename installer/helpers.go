@@ -83,9 +83,13 @@ func createShortcut(linkName string, target string, arguments string, workingDir
 		scriptTxt.WriteString("objLink.TargetPath = \"")
 		scriptTxt.WriteString(filepath.FromSlash(target))
 		scriptTxt.WriteString("\"\n")
-		scriptTxt.WriteString("objLink.IconLocation  = \"")
-		scriptTxt.WriteString(filepath.FromSlash(icon))
-		scriptTxt.WriteString("\"\n")
+
+		if icon != "" {
+			scriptTxt.WriteString("objLink.IconLocation  = \"")
+			scriptTxt.WriteString(filepath.FromSlash(icon))
+			scriptTxt.WriteString("\"\n")
+		}
+
 		scriptTxt.WriteString("objLink.WindowStyle = 1\n")
 		scriptTxt.WriteString("objLink.WorkingDirectory = \"")
 		scriptTxt.WriteString(filepath.FromSlash(workingDirectory))
