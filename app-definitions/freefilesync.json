@@ -24,6 +24,7 @@
 	[
 		"GlobalSettings.xml",
 		"Logs/",
-		"LastRun.ffs_gui"
+		"LastRun.ffs_gui",
+		"config/"
 	]
 }
