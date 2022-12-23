@@ -92,7 +92,7 @@ func restoreFiles(files []string, source string, destination string) error {
 				err := filepath.Walk(sourcePath, func(walkingPath string, _ os.FileInfo, _ error) error {
 
 					//walk walks given folder as well...
-					if walkingPath != sourcePath {
+					if walkingPath != sourcePath && !isDirectory(walkingPath) {
 						//log.Println("=>Walking " + walkingPath)
 						destSubPath := strings.Join(strings.Split(walkingPath, string(os.PathSeparator))[2:], string(os.PathSeparator))
 						restore(walkingPath, filepath.Join(destination, destSubPath))
