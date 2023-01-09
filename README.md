@@ -9,11 +9,12 @@ I needed a fast, reliable and simple way to manage portable apps.
 
 # How
  1. Download [latest release](https://github.com/jonathanMelly/portable-app-installer/releases/latest)
- 2. Run 
+ 2. To install / update an app (*Filezilla* for instance), start a terminal and run
 ```bash 
-portable-app-installer app.json 
+portable-app-installer filezilla
 ```
-(where *app.json* is a file with some info on the app like [these ones I personnaly use](app-definitions))
+
+(available apps are listed [here](app-definitions) and you can add yours by adding any valid json file...)
 
 # Options
 
