@@ -8,7 +8,7 @@ I needed a fast, reliable and simple way to manage portable apps.
  * [scoop](https://scoop.sh/) status was uncertain and I wanted to handle my apps without validation...
 
 # How
- 1. Download [https://github.com/jonathanMelly/portable-app-installer/releases/latest](latest release)
+ 1. Download [latest release](https://github.com/jonathanMelly/portable-app-installer/releases/latest)
  2. Run 
 ```bash 
 portable-app-installer app.json 
