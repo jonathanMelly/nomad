@@ -1,60 +1,29 @@
-# GoAppMation
-Portable App Creator in Go
+# Portable app installer (fork of [goappmation](https://github.com/josephspurrier/goappmation))
 
-Note: Project is in development so it may change frequently.
+# Why ?
+I needed a fast, reliable and simple way to manage portable apps.
 
-This package makes it easy to find latest version of an application found on a website, download the zip to your computer, extract only the necessary files, and then add any files and scripts you need to make the software portable.
+# Other solutions ?
+ * [portableapps](https://portableapps.com/) was to slow or buggy (do some fs stuff before/after run) 
+ * [scoop](https://scoop.sh/) status was uncertain and I wanted to handle my apps without validation...
 
-This tool is currently used to update [golang-portable-windows](https://github.com/josephspurrier/golang-portable-windows) and will be eventually used to update [surfstack-wamp](https://github.com/josephspurrier/surfstack-wamp) because much of the work to create portable versions of the latest software is manual.
+# How
+ 1. Download [https://github.com/jonathanMelly/portable-app-installer/releases/latest](latest release)
+ 2. Run 
+```bash 
+portable-app-installer app.json 
+```
+(where *app.json* is a file with some info on the app like [these ones I personnaly use](app-definitions))
 
-## Example: Build MySQL Portable for Windows
+# Options
 
-In the **project/MySQL Portable** folder, there are two json config files. These files contains all the instructions on how to create a portable distribution of MySQL.
+| Flag                                  | Description                                                         |
+|---------------------------------------|---------------------------------------------------------------------|
+| -configs &lt;folder&gt;               | runs on all .json files in given folder                             |
+| -force                                | force reinstalls (removes existing folder)                          |
+| -skip=false                           | do not reuse already downloaded archive                             |
+| -envvar=&lt;envVarForShortcutPath&gt; | sets env var which points to shortcut (empty to use absolute paths) |
 
-To install, run the following command:
-~~~
-go get github.com/josephspurrier/goappmation/cmd/goappmation
-~~~
+# App definition structure
+Please refer to [this file](installer/config.go)
 
-Then, run one of these commands depending on how you want to specify the version:
-
-~~~
-# MySQL v5.7.12 - version specified inside the config file
-goappmation.exe "../../project/MySQL Portable/MySQL Portable v5.7.12.json"
-
-# MySQL v5.7.12 - version specified outside the config file
-goappmation.exe -version=5.7.12 "../../project/MySQL Portable/MySQL Portable v5.7.X.json"
-~~~
-
-The portable distribution will be created in a folder called: MySQL Portable v5.7.12
-
-The folder will contain the following batch scripts:
-
-* _Initialize.cmd - Run first to create the data directory before starting MySQL
-* _Start.cmd      - Run to start MySQL
-* _Stop.cmd       - Run to stop MySQL
-
-## Variables in config
-
-You can use the **{{VERSION}}** variable in **ApplicationName** and **DownloadUrl**.
-
-## Goals of this Project
-
-### Completed
-
-* Download a ZIP file from a URL using a version number
-* Extract certain files from a URL using regular expressions
-* Remove the root folder from a ZIP archive
-* Create files to do certain things like run the application
-* Get the version number of the latest version
-* Move/rename files and folders
-* Pass version that overwrites version in the config file
-
-### Next Goals
-
-* Add ability to download files that are not zipped
-* Add ability to edit files
-* Add ability to append to files
-* Handle migrations between different versions
-* Do diffs between text files for configs
-* Maybe create a simple script language
