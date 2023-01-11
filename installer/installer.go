@@ -107,6 +107,7 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 		log.Println("Will Download:", folderName)
 
 		downloadURL := strings.Replace(appInfo.DownloadUrl, "{{VERSION}}", version, -1)
+		downloadURL = strings.Replace(downloadURL, "{{VERSION_NO_DOT}}", strings.ReplaceAll(version, ".", ""), -1)
 
 		log.Println("Downloading from:", downloadURL)
 		log.Println("Downloading to:", zip)
