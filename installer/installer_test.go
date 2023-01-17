@@ -2,6 +2,8 @@ package installer
 
 import (
 	//"regexp"
+	"log"
+	"os"
 	"testing"
 )
 
@@ -9,7 +11,10 @@ import (
 // for a valid return value.
 func TestHelloName(t *testing.T) {
 
-	Run("../app-definitions/putty.json", "", false, true, "", "archives")
+	file, _ := os.Stat(`C:\Users\jonmelly\test\portable\apps\archives`)
+	log.Println(file.Size())
+
+	Run("../app-definitions/test.json", "", false, true, "", "archives")
 	/*name := "Gladys"
 	want := regexp.MustCompile(`\b` + name + `\b`)
 	msg, err := Hello("Gladys")

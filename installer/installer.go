@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jonathanMelly/portable-app-installer/lib/bytesize"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 )
@@ -106,8 +108,31 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 	} else {
 		log.Println("Will Download:", folderName)
 
-		downloadURL := strings.Replace(appInfo.DownloadUrl, "{{VERSION}}", version, -1)
-		downloadURL = strings.Replace(downloadURL, "{{VERSION_NO_DOT}}", strings.ReplaceAll(version, ".", ""), -1)
+		versionRegex := regexp.MustCompile(`(\d+)(?:\.(\d+)*)`)
+		versionMatch := versionRegex.FindStringSubmatch(version)
+
+		versionMajor := versionMatch[1]
+		versionMinor := "0"
+		if len(versionMatch) > 2 {
+			versionMinor = versionMatch[2]
+		}
+		versionBugfix := "0"
+		if len(versionMatch) > 3 {
+			versionBugfix = versionMatch[3]
+		}
+		log.Println("Version details: Major:" + versionMajor + "|Minor:" + versionMinor + "|BugFix:" + versionBugfix)
+
+		var versionReplaces = map[string]string{
+			"VERSION":        version,
+			"VERSION_NO_DOT": strings.ReplaceAll(version, ".", ""),
+			"V_MINOR":        versionMinor,
+			"V_MAJOR":        versionMajor,
+			"V_BUGFIX":       versionBugfix,
+		}
+		downloadURL := appInfo.DownloadUrl
+		for source, replacement := range versionReplaces {
+			downloadURL = strings.Replace(downloadURL, "{{"+source+"}}", replacement, -1)
+		}
 
 		log.Println("Downloading from:", downloadURL)
 		log.Println("Downloading to:", zip)
