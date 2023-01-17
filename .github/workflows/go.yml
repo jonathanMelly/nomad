@@ -26,6 +26,14 @@ jobs:
       - name: Build
         run: GOOS=windows GOARCH=amd64 go build -o bin/ ./cmd/portable-app-installer.go
 
+      - name: Package
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          mkdir archive
+          cp bin/* archive/
+          cp app-definitions/*.json archive
+          zip archive.zip archive/
+
       - name: Upload release binary
         uses: actions/upload-release-asset@v1.0.2
         if: ${{ steps.release.outputs.release_created }}
@@ -33,6 +41,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: bin/portable-app-installer.exe
-          asset_name: portable-app-installer-${{ steps.release.outputs.major }}.${{steps.release.outputs.minor}}.${{steps.release.outputs.patch}}-win64.exe
+          asset_path: archive.zip
+          asset_name: portable-app-installer-${{ steps.release.outputs.major }}.${{steps.release.outputs.minor}}.${{steps.release.outputs.patch}}-win64.zip
           asset_content_type: application/octet-stream
