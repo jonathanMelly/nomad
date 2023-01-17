@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0](https://github.com/jonathanMelly/portable-app-installer/compare/v1.0.0...v1.1.0) (2023-01-17)
+
+
+### Features
+
+* **apps:** add app defs in release ([eecdfa7](https://github.com/jonathanMelly/portable-app-installer/commit/eecdfa7532fe907eabb8674363eb4e985807ed4b))
+* **apps:** bunch of new apps ([0780590](https://github.com/jonathanMelly/portable-app-installer/commit/07805909c226c70b57c7c1c69f518285e9428afb))
+* **archive format:** nearly ready for other formats... ([3d06c49](https://github.com/jonathanMelly/portable-app-installer/commit/3d06c49355944f6996ad8c4283c8fa3f3973f630))
+* **putty:** use putty cac (handles security keys) ([6cf13bc](https://github.com/jonathanMelly/portable-app-installer/commit/6cf13bce645ee70af96f05ea84552021f1a1deb1))
+* **release:** add configs to zip ([639725d](https://github.com/jonathanMelly/portable-app-installer/commit/639725d06f19205f99e983396be466ae5be518b6))
+* **version:** versions parts available to json configs ([4fc59f6](https://github.com/jonathanMelly/portable-app-installer/commit/4fc59f6a96f14c040cf626487ff9e8399912b5e9))
+
+
+### Bug Fixes
+
+* **download:** correctly replace version number in url ([bdc1497](https://github.com/jonathanMelly/portable-app-installer/commit/bdc149719a104e361a20fc862dc32793e5d691c0))
+* **vlc:** working portable config ([f39ef45](https://github.com/jonathanMelly/portable-app-installer/commit/f39ef45ff4c9ce42793b06a73b7e7a96571c06d7))
+
 ## 1.0.0 (2023-01-09)
 
 
