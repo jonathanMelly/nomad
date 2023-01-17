@@ -155,7 +155,7 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 		log.Println("Extracting files")
 
 		switch appInfo.DownloadExtension {
-		case ".zip":
+		case ".zip", ".7zTODO":
 			// If RemoveRootFolder is set to true
 			if appInfo.RemoveRootFolder {
 				// If the root folder name is specified
@@ -163,7 +163,8 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 					workingFolder = appInfo.RootFolderName
 				} else { // Else the root folder name is not specified so guess it
 					// Return the name of the root folder in the ZIP
-					workingFolder, err = extractZipRootFolder(zip)
+
+					workingFolder, err = extractRootFolder(zip, appInfo.DownloadExtension)
 					if err != nil {
 						log.Println("Error discovering working folder |", err)
 						unifiedExit(1)
@@ -174,7 +175,7 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 			}
 
 			// Extract files based on regular expression
-			_, err = extractZipRegex(zip, rootFolder, re)
+			_, err = extractRegex(appInfo.DownloadExtension, zip, rootFolder, re)
 			if err != nil {
 				log.Println("Error extracting from zip |", err)
 				unifiedExit(1)
@@ -199,6 +200,7 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 
 			// Manually set the arguments since Go escaping does not work with MSI arguments
 			argString := fmt.Sprintf(`/a "%v" /qb TARGETDIR="%v"`, zip, fullFolderPath)
+			log.Println(argString)
 			cmd.SysProcAttr = &syscall.SysProcAttr{
 				HideWindow:    false,
 				CmdLine:       " " + argString,
@@ -358,4 +360,22 @@ func Run(configFile string, versionOverwrite string, forceExtract bool, skipDown
 
 	//unifiedExit(0)
 	log.Println("*** Success")
+}
+
+func extractRegex(extension string, zip string, folder string, re *regexp.Regexp) (interface{}, error) {
+	switch extension {
+	case ".zip":
+		return extractZipRegex(zip, folder, re)
+	default:
+		return "", errors.New("Unsupported extension " + extension)
+	}
+}
+
+func extractRootFolder(zip string, extension string) (string, error) {
+	switch extension {
+	case ".zip":
+		return extractZipRootFolder(zip)
+	default:
+		return "", errors.New("Unsupported extension " + extension)
+	}
 }
