@@ -1,0 +1,27 @@
+{
+	"Version": "3.0.18",
+	"ApplicationName": "vlc-{{VERSION}}",
+	"Symlink": "vlc",
+	"Shortcut": "vlc.exe",
+	"DownloadExtension": ".zip",
+	"DownloadUrl": "https://download.videolan.org/pub/videolan/vlc/last/win64/vlc-{{VERSION}}-win64.zip",
+	"RemoveRootFolder": true,
+	"VersionCheck":
+	{
+		"Url":"https://www.videolan.org/news.html",
+		"RegEx":">VLC {{VERSION}}</a",
+		"UseLatestVersion": true
+	},
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	},
+	"RestoreFiles":
+	[
+		"portable/"
+	]
+}
