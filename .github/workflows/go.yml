@@ -31,8 +31,8 @@ jobs:
         run: |
           mkdir archive
           cp bin/* archive/
-          cp app-definitions/*.json archive
-          zip archive.zip archive/
+          cp app-definitions/*.json archive/
+          cd archive && zip ../archive *
 
       - name: Upload release binary
         uses: actions/upload-release-asset@v1.0.2
