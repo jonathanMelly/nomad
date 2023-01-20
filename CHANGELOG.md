@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/jonathanMelly/portable-app-installer/compare/v1.1.0...v1.1.1) (2023-01-20)
+
+
+### Bug Fixes
+
+* **release:** archive not anymore empty ;-) ([e46e4e4](https://github.com/jonathanMelly/portable-app-installer/commit/e46e4e41a5de50e2e72f8a75346a2e3e93a7270e))
+
 ## [1.1.0](https://github.com/jonathanMelly/portable-app-installer/compare/v1.0.0...v1.1.0) (2023-01-17)
 
 
