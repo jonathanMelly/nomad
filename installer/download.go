@@ -52,11 +52,10 @@ func downloadFile(url string, fileName string) (int64, error) {
 	}
 
 	client, err := http.DefaultClient.Do(r)
-	defer client.Body.Close()
-
 	if err != nil {
 		return -1, err
 	}
+	defer client.Body.Close()
 
 	n, err := io.Copy(out, client.Body)
 
