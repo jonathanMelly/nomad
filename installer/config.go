@@ -52,7 +52,7 @@ func LoadConfig(configFile string) (*AppInfo, error) {
 		return nil, err
 	}
 
-	// Create a new container
+	// Create a upcoming container
 	pi := &AppInfo{}
 
 	// Parse the app-definitions
