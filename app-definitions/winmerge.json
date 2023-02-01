@@ -9,8 +9,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/WinMerge/winmerge/releases/latest",
-		"RegEx":"\"tag_name\": \"v{{VERSION}}",
-		"UseLatestVersion": true
+		"RegEx":"\"tag_name\": \"v{{VERSION}}"
 	},
 	"ExtractRegExList":
 	[

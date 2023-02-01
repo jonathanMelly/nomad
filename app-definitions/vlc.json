@@ -9,8 +9,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://www.videolan.org/news.html",
-		"RegEx":">VLC {{VERSION}}</a",
-		"UseLatestVersion": true
+		"RegEx":">VLC {{VERSION}}</a"
 	},
 	"ExtractRegExList":
 	[

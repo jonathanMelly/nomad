@@ -10,8 +10,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/NoMoreFood/putty-cac/releases/latest",
-		"RegEx":"\"tag_name\": \"{{VERSION}}",
-		"UseLatestVersion": true
+		"RegEx":"\"tag_name\": \"{{VERSION}}"
 	},
 	"ExtractRegExList":
 	[

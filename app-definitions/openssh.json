@@ -8,8 +8,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/PowerShell/Win32-OpenSSH/releases/latest",
-		"RegEx":"\"tag_name\": \"([vV]\\d+(?:\\.\\d+)*..-Beta)",
-		"UseLatestVersion": true
+		"RegEx":"\"tag_name\": \"([vV]\\d+(?:\\.\\d+)*..-Beta)"
 	},
 	"ExtractRegExList":
 	[

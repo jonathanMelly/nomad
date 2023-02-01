@@ -9,8 +9,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://keepassxc.org/blog/",
-		"RegEx":"KeePassXC ({{VERSION}}) released",
-		"UseLatestVersion": true
+		"RegEx":"KeePassXC ({{VERSION}}) released"
 	},
 	"ExtractRegExList":
 	[

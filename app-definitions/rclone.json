@@ -8,8 +8,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/rclone/rclone/releases/latest",
-		"RegEx":"\"tag_name\": \"v{{VERSION}}",
-		"UseLatestVersion": true
+		"RegEx":"\"tag_name\": \"v{{VERSION}}"
 	},
 	"ExtractRegExList":
 	[

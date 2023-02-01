@@ -10,7 +10,6 @@
 	{
 		"Url":"https://www.ccleaner.com/fr-fr/ccleaner/builds",
 		"RegEx":"data-download-url=\"https://download.ccleaner.com/portable/ccsetup{{VERSION}}.zip\"",
-		"UseLatestVersion": true
 	},
 	"ExtractRegExList":
 	[

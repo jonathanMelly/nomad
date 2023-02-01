@@ -10,7 +10,6 @@
 	{
 		"Url":"https://freefilesync.org/download.php",
 		"RegEx":"content=\"Download FreeFileSync {{VERSION}}",
-		"UseLatestVersion": true
 	},
 	"ExtractRegExList":
 	[

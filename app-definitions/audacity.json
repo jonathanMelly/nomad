@@ -9,8 +9,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/audacity/audacity/releases/latest",
-		"RegEx":"\"tag_name\": \"Audacity-{{VERSION}}",
-		"UseLatestVersion": true
+		"RegEx":"\"tag_name\": \"Audacity-{{VERSION}}"
 	},
 	"ExtractRegExList":
 	[

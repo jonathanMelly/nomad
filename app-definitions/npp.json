@@ -8,8 +8,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://github.com/notepad-plus-plus/notepad-plus-plus/releases/latest",
-		"RegEx":"<title>Release Notepad\\+\\+ release ({{VERSION}})",
-		"UseLatestVersion": true
+		"RegEx":"<title>Release Notepad\\+\\+ release ({{VERSION}})"
 	},
 	"RemoveRootFolder": false,
 	"ExtractRegExList":

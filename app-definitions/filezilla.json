@@ -9,7 +9,6 @@
 	{
 		"Url":"https://filezilla-project.org/versions.php",
 		"RegEx":"name=\"{{VERSION}}\"",
-		"UseLatestVersion": true
 	},
 	"RemoveRootFolder": true,
 	"ExtractRegExList":

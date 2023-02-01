@@ -8,8 +8,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://www.heidisql.com/download.php",
-		"RegEx":"<h1>Download HeidiSQL {{VERSION}},",
-		"UseLatestVersion": true
+		"RegEx":"<h1>Download HeidiSQL {{VERSION}},"
 	},
 	"ExtractRegExList":
 	[
