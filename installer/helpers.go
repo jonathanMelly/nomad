@@ -14,13 +14,10 @@ import (
 	"strings"
 )
 
-// isExist returns true if a file object exists
-func isExist(dir string) bool {
-	if _, err := os.Stat(dir); err == nil {
-		return true
-	}
-
-	return false
+// fileOrDirExists returns true if a file object exists
+func fileOrDirExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return !os.IsNotExist(err)
 }
 
 // combineRegex will take a string array of regular expressions and compile them
@@ -34,17 +31,6 @@ func combineRegex(s []string) (*regexp.Regexp, error) {
 	}
 
 	return re, nil
-}
-
-// unifiedExit prints a line and then exists
-func unifiedExit(exitCode int) {
-	if exitCode == 0 {
-		log.Println("*** Success")
-		os.Exit(exitCode)
-	} else {
-		log.Println("*** Fail")
-		os.Exit(exitCode)
-	}
 }
 
 func isDirectory(path string) bool {

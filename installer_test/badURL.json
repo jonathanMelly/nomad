@@ -1,0 +1,16 @@
+{
+	"Version": "1.0",
+	"ApplicationName": "test-{{VERSION}}",
+	"Symlink": "test",
+	"DownloadExtension": ".7z",
+	"DownloadUrl": "local",
+	"RemoveRootFolder": false,
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	}
+}

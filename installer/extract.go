@@ -3,6 +3,7 @@ package installer
 import (
 	"archive/zip"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -17,20 +18,12 @@ func extractFromRequest(url string, regExp string) (string, error) {
 		return "", err
 	}
 
-	re, err := regexp.Compile(regExp)
+	version, err := findVersion(body)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Could not find "+regExp+" on page:"+url+" | %w", err)
 	}
 
-	rePair := re.FindStringSubmatch(body)
-
-	if len(rePair) > 1 {
-		version := strings.TrimSpace(rePair[1])
-
-		return version, nil
-	}
-
-	return "", errors.New("Could not find " + regExp + " on page:" + url)
+	return version, nil
 }
 
 var msiDstFolder string
@@ -40,7 +33,7 @@ var msiAllowRegExp *regexp.Regexp
 // copyMsiRegex will restore certain files from a directory to another folder based on a regular expression
 func copyMsiRegex(srcFolder string, dstFolder string, allowRegExp *regexp.Regexp) (bool, error) {
 	// Create folder to extract files
-	if !isExist(dstFolder) {
+	if !fileOrDirExists(dstFolder) {
 		err := os.MkdirAll(dstFolder, os.ModePerm)
 		if err != nil {
 			return false, err
@@ -79,7 +72,7 @@ func visitMsiFile(fp string, fi os.FileInfo, err error) error {
 	}
 
 	// Create the file directory if it doesn't exist
-	if !isExist(basePath) {
+	if !fileOrDirExists(basePath) {
 		err = os.MkdirAll(basePath, os.ModePerm)
 		if err != nil {
 			return err
@@ -107,7 +100,7 @@ func extractZipRegex(file string, rootFolder string, allowRegExp *regexp.Regexp)
 	// If the rootFolder is NOT empty,
 	if rootFolder != "" {
 		// Create folder to extract files
-		if !isExist(rootFolder) {
+		if !fileOrDirExists(rootFolder) {
 			err = os.MkdirAll(rootFolder, os.ModePerm)
 			if err != nil {
 				return false, err
@@ -138,7 +131,7 @@ func extractZipRegex(file string, rootFolder string, allowRegExp *regexp.Regexp)
 		}
 
 		// Create the file directory if it doesn't exist
-		if !isExist(basePath) {
+		if !fileOrDirExists(basePath) {
 			err = os.MkdirAll(basePath, os.ModePerm)
 			if err != nil {
 				return false, err
@@ -197,7 +190,7 @@ func extractZipAll(file string, workingFolder string) (bool, error) {
 	defer r.Close()
 
 	// Create folder to extract files
-	if !isExist(workingFolder) {
+	if !fileOrDirExists(workingFolder) {
 		os.MkdirAll(workingFolder, os.ModePerm)
 		if err != nil {
 			return false, err
@@ -219,7 +212,7 @@ func extractZipAll(file string, workingFolder string) (bool, error) {
 		basePath := filepath.Dir(relativePath)
 
 		// Create the file directory if it doesn't exist
-		if !isExist(basePath) {
+		if !fileOrDirExists(basePath) {
 			err = os.MkdirAll(basePath, os.ModePerm)
 			if err != nil {
 				return false, err
