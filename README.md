@@ -1,4 +1,4 @@
-# Portable app installer (fork of [goappmation](https://github.com/josephspurrier/goappmation))
+# NOMAD, a portable app manager (fork of [goappmation](https://github.com/josephspurrier/goappmation))
 
 # Why ?
 I needed a fast, reliable and simple way to manage portable apps.
