@@ -12,15 +12,15 @@ import (
 )
 
 // extractFromRequest will return extracted text from a page at a URL
-func extractFromRequest(url string, regExp string) (string, error) {
+func extractFromRequest(url string, regex string) (*Version, error) {
 	body, err := getRequestBody(url)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	version, err := findVersion(body)
+	version, err := fromStringCustom(body, regex)
 	if err != nil {
-		return "", fmt.Errorf("Could not find "+regExp+" on page:"+url+" | %w", err)
+		return nil, fmt.Errorf("Could not find version on page:"+url+" | %w", err)
 	}
 
 	return version, nil

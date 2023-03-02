@@ -1,10 +1,13 @@
-module github.com/jonathanMelly/portable-app-installer
+module github.com/jonathanMelly/nomad
 
 go 1.17
 
-replace github.com/jonathanMelly/portable-app-installer => ./
+replace github.com/jonathanMelly/nomad => ./
 
-require github.com/stretchr/testify v1.8.1
+require (
+	github.com/gologme/log v1.3.0
+	github.com/stretchr/testify v1.8.1
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

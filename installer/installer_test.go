@@ -30,7 +30,7 @@ func TestBadConfig(t *testing.T) {
 	setup(t)
 
 	//ACT
-	err, msg, code := Run("../404.json", "", false, true, "", "archives", true, false)
+	err, msg, code := Run("install", "../404.json", "", false, true, "", "archives", true, false)
 	log.Println(err, msg)
 
 	//ASSERT
@@ -43,7 +43,7 @@ func TestBadURL(t *testing.T) {
 	setup(t)
 
 	//ACT
-	err, msg, code := Run("../badURL.json", "", false, true, "", "archives", true, false)
+	err, msg, code := Run("install", "../badURL.json", "", false, true, "", "archives", true, false)
 	log.Println(err, msg)
 
 	//ASSERT

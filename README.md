@@ -1,4 +1,4 @@
-# NOMAD, a portable app manager (fork of [goappmation](https://github.com/josephspurrier/goappmation))
+# NOMAD, a portable app installer (fork of [goappmation](https://github.com/josephspurrier/goappmation))
 
 # Why ?
 I needed a fast, reliable and simple way to manage portable apps.
@@ -9,9 +9,11 @@ I needed a fast, reliable and simple way to manage portable apps.
 
 # How
  1. Download [latest release](https://github.com/jonathanMelly/portable-app-installer/releases/latest)
- 2. To install / update an app (*Filezilla* for instance), start a terminal and run
+ 2. To install / update / get status an app (*Filezilla* for instance), start a terminal and run
 ```bash 
-portable-app-installer filezilla
+nomad install filezilla
+nomad update filezilla
+nomad status filezilla
 ```
 
 (available apps are listed [here](app-definitions) and you can add yours by adding any valid json file...)
@@ -27,4 +29,7 @@ portable-app-installer filezilla
 
 # App definition structure
 Please refer to [this file](installer/config.go)
+
+# Next steps
+Append defs to binary, get info from their if no custom is found...
 
