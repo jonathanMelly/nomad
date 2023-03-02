@@ -9,7 +9,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://freefilesync.org/download.php",
-		"RegEx":"content=\"Download FreeFileSync {{VERSION}}",
+		"RegEx":"content=\"Download FreeFileSync {{VERSION}}"
 	},
 	"ExtractRegExList":
 	[

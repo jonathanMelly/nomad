@@ -8,7 +8,7 @@
 	"VersionCheck":
 	{
 		"Url":"https://filezilla-project.org/versions.php",
-		"RegEx":"name=\"{{VERSION}}\"",
+		"RegEx":"name=\"{{VERSION}}\""
 	},
 	"RemoveRootFolder": true,
 	"ExtractRegExList":
