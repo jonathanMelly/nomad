@@ -1,0 +1,23 @@
+{
+	"Version": "22.01",
+	"ApplicationName": "7zip-{{VERSION}}",
+	"Symlink": "7zip",
+	"Shortcut": "7zipFM.exe",
+	"DownloadExtension": ".7z",
+	"DownloadUrl": "https://www.7-zip.org/a/7z{{VERSION_NO_DOT}}-x64.exe",
+	"VersionCheck":
+	{
+		"Url":"https://www.7-zip.org/download.html",
+		"RegEx":">Download 7-Zip {{VERSION}}",
+		"UseLatestVersion": true
+	},
+	"RemoveRootFolder": false,
+	"ExtractRegExList":
+	[
+		"(.*)"
+	],
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	}
+}
