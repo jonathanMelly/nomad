@@ -32,6 +32,7 @@ It is working (I’m using it at my work) but still need some improvements befor
 
 # How
  1. Download [latest release](https://github.com/jonathanMelly/portable-app-installer/releases/latest)
+2. Activate [developer mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) (if needed) [this is for symlink]
  2. To install / update / get status an app (*Filezilla* for instance), start a terminal and run
 ```bash 
 nomad install filezilla
