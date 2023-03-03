@@ -18,7 +18,7 @@ func writeScripts(scripts map[string]string, workingFolder string, version strin
 		relativePath := strings.Replace(filepath.Join(workingFolder, name), "{{VERSION}}", version, -1)
 
 		// Write to file
-		if fileOrDirExists(relativePath) {
+		if FileOrDirExists(relativePath) {
 			log.Println(relativePath + " already in destination, skipping")
 		} else {
 			err := ioutil.WriteFile(relativePath, []byte(strings.Replace(body, "{{VERSION}}", version, -1)), os.ModePerm)
@@ -59,7 +59,7 @@ func createFolders(folders []string, dstFolder string) error {
 		// Path of file
 		newPath := filepath.Join(dstFolder, folder)
 
-		if !fileOrDirExists(newPath) {
+		if !FileOrDirExists(newPath) {
 			err := os.MkdirAll(newPath, os.ModePerm)
 			if err != nil {
 				return err
@@ -73,11 +73,11 @@ func createFolders(folders []string, dstFolder string) error {
 //restore files from previous version (mainly for config)
 func restoreFiles(files []string, source string, destination string) error {
 
-	if destination == "" || !fileOrDirExists(destination) {
+	if destination == "" || !FileOrDirExists(destination) {
 		log.Println("Missing destination " + destination + " for restore => restore operation cancelled")
 		return nil
 	}
-	if source == "" || !fileOrDirExists(source) {
+	if source == "" || !FileOrDirExists(source) {
 		log.Println("Missing source " + source + " for restore => restore operation cancelled")
 		return nil
 	}
@@ -87,7 +87,7 @@ func restoreFiles(files []string, source string, destination string) error {
 
 		sourcePath := filepath.Join(source, file)
 
-		if fileOrDirExists(sourcePath) {
+		if FileOrDirExists(sourcePath) {
 			if isDirectory(sourcePath) {
 				err := filepath.Walk(sourcePath, func(walkingPath string, _ os.FileInfo, _ error) error {
 
@@ -129,7 +129,7 @@ func restore(sourcePath string, destinationPath string) {
 	if err != nil {
 		log.Println("Cannot read source "+sourcePath+", skipping|", err)
 	} else {
-		if fileOrDirExists(destinationPath) {
+		if FileOrDirExists(destinationPath) {
 			log.Println("===> " + destinationPath + " already exists, trying to backup")
 			newpath := destinationPath + "-" + time.Now().Format("2006-01-02-15h04m05s")
 			err := os.Rename(destinationPath, newpath)
@@ -143,7 +143,7 @@ func restore(sourcePath string, destinationPath string) {
 
 		//Warning, filepath.Dir is not os separator agnostic...
 		destinationDirectory := filepath.Dir(filepath.ToSlash(destinationPath))
-		if !fileOrDirExists(destinationDirectory) {
+		if !FileOrDirExists(destinationDirectory) {
 			err := os.MkdirAll(destinationDirectory, os.ModePerm)
 			if err != nil {
 				log.Println("Cannot mkdir "+destinationDirectory+", aborting restore of "+destinationPath+" |", err)

@@ -11,6 +11,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gologme/log"
+	"github.com/gookit/config"
+	"github.com/gookit/config/toml"
 	"github.com/jonathanMelly/nomad/installer"
 	"io/ioutil"
 	"os"
@@ -47,14 +49,6 @@ func main() {
 
 	flagArchivesSubDir := flag.String("archives", "archives", "Set archives subdir")
 
-	/*
-	   Level 10 = panic, fatal, error, warn, info, debug, & trace
-	   Level 5 = panic, fatal, error, warn, info, & debug
-	   Level 4 = panic, fatal, error, warn, & info
-	   Level 3 = panic, fatal, error, & warn
-	   Level 2 = panic, fatal & error
-	   Level 1 = panic, fatal
-	*/
 	flagVerbose := flag.Bool("verbose", false, "Gives info for debug")
 
 	flag.Parse()
@@ -64,15 +58,26 @@ func main() {
 		os.Exit(52)
 	}
 
+	/*
+	   Level 10 = panic, fatal, error, warn, info, debug, & trace
+	   Level 5 = panic, fatal, error, warn, info, & debug
+	   Level 4 = panic, fatal, error, warn, & info
+	   Level 3 = panic, fatal, error, & warn
+	   Level 2 = panic, fatal & error
+	   Level 1 = panic, fatal
+	*/
 	if *flagVerbose {
 		log.EnableLevelsByNumber(10)
 	} else {
 		log.EnableLevelsByNumber(4)
 	}
+
+	//Prefix is used to show app name...
 	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
 
-	action := flag.Arg(0)
+	handleNomadConfig()
 
+	action := flag.Arg(0)
 	configFile := flag.Arg(1)
 
 	if configFile == "" {
@@ -127,4 +132,20 @@ func HandleRun(err error, errorMessage string, exitCode int) int {
 	}
 
 	return exitCode
+}
+
+func handleNomadConfig() {
+	path := "nomad.toml"
+	if installer.FileOrDirExists(path) {
+		config.WithOptions(config.ParseEnv)
+		config.AddDriver(toml.Driver)
+
+		err := config.LoadFiles("nomad.toml")
+		if err != nil {
+			log.Fatalf("Cannot read config file", err)
+		}
+	} else {
+		log.Debugln(path, "not found, skipping config load")
+	}
+
 }

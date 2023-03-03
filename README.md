@@ -18,14 +18,21 @@ nomad status filezilla
 
 (available apps are listed [here](app-definitions) and you can add yours by adding any valid json file...)
 
-# Options
+# Essential options
 
-| Flag                                  | Description                                                         |
-|---------------------------------------|---------------------------------------------------------------------|
-| -configs &lt;folder&gt;               | runs on all .json files in given folder                             |
-| -force                                | force reinstalls (removes existing folder)                          |
-| -skip=false                           | do not reuse already downloaded archive                             |
-| -envvar=&lt;envVarForShortcutPath&gt; | sets env var which points to shortcut (empty to use absolute paths) |
+| Flag                    | Description                                                         |
+|-------------------------|---------------------------------------------------------------------|
+| -configs &lt;folder&gt; | runs on all .json files in given folder                             |
+| -force                  | force reinstall (removes existing folder)                           |
+| -skip=false             | do not reuse already downloaded archive                             |
+| -latest=false           | do not check for latest version (if url provided in config)         |
+| -verbose                | verbose output useful for debug                                     |
+
+# Other options
+Please run
+```bash 
+nomad --help
+```
 
 # App definition structure
 Please refer to [this file](installer/config.go)

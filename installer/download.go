@@ -1,16 +1,22 @@
 package installer
 
 import (
+	"github.com/gookit/config"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
 // getRequestBody returns the page HTML
 func getRequestBody(url string) (string, error) {
 	r, err := http.NewRequest("GET", url, nil)
 
+	apiKey, found := config.String("githubApiKey")
+	if strings.Contains(url, "github") && found {
+		r.Header.Add("Authorization", "Bearer "+apiKey)
+	}
 	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
 	r.Header.Add("User-Agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`)
 

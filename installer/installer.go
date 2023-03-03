@@ -47,7 +47,7 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 	}
 
 	appNameWithoutVersion := appInfo.ApplicationName[0:strings.LastIndex(appInfo.ApplicationName, "-")]
-	log.SetPrefix(appNameWithoutVersion + ": ")
+	log.SetPrefix("|" + appNameWithoutVersion + "| ")
 
 	// Set the folder name
 	const DefaultAppPath = "apps"
@@ -76,7 +76,7 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 	var currentInstalledVersion *Version = nil
 	if appInfo.Symlink != "" {
 		symlink = path.Join(DefaultAppPath, appInfo.Symlink)
-		if fileOrDirExists(symlink) {
+		if FileOrDirExists(symlink) {
 			target, _ := os.Readlink(symlink)
 			split := strings.Split(filepath.Base(target), "-")
 			if len(split) > 1 {
@@ -154,7 +154,7 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 			}
 		}
 
-		if !fileOrDirExists(DefaultAppPath) {
+		if !FileOrDirExists(DefaultAppPath) {
 			log.Debugln("Creating " + DefaultAppPath + " directory")
 			os.Mkdir(DefaultAppPath, os.ModePerm)
 		}
@@ -167,18 +167,18 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 		var zip = path.Join(DefaultAppPath, archivesSubDir, applicationName+appInfo.DownloadExtension)
 
 		// If the zip file DOES exist on disk
-		if fileOrDirExists(zip) {
+		if FileOrDirExists(zip) {
 			// Output the filename of the folder
 			log.Debugln("Download Exists:", zip)
 		} else {
 			zipDir := filepath.Dir(zip)
-			if !fileOrDirExists(zipDir) {
+			if !FileOrDirExists(zipDir) {
 				os.MkdirAll(zipDir, os.ModePerm)
 			}
 		}
 
 		// If SkipDownload is true
-		if skipDownload && fileOrDirExists(zip) {
+		if skipDownload && FileOrDirExists(zip) {
 			log.Debugln("Skipping download as ", zip, " archive already exists (use -force to override)")
 		} else {
 			downloadURL := targetVersion.fillVersionsPlaceholders(appInfo.DownloadUrl)
@@ -195,7 +195,7 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 		log.Debugln("Extracting to ", folderName)
 		extract := true
 		// If the folder exists
-		if fileOrDirExists(folderName) {
+		if FileOrDirExists(folderName) {
 			if isDirectory(folderName) {
 				if forceExtract {
 					log.Debugln("Removing old folder:", folderName, " (as force extract asked)")
@@ -344,7 +344,7 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 			log.Traceln("Handling symlink and restores")
 
 			//Can only restore from previous symlink (targetVersion)....
-			if fileOrDirExists(symlink) {
+			if FileOrDirExists(symlink) {
 				absoluteFolderName, _ := filepath.Abs(folderName)
 				evalSymlink, _ := filepath.EvalSymlinks(symlink)
 				absoluteSymlink, _ := filepath.Abs(evalSymlink)
@@ -374,7 +374,7 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 
 			if appInfo.Shortcut != "" {
 				const DefaultShortcutsDir = "shortcuts"
-				if !fileOrDirExists(DefaultShortcutsDir) {
+				if !FileOrDirExists(DefaultShortcutsDir) {
 					log.Debugln("Creating shortcutDir ", DefaultShortcutsDir)
 					os.Mkdir(DefaultShortcutsDir, os.ModePerm)
 				}

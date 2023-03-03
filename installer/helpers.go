@@ -14,8 +14,8 @@ import (
 	"strings"
 )
 
-// fileOrDirExists returns true if a file object exists
-func fileOrDirExists(filename string) bool {
+// FileOrDirExists returns true if a file object exists
+func FileOrDirExists(filename string) bool {
 	_, err := os.Stat(filename)
 	return !os.IsNotExist(err)
 }
