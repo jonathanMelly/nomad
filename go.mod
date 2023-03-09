@@ -1,8 +1,6 @@
 module github.com/jonathanMelly/nomad
 
-go 1.17
-
-replace github.com/jonathanMelly/nomad => ./
+go 1.20
 
 require (
 	github.com/gologme/log v1.3.0
