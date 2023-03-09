@@ -26,10 +26,14 @@ func combineRegex(s []string) (*regexp.Regexp, error) {
 	return re, nil
 }
 
+func isWindowsPlatform() bool {
+	return strings.Contains(runtime.GOOS, "windows")
+}
+
 // https://stackoverflow.com/questions/32438204/create-a-windows-shortcut-lnk-in-go
 func createShortcut(linkName string, target string, arguments string, workingDirectory string, description string, destination string, icon string) {
 
-	if runtime.GOOS == "windows" {
+	if isWindowsPlatform() {
 		var scriptTxt bytes.Buffer
 		scriptTxt.WriteString("option explicit\n\n")
 		scriptTxt.WriteString("sub CreateShortCut()\n")

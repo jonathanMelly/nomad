@@ -6,10 +6,12 @@ require (
 	github.com/gologme/log v1.3.0
 	github.com/gookit/config/v2 v2.2.1
 	github.com/gookit/goutil v0.6.6
+	github.com/nyaosorg/go-windows-junction v0.1.0
 )
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/gookit/color v1.5.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect

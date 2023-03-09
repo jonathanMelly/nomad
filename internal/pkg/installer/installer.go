@@ -9,6 +9,7 @@ import (
 	"github.com/jonathanMelly/nomad/internal/pkg/iohelper"
 	"github.com/jonathanMelly/nomad/pkg/bytesize"
 	"github.com/jonathanMelly/nomad/pkg/version"
+	junction "github.com/nyaosorg/go-windows-junction"
 	"os"
 	"os/exec"
 	"path"
@@ -158,7 +159,10 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 
 		if !iohelper.FileOrDirExists(DefaultAppPath) {
 			log.Debugln("Creating " + DefaultAppPath + " directory")
-			os.Mkdir(DefaultAppPath, os.ModePerm)
+			err := os.Mkdir(DefaultAppPath, os.ModePerm)
+			if err != nil {
+				return err, fmt.Sprint("Cannot create ", DefaultAppPath), 0
+			}
 		}
 
 		var appNameWithVersion = fmt.Sprint(appName, "-", targetVersion)
@@ -176,7 +180,10 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 		} else {
 			zipDir := filepath.Dir(zip)
 			if !iohelper.FileOrDirExists(zipDir) {
-				os.MkdirAll(zipDir, os.ModePerm)
+				err := os.MkdirAll(zipDir, os.ModePerm)
+				if err != nil {
+					return err, fmt.Sprint("Cannot create ", zipDir), 0
+				}
 			}
 		}
 
@@ -363,22 +370,33 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 				}
 
 				//Remove old
-				os.Remove(symlink)
+				err := os.Remove(symlink)
+				if err != nil {
+					return err, fmt.Sprint("Cannot remove symlink ", symlink, " for update to latest version..."), 0
+				}
 			}
 
 			//err = os.Mkdir(symlink)
 			target := appNameWithVersion + "/"
 			log.Debugln("Linking " + symlink + " -> " + target)
-			err = os.Symlink(target, symlink)
+
+			if isWindowsPlatform() {
+				err = junction.Create(target, symlink)
+			} else {
+				err = os.Symlink(target, symlink)
+			}
 			if err != nil {
-				return err, "Error symlink to " + target, 23
+				return err, "Error symlink/junction to " + target, 23
 			}
 
 			if app.Shortcut != "" {
 				const DefaultShortcutsDir = "shortcuts"
 				if !iohelper.FileOrDirExists(DefaultShortcutsDir) {
 					log.Debugln("Creating shortcutDir ", DefaultShortcutsDir)
-					os.Mkdir(DefaultShortcutsDir, os.ModePerm)
+					err := os.Mkdir(DefaultShortcutsDir, os.ModePerm)
+					if err != nil {
+						return err, fmt.Sprint("Cannot create shortcut dir ", DefaultShortcutsDir), 0
+					}
 				}
 
 				absSymlink, _ := filepath.Abs(symlink)
