@@ -1,0 +1,22 @@
+title = "NOMAD settings"
+
+#List all the apps you would like to be installed/updated
+#Not yet used
+myapps = ["filezilla","npp"]
+
+#github api key (to avoid limitations)
+#Extracted from GITHUB_PAT ENV if existing
+githubApiKey = "${GITHUB_PAT|paste_your_pat_here_if_not_set_by_env}"
+
+#You may add custom app definitions here if needed
+#[apps.custom]
+#Version = "1.2"
+#Symlink="custom"
+#Shortcut="custom.exe"
+#DownloadExtension=".zip"
+#DownloadUrl="https://download.com/custom-{{VERSION}}.zip"
+#RemoveRootFolder=false
+#VersionCheck={Url="https://custom.com/news",RegEx="tag=\"v{{VERSION}}\""}
+#ExtractRegExList=["(.*)"]
+#CreateFiles={"VERSION-{{VERSION}}.txt"="{{VERSION}}"}
+#RestoreFiles=["custom/"]

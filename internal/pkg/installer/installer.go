@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gologme/log"
-	"github.com/jonathanMelly/nomad/lib/bytesize"
+	"github.com/jonathanMelly/nomad/internal/pkg/data"
+	"github.com/jonathanMelly/nomad/internal/pkg/iohelper"
+	"github.com/jonathanMelly/nomad/pkg/bytesize"
+	"github.com/jonathanMelly/nomad/pkg/version"
 	"os"
 	"os/exec"
 	"path"
@@ -21,77 +24,76 @@ func init() {
 }
 
 // Run will execute commands from a app-definitions file
-func Run(action string, configFile string, versionOverwrite string, forceExtract bool, skipDownload bool,
+func Run(action string, app data.AppDefinition, versionOverwrite string, forceExtract bool, skipDownload bool,
 	customAppLocationForShortcut string, archivesSubDir string, useLatestVersion bool, confirm bool) (error error, errorMessage string, exitCode int) {
 
-	if !strings.HasSuffix(configFile, ".json") {
-		configFile += ".json"
-	}
-
-	// Set the name of the app-definitions file
-	configFileName := path.Base(configFile)
-
-	// Output the name of the app-definitions file
-	log.Debugln("Loading config: ", configFileName)
-
-	// Load the app-definitions file
-	appInfo, err := LoadConfig(configFile)
+	err := app.Validate()
 	if err != nil {
-		return err, "Error loading config file " + configFile, 1
+		log.Errorln("Invalid app definition", err)
+		return
 	}
 
 	// Compile the regular expressions into one
-	re, err := combineRegex(appInfo.ExtractRegExList)
+	re, err := combineRegex(app.ExtractRegExList)
 	if err != nil {
 		return err, "Error creating regular expression from list", 2
 	}
 
-	appNameWithoutVersion := appInfo.ApplicationName[0:strings.LastIndex(appInfo.ApplicationName, "-")]
-	log.SetPrefix("|" + appNameWithoutVersion + "| ")
+	//Old config format
+	//TODO TEST THAT
+	var appName string
+	if strings.Contains(app.ApplicationName, version.VERSION_PLACEHOLDER) {
+		appName = app.ApplicationName[0:strings.LastIndex(app.ApplicationName, "-")]
+		log.Warnln("Please upgrade config : remove -{{VERSION}} from app name")
+	} else {
+		appName = app.ApplicationName
+	}
+
+	log.SetPrefix("|" + appName + "| ")
 
 	// Set the folder name
 	const DefaultAppPath = "apps"
 
 	//VERSION HANDLING
-	var targetVersion *Version = nil
+	var targetVersion *version.Version = nil
 	symlink := ""
 
 	// Overwrite the targetVersion if available
-	var versionOverwriteVersion *Version = nil
+	var versionOverwriteVersion *version.Version = nil
 	if versionOverwrite != "" {
-		versionOverwriteVersion, err = fromString(versionOverwrite)
+		versionOverwriteVersion, err = version.FromString(versionOverwrite)
 		if err != nil {
-			return err, "Bad forced version format: " + appInfo.Version, 31
+			return err, "Bad forced version format: " + app.Version, 31
 		}
 		log.Debugln("Version flag overwrite:", versionOverwriteVersion)
 	}
 
-	configVersion, err := fromString(appInfo.Version)
+	configVersion, err := version.FromString(app.Version)
 	if err != nil {
-		return err, "Bad version format in config :" + appInfo.Version, 30
+		return err, "Bad version format in config :" + app.Version, 30
 	}
 	log.Debugln("Version from config: ", configVersion)
 
 	//Current version
-	var currentInstalledVersion *Version = nil
-	if appInfo.Symlink != "" {
-		symlink = path.Join(DefaultAppPath, appInfo.Symlink)
-		if FileOrDirExists(symlink) {
+	var currentInstalledVersion *version.Version = nil
+	if app.Symlink != "" {
+		symlink = path.Join(DefaultAppPath, app.Symlink)
+		if iohelper.FileOrDirExists(symlink) {
 			target, _ := os.Readlink(symlink)
 			split := strings.Split(filepath.Base(target), "-")
 			if len(split) > 1 {
-				currentInstalledVersion, err = fromString(split[1])
+				currentInstalledVersion, err = version.FromString(split[1])
 				log.Debugln("Version installed: ", currentInstalledVersion)
 			}
 		}
 	}
 
-	var latestVersionFromRemote *Version = nil
+	var latestVersionFromRemote *version.Version = nil
 	// If Version Check parameters are specified
-	if useLatestVersion && appInfo.VersionCheck.Url != "" && appInfo.VersionCheck.RegEx != "" {
+	if useLatestVersion && app.VersionCheck.Url != "" && app.VersionCheck.RegEx != "" {
 
 		// Extract the targetVersion from the webpage
-		latestVersionFromRemote, err = extractFromRequest(appInfo.VersionCheck.Url, appInfo.VersionCheck.RegEx)
+		latestVersionFromRemote, err = extractFromRequest(app.VersionCheck.Url, app.VersionCheck.RegEx)
 		if err != nil {
 			return err, "Error retrieving last version from remote", 3
 		}
@@ -104,15 +106,15 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 	} else {
 		//not yet installed
 		if currentInstalledVersion == nil {
-			if latestVersionFromRemote != nil && latestVersionFromRemote.isNewerThan(*configVersion) {
+			if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) {
 				targetVersion = latestVersionFromRemote
 			} else {
 				targetVersion = configVersion
 			}
 		} else /*Already installed*/ {
-			if latestVersionFromRemote != nil && latestVersionFromRemote.isNewerThan(*configVersion) && latestVersionFromRemote.isNewerThan(*currentInstalledVersion) {
+			if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) && latestVersionFromRemote.IsNewerThan(*currentInstalledVersion) {
 				targetVersion = latestVersionFromRemote
-			} else if configVersion.isNewerThan(*currentInstalledVersion) {
+			} else if configVersion.IsNewerThan(*currentInstalledVersion) {
 				targetVersion = configVersion
 			} else {
 				targetVersion = currentInstalledVersion
@@ -131,7 +133,7 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 			log.Infoln(action, "version", targetVersion)
 		} else {
 			action := "upgrading"
-			if currentInstalledVersion.isNewerThan(*targetVersion) {
+			if currentInstalledVersion.IsNewerThan(*targetVersion) {
 				action = "downgrading"
 			}
 			log.Infoln(action, "version from", currentInstalledVersionString, ">>", targetVersion)
@@ -154,34 +156,35 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 			}
 		}
 
-		if !FileOrDirExists(DefaultAppPath) {
+		if !iohelper.FileOrDirExists(DefaultAppPath) {
 			log.Debugln("Creating " + DefaultAppPath + " directory")
 			os.Mkdir(DefaultAppPath, os.ModePerm)
 		}
 
-		var applicationName = strings.Replace(appInfo.ApplicationName, "{{VERSION}}", targetVersion.String(), -1)
-		var folderName = path.Join(DefaultAppPath, applicationName)
+		var appNameWithVersion = fmt.Sprint(appName, "-", targetVersion)
+
+		var folderName = path.Join(DefaultAppPath, appNameWithVersion)
 
 		// Set the zip name based off the folder
 		// Note: The original file download name will be changed
-		var zip = path.Join(DefaultAppPath, archivesSubDir, applicationName+appInfo.DownloadExtension)
+		var zip = path.Join(DefaultAppPath, archivesSubDir, appName+app.DownloadExtension)
 
 		// If the zip file DOES exist on disk
-		if FileOrDirExists(zip) {
+		if iohelper.FileOrDirExists(zip) {
 			// Output the filename of the folder
 			log.Debugln("Download Exists:", zip)
 		} else {
 			zipDir := filepath.Dir(zip)
-			if !FileOrDirExists(zipDir) {
+			if !iohelper.FileOrDirExists(zipDir) {
 				os.MkdirAll(zipDir, os.ModePerm)
 			}
 		}
 
 		// If SkipDownload is true
-		if skipDownload && FileOrDirExists(zip) {
+		if skipDownload && iohelper.FileOrDirExists(zip) {
 			log.Debugln("Skipping download as ", zip, " archive already exists (use -force to override)")
 		} else {
-			downloadURL := targetVersion.fillVersionsPlaceholders(appInfo.DownloadUrl)
+			downloadURL := targetVersion.FillVersionsPlaceholders(app.DownloadUrl)
 
 			log.Debugln("Downloading from ", downloadURL, " >> ", zip)
 
@@ -195,8 +198,8 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 		log.Debugln("Extracting to ", folderName)
 		extract := true
 		// If the folder exists
-		if FileOrDirExists(folderName) {
-			if isDirectory(folderName) {
+		if iohelper.FileOrDirExists(folderName) {
+			if iohelper.IsDirectory(folderName) {
 				if forceExtract {
 					log.Debugln("Removing old folder:", folderName, " (as force extract asked)")
 					err = os.RemoveAll(folderName)
@@ -225,18 +228,18 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 		if extract {
 			log.Debugln("Extracting files")
 
-			switch appInfo.DownloadExtension {
+			switch app.DownloadExtension {
 			case ".zip", ".7zTODO":
 				log.Debugln("ZIP archive")
 				// If RemoveRootFolder is set to true
-				if appInfo.RemoveRootFolder {
+				if app.RemoveRootFolder {
 					// If the root folder name is specified
-					if len(appInfo.RootFolderName) > 0 {
-						workingFolder = appInfo.RootFolderName
+					if len(app.RootFolderName) > 0 {
+						workingFolder = app.RootFolderName
 					} else { // Else the root folder name is not specified so guess it
 						// Return the name of the root folder in the ZIP
 
-						workingFolder, err = extractRootFolder(zip, appInfo.DownloadExtension)
+						workingFolder, err = extractRootFolder(zip, app.DownloadExtension)
 						if err != nil {
 							return err, "Error discovering working folder ", 6
 						}
@@ -246,7 +249,7 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 				}
 
 				// Extract files based on regular expression
-				_, err = extractRegex(appInfo.DownloadExtension, zip, rootFolder, re)
+				_, err = extractRegex(app.DownloadExtension, zip, rootFolder, re)
 				if err != nil {
 					return err, "Error extracting from zip |", 7
 				}
@@ -264,16 +267,15 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 					return err, "Error getting folder full path ", 9
 				}
 
-				// Build the command
-				cmd := exec.Command("msiexec")
-
 				// Manually set the arguments since Go escaping does not work with MSI arguments
 				argString := fmt.Sprintf(`/a "%v" /qb TARGETDIR="%v"`, zip, fullFolderPath)
+				// Build the command
 				log.Traceln("msi args: ", argString)
+				cmd := exec.Command("msiexec", argString)
+
 				cmd.SysProcAttr = &syscall.SysProcAttr{
-					HideWindow:    false,
-					CmdLine:       " " + argString,
-					CreationFlags: 0,
+					Foreground: false,
+					Ctty:       0,
 				}
 
 				if err = cmd.Run(); err != nil {
@@ -281,16 +283,16 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 				}
 
 				// If RemoveRootFolder is set to true
-				if appInfo.RemoveRootFolder {
+				if app.RemoveRootFolder {
 					// If the root folder name is specified
-					if len(appInfo.RootFolderName) > 0 {
+					if len(app.RootFolderName) > 0 {
 
 						//Get the full path of the folder to set as the root folder
-						currentPath := filepath.Join(fullFolderPath, appInfo.RootFolderName)
+						currentPath := filepath.Join(fullFolderPath, app.RootFolderName)
 
 						// Check to make sure the path is valid
 						if currentPath == fullFolderPath {
-							return nil, "RootFolderName is invalid:" + appInfo.RootFolderName, 12
+							return nil, "RootFolderName is invalid:" + app.RootFolderName, 12
 						}
 
 						// Copy files based on regular expressions
@@ -313,22 +315,22 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 				}
 			default:
 				log.Println()
-				return nil, "Download extension not supported:" + appInfo.DownloadExtension, 17
+				return nil, "Download extension not supported:" + app.DownloadExtension, 17
 			}
 		}
 
-		log.Traceln("Creating folders:", appInfo.CreateFolders)
-		if err := createFolders(appInfo.CreateFolders, workingFolder); err != nil {
+		log.Traceln("Creating folders:", app.CreateFolders)
+		if err := createFolders(app.CreateFolders, workingFolder); err != nil {
 			return err, "Error creating folders", 18
 		}
 
-		log.Traceln("Creating files:", appInfo.CreateFiles)
-		if err := writeScripts(appInfo.CreateFiles, workingFolder, targetVersion.String()); err != nil {
+		log.Traceln("Creating files:", app.CreateFiles)
+		if err := writeScripts(app.CreateFiles, workingFolder, targetVersion.String()); err != nil {
 			return err, "Error writing files", 19
 		}
 
-		log.Traceln("Moving objects:", appInfo.MoveObjects)
-		if err := moveObjects(appInfo.MoveObjects, workingFolder); err != nil {
+		log.Traceln("Moving objects:", app.MoveObjects)
+		if err := moveObjects(app.MoveObjects, workingFolder); err != nil {
 			return err, "Error moving objects ", 20
 		}
 
@@ -339,20 +341,20 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 			}
 		}
 
-		if appInfo.Symlink != "" {
+		if app.Symlink != "" {
 			//create/update symlink app-1.0.2 => app ...
 			log.Traceln("Handling symlink and restores")
 
 			//Can only restore from previous symlink (targetVersion)....
-			if FileOrDirExists(symlink) {
+			if iohelper.FileOrDirExists(symlink) {
 				absoluteFolderName, _ := filepath.Abs(folderName)
 				evalSymlink, _ := filepath.EvalSymlinks(symlink)
 				absoluteSymlink, _ := filepath.Abs(evalSymlink)
 				if absoluteFolderName != absoluteSymlink {
-					if len(appInfo.RestoreFiles) > 0 {
+					if len(app.RestoreFiles) > 0 {
 						//(handles customs/configurations that are overwritten upon upgrade)
-						log.Debugln("Restoring ", appInfo.RestoreFiles)
-						if err := restoreFiles(appInfo.RestoreFiles, symlink, folderName); err != nil {
+						log.Debugln("Restoring ", app.RestoreFiles)
+						if err := restoreFiles(app.RestoreFiles, symlink, folderName); err != nil {
 							return err, "Error restoring files |", 22
 						}
 					}
@@ -365,16 +367,16 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 			}
 
 			//err = os.Mkdir(symlink)
-			target := applicationName + "/"
+			target := appNameWithVersion + "/"
 			log.Debugln("Linking " + symlink + " -> " + target)
 			err = os.Symlink(target, symlink)
 			if err != nil {
 				return err, "Error symlink to " + target, 23
 			}
 
-			if appInfo.Shortcut != "" {
+			if app.Shortcut != "" {
 				const DefaultShortcutsDir = "shortcuts"
-				if !FileOrDirExists(DefaultShortcutsDir) {
+				if !iohelper.FileOrDirExists(DefaultShortcutsDir) {
 					log.Debugln("Creating shortcutDir ", DefaultShortcutsDir)
 					os.Mkdir(DefaultShortcutsDir, os.ModePerm)
 				}
@@ -383,25 +385,25 @@ func Run(action string, configFile string, versionOverwrite string, forceExtract
 
 				pwd, _ := os.Getwd()
 
-				targetForShortcut := path.Join(absSymlink, appInfo.Shortcut)
+				targetForShortcut := path.Join(absSymlink, app.Shortcut)
 				if customAppLocationForShortcut != "" {
-					targetForShortcut = path.Join(customAppLocationForShortcut, filepath.Base(pwd), symlink, appInfo.Shortcut)
+					targetForShortcut = path.Join(customAppLocationForShortcut, filepath.Base(pwd), symlink, app.Shortcut)
 				}
 
 				absShortcutsDir, _ := filepath.Abs(DefaultShortcutsDir)
 
 				icon := ""
-				if appInfo.ShortcutIcon != "" {
-					icon = path.Join(path.Dir(targetForShortcut), appInfo.ShortcutIcon)
+				if app.ShortcutIcon != "" {
+					icon = path.Join(path.Dir(targetForShortcut), app.ShortcutIcon)
 				}
 
-				log.Debugln("Creating shortcut ", appInfo.Shortcut, " -> ", targetForShortcut)
+				log.Debugln("Creating shortcut ", app.Shortcut, " -> ", targetForShortcut)
 				createShortcut(
-					appInfo.Shortcut,
+					app.Shortcut,
 					targetForShortcut,
 					"",
 					filepath.Dir(targetForShortcut),
-					"portable-"+appInfo.Shortcut,
+					"portable-"+app.Shortcut,
 					absShortcutsDir,
 					icon)
 			}

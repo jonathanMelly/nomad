@@ -11,12 +11,10 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gologme/log"
-	"github.com/gookit/config"
-	"github.com/gookit/config/toml"
-	"github.com/jonathanMelly/nomad/installer"
-	"io/ioutil"
+	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
+	"github.com/jonathanMelly/nomad/internal/pkg/data"
+	"github.com/jonathanMelly/nomad/internal/pkg/installer"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -34,8 +32,8 @@ func main() {
 
 	flag.Usage = customUsage
 	// Overwrite version
-	flagVersion := flag.String("version", "", "Overwrites the version in the app-definitions file")
-	flagConfig := flag.String("configs", "", "Runs all json in given folder")
+	flagVersion := flag.String("version", "", "Overwrites the version in the app-definitions iohelper")
+	flagDefinitionsDirectory := flag.String("definitions", "app-definitions", "Specify directory for custom app definitions files")
 
 	flagEnvVarForAppsLocation := flag.String("shortcutLocation", "", "If not empty, will be used for shortcuts generation as base path... (to allow easy switch)")
 
@@ -75,21 +73,27 @@ func main() {
 	//Prefix is used to show app name...
 	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
 
-	handleNomadConfig()
+	exe, err := os.Executable()
+	if err != nil {
+		log.Panic("Cannot retrieve current process", err)
+	}
+
+	configuration.Load(*flagDefinitionsDirectory, "nomad.toml", exe)
 
 	action := flag.Arg(0)
 	configFile := flag.Arg(1)
 
 	if configFile == "" {
-		if *flagConfig != "" {
-			files, err := ioutil.ReadDir(*flagConfig)
+		if *flagDefinitionsDirectory != "" {
+			files, err := os.ReadDir(*flagDefinitionsDirectory)
 			if err != nil {
 				log.Fatal(err)
 			}
 			for _, f := range files {
 				if !f.IsDir() && strings.HasSuffix(f.Name(), ".json") {
+					//conf := path.Join(*flagDefinitionsDirectory, f.Name())
 					exitCode := HandleRun(
-						installer.Run(action, path.Join(*flagConfig, f.Name()), *flagVersion,
+						installer.Run(action /*TODO*/, data.AppDefinition{}, *flagVersion,
 							*flagForceExtract, *flagSkipDownload, *flagEnvVarForAppsLocation, *flagArchivesSubDir,
 							*flagLatestVersion, *flagConfirm))
 					//log.Println("")
@@ -106,7 +110,7 @@ func main() {
 
 	} else {
 		// Run the automation
-		exitCode := HandleRun(installer.Run(action, configFile, *flagVersion,
+		exitCode := HandleRun(installer.Run(action /*TODO*/, data.AppDefinition{}, *flagVersion,
 			*flagForceExtract, *flagSkipDownload, *flagEnvVarForAppsLocation,
 			*flagArchivesSubDir, *flagLatestVersion, *flagConfirm))
 		os.Exit(exitCode)
@@ -132,20 +136,4 @@ func HandleRun(err error, errorMessage string, exitCode int) int {
 	}
 
 	return exitCode
-}
-
-func handleNomadConfig() {
-	path := "nomad.toml"
-	if installer.FileOrDirExists(path) {
-		config.WithOptions(config.ParseEnv)
-		config.AddDriver(toml.Driver)
-
-		err := config.LoadFiles("nomad.toml")
-		if err != nil {
-			log.Fatalf("Cannot read config file", err)
-		}
-	} else {
-		log.Debugln(path, "not found, skipping config load")
-	}
-
 }

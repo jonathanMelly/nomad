@@ -1,4 +1,4 @@
-package installer
+package version
 
 import (
 	"errors"
@@ -32,7 +32,7 @@ const VERSION_REGEX = `(?P<full>` +
 
 const VERSION_PLACEHOLDER = "{{VERSION}}"
 
-func (version Version) isNewerThan(other Version) bool {
+func (version Version) IsNewerThan(other Version) bool {
 
 	log.Traceln("Comparing ", version, " to ", other)
 
@@ -70,7 +70,7 @@ func buildVersionRegex(regex string) *regexp.Regexp {
 	return re
 }
 
-func fromStringCustom(source string, regex string) (*Version, error) {
+func FromStringCustom(source string, regex string) (*Version, error) {
 	version := new(Version)
 
 	re := buildVersionRegex(regex)
@@ -112,8 +112,8 @@ func fromStringCustom(source string, regex string) (*Version, error) {
 	return version, nil
 }
 
-func fromString(source string) (*Version, error) {
-	return fromStringCustom(source, VERSION_PLACEHOLDER)
+func FromString(source string) (*Version, error) {
+	return FromStringCustom(source, VERSION_PLACEHOLDER)
 }
 
 func getTextPart(matches []string, re *regexp.Regexp, partName string) string {
@@ -154,7 +154,7 @@ func (version Version) String() string {
 	return version.Text
 }
 
-func (version Version) fillVersionsPlaceholders(input string) string {
+func (version Version) FillVersionsPlaceholders(input string) string {
 
 	major := ""
 	if version.Major != nil {

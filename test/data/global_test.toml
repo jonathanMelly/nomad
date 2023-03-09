@@ -1,9 +1,12 @@
-title = "NOMAD settings"
+title = "test"
 
 #List all the apps you would like to be installed/updated
 #Not yet used
-apps = ["filezilla","npp"]
+myapps = ["test1","test2"]
 
 #github api key (to avoid limitations)
 #Extracted from GITHUB_PAT ENV if existing
-githubApiKey = "${GITHUB_PAT|paste_your_pat_here_if_not_set_by_env}"
+githubApiKey = "12345"
+
+[apps.ccleaner]
+Version = "606"

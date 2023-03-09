@@ -3,7 +3,6 @@ package installer
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -13,12 +12,6 @@ import (
 	"runtime"
 	"strings"
 )
-
-// FileOrDirExists returns true if a file object exists
-func FileOrDirExists(filename string) bool {
-	_, err := os.Stat(filename)
-	return !os.IsNotExist(err)
-}
 
 // combineRegex will take a string array of regular expressions and compile them
 // into a single regular expressions
@@ -33,17 +26,7 @@ func combineRegex(s []string) (*regexp.Regexp, error) {
 	return re, nil
 }
 
-func isDirectory(path string) bool {
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	return fileInfo.IsDir()
-}
-
-//https://stackoverflow.com/questions/32438204/create-a-windows-shortcut-lnk-in-go
+// https://stackoverflow.com/questions/32438204/create-a-windows-shortcut-lnk-in-go
 func createShortcut(linkName string, target string, arguments string, workingDirectory string, description string, destination string, icon string) {
 
 	if runtime.GOOS == "windows" {
@@ -85,7 +68,7 @@ func createShortcut(linkName string, target string, arguments string, workingDir
 		//fmt.Println(scriptTxt.String())
 
 		filename := fmt.Sprintf("lnkTo%s.vbs", linkName)
-		ioutil.WriteFile(filename, scriptTxt.Bytes(), 0777)
+		os.WriteFile(filename, scriptTxt.Bytes(), 0777)
 		cmd := exec.Command("wscript", filename)
 		err := cmd.Run()
 		if err != nil {

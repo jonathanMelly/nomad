@@ -1,0 +1,12 @@
+[apps.ccleaner]
+Version = "606"
+ApplicationName="ccleaner"
+Symlink="ccleaner"
+Shortcut="ccleaner.exe"
+DownloadExtension=".zip"
+DownloadUrl="https://download.ccleaner.com/portable/ccsetup{{VERSION}}.zip"
+RemoveRootFolder=false
+VersionCheck={Url="https://www.ccleaner.com/fr-fr/ccleaner/builds",RegEx="data-download-url=\"https://download.ccleaner.com/portable/ccsetup{{VERSION}}.zip\""}
+ExtractRegExList=["(.*)"]
+CreateFiles={"VERSION-{{VERSION}}.txt"="{{VERSION}}"}
+RestoreFiles=["backups/"]

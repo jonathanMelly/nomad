@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"github.com/jonathanMelly/nomad/internal/pkg/iohelper"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,10 +19,10 @@ func writeScripts(scripts map[string]string, workingFolder string, version strin
 		relativePath := strings.Replace(filepath.Join(workingFolder, name), "{{VERSION}}", version, -1)
 
 		// Write to file
-		if FileOrDirExists(relativePath) {
+		if iohelper.FileOrDirExists(relativePath) {
 			log.Println(relativePath + " already in destination, skipping")
 		} else {
-			err := ioutil.WriteFile(relativePath, []byte(strings.Replace(body, "{{VERSION}}", version, -1)), os.ModePerm)
+			err := os.WriteFile(relativePath, []byte(strings.Replace(body, "{{VERSION}}", version, -1)), os.ModePerm)
 			if err != nil {
 				return err
 			}
@@ -59,7 +60,7 @@ func createFolders(folders []string, dstFolder string) error {
 		// Path of file
 		newPath := filepath.Join(dstFolder, folder)
 
-		if !FileOrDirExists(newPath) {
+		if !iohelper.FileOrDirExists(newPath) {
 			err := os.MkdirAll(newPath, os.ModePerm)
 			if err != nil {
 				return err
@@ -70,14 +71,14 @@ func createFolders(folders []string, dstFolder string) error {
 	return nil
 }
 
-//restore files from previous version (mainly for config)
+// restore files from previous version (mainly for config)
 func restoreFiles(files []string, source string, destination string) error {
 
-	if destination == "" || !FileOrDirExists(destination) {
+	if destination == "" || !iohelper.FileOrDirExists(destination) {
 		log.Println("Missing destination " + destination + " for restore => restore operation cancelled")
 		return nil
 	}
-	if source == "" || !FileOrDirExists(source) {
+	if source == "" || !iohelper.FileOrDirExists(source) {
 		log.Println("Missing source " + source + " for restore => restore operation cancelled")
 		return nil
 	}
@@ -87,12 +88,12 @@ func restoreFiles(files []string, source string, destination string) error {
 
 		sourcePath := filepath.Join(source, file)
 
-		if FileOrDirExists(sourcePath) {
-			if isDirectory(sourcePath) {
+		if iohelper.FileOrDirExists(sourcePath) {
+			if iohelper.IsDirectory(sourcePath) {
 				err := filepath.Walk(sourcePath, func(walkingPath string, _ os.FileInfo, _ error) error {
 
 					//walk walks given folder as well...
-					if walkingPath != sourcePath && !isDirectory(walkingPath) {
+					if walkingPath != sourcePath && !iohelper.IsDirectory(walkingPath) {
 						//log.Println("=>Walking " + walkingPath)
 						destSubPath := strings.Join(strings.Split(walkingPath, string(os.PathSeparator))[2:], string(os.PathSeparator))
 						restore(walkingPath, filepath.Join(destination, destSubPath))
@@ -117,7 +118,7 @@ func restoreFiles(files []string, source string, destination string) error {
 	return nil
 }
 
-//Copy source to upcoming location
+// Copy source to upcoming location
 func restore(sourcePath string, destinationPath string) {
 	log.Println("==> restoring " + sourcePath + " -> " + destinationPath)
 	stat, err := os.Stat(sourcePath)
@@ -129,7 +130,7 @@ func restore(sourcePath string, destinationPath string) {
 	if err != nil {
 		log.Println("Cannot read source "+sourcePath+", skipping|", err)
 	} else {
-		if FileOrDirExists(destinationPath) {
+		if iohelper.FileOrDirExists(destinationPath) {
 			log.Println("===> " + destinationPath + " already exists, trying to backup")
 			newpath := destinationPath + "-" + time.Now().Format("2006-01-02-15h04m05s")
 			err := os.Rename(destinationPath, newpath)
@@ -143,7 +144,7 @@ func restore(sourcePath string, destinationPath string) {
 
 		//Warning, filepath.Dir is not os separator agnostic...
 		destinationDirectory := filepath.Dir(filepath.ToSlash(destinationPath))
-		if !FileOrDirExists(destinationDirectory) {
+		if !iohelper.FileOrDirExists(destinationDirectory) {
 			err := os.MkdirAll(destinationDirectory, os.ModePerm)
 			if err != nil {
 				log.Println("Cannot mkdir "+destinationDirectory+", aborting restore of "+destinationPath+" |", err)
@@ -153,7 +154,7 @@ func restore(sourcePath string, destinationPath string) {
 			}
 		}
 
-		err = ioutil.WriteFile(destinationPath, bytesRead, stat.Mode())
+		err = os.WriteFile(destinationPath, bytesRead, stat.Mode())
 		if err != nil {
 			log.Println("Cannot write destination "+destinationPath+", restore failed |", err)
 		} else {

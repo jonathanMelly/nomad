@@ -1,38 +1,38 @@
-package installer
+package version
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"github.com/gookit/goutil/testutil/assert"
 	"log"
+	"os"
 	"testing"
 )
 
 func assertOne(t *testing.T, input string, prependRegex string, expected string) {
-	version, error := fromStringCustom(input, prependRegex+VERSION_PLACEHOLDER)
+	version, error := FromStringCustom(input, prependRegex+VERSION_PLACEHOLDER)
 	assert.Nil(t, error)
 	assert.Equal(t, expected, version.String())
 }
 
 func assertVersionComparison(t *testing.T, v2 string, v1 string) {
-	newer, err := fromString(v2)
+	newer, err := FromString(v2)
 	if err != nil {
 		assert.Fail(t, "Cannot extract version from "+v2, err)
 	}
-	older, err := fromString(v1)
+	older, err := FromString(v1)
 	if err != nil {
 		assert.Fail(t, "Cannot extract version from "+v1, err)
 	}
 
-	assert.True(t, newer.isNewerThan(*older), fmt.Sprint("Version ", newer, " should be reported as newer than ", older))
-	assert.False(t, older.isNewerThan(*newer), fmt.Sprint("Version ", older, " shouldn’t be reported as newer than ", newer))
+	assert.True(t, newer.IsNewerThan(*older), fmt.Sprint("Version ", newer, " should be reported as newer than ", older))
+	assert.False(t, older.IsNewerThan(*newer), fmt.Sprint("Version ", older, " shouldn’t be reported as newer than ", newer))
 }
 
 func TestGitReleaseParsing(t *testing.T) {
 
-	// Read entire file content, giving us little control but
-	// making it very simple. No need to close the file.
-	content, err := ioutil.ReadFile("../installer_test/git-release.json")
+	// Read entire iohelper content, giving us little control but
+	// making it very simple. No need to close the iohelper.
+	content, err := os.ReadFile("../../test/data/git-release.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,19 +40,19 @@ func TestGitReleaseParsing(t *testing.T) {
 	// Convert []byte to string and print to screen
 	text := string(content)
 
-	version, err := fromStringCustom(text, `"tag_name": "v`+VERSION_PLACEHOLDER+`"`)
+	version, err := FromStringCustom(text, `"tag_name": "v`+VERSION_PLACEHOLDER+`"`)
 	if err != nil {
 		assert.Fail(t, "Cannot extract version", err)
 	}
 
-	assert.Equal(t, "2.39.2.windows.1 2 39 2", version.fillVersionsPlaceholders("{{VERSION}} {{V_MAJOR}} {{V_MINOR}} {{V_PATCH}}"))
+	assert.Equal(t, "2.39.2.windows.1 2 39 2", version.FillVersionsPlaceholders("{{VERSION}} {{V_MAJOR}} {{V_MINOR}} {{V_PATCH}}"))
 
 }
 
 func TestPlaceholderReplacement(t *testing.T) {
 
-	version, _ := fromString("1.2.3")
-	assert.Equal(t, "salut1.2.3 1 2 3", version.fillVersionsPlaceholders("salut{{VERSION}} {{V_MAJOR}} {{V_MINOR}} {{V_PATCH}}"))
+	version, _ := FromString("1.2.3")
+	assert.Equal(t, "salut1.2.3 1 2 3", version.FillVersionsPlaceholders("salut{{VERSION}} {{V_MAJOR}} {{V_MINOR}} {{V_PATCH}}"))
 
 }
 
@@ -121,7 +121,7 @@ func TestVersionPatterns(t *testing.T) {
 }
 
 func TestSafeGetIntPart(t *testing.T) {
-	version, _ := fromString("1.2.3.4-alpha+45")
+	version, _ := FromString("1.2.3.4-alpha+45")
 	assert.Equal(t, 1, version.safeGetIntProperty("Major"))
 	assert.Equal(t, 2, version.safeGetIntProperty("Minor"))
 	assert.Equal(t, 3, version.safeGetIntProperty("Patch"))

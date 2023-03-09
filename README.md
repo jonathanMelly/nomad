@@ -62,7 +62,7 @@ nomad --help
 ## Github
 To reduce network traffic, when possible, GitHub API is used to retrieve last release info.
 As GitHub API limit traffic to guest requests, a PAT (GitHub token) is very useful.
-If you have a PAT, please add it in your env (GITHUB_PAT) and put the following [file](example/nomad.toml) in 
+If you have a PAT, please add it in your env (GITHUB_PAT) and put the following [file](config/nomad.toml) in 
 the same directory as the binary (you may also write it directly into the file).
 
 ### Create a PAT
@@ -70,7 +70,7 @@ Please follow [this link](https://docs.github.com/en/authentication/keeping-your
 
 
 # App definition structure
-Please refer to [this file](installer/config.go).
+Please refer to [this file](internal/pkg/installer/config.go).
 
 # Next steps
 Append defs to binary, get info from their if no custom is found...

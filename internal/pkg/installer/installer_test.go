@@ -1,7 +1,7 @@
 package installer
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/gookit/goutil/testutil/assert"
 	"log"
 	"os"
 	"path/filepath"
@@ -23,30 +23,4 @@ func setup(t *testing.T) {
 	os.Chdir(tempDir)
 	here, _ := os.Getwd()
 	log.Println("Working in " + here)
-}
-
-func TestBadConfig(t *testing.T) {
-	//ARRANGE
-	setup(t)
-
-	//ACT
-	err, msg, code := Run("install", "../404.json", "", false, true, "", "archives", true, false)
-	log.Println(err, msg)
-
-	//ASSERT
-	assert.Equal(t, 1, code)
-
-}
-
-func TestBadURL(t *testing.T) {
-	//ARRANGE
-	setup(t)
-
-	//ACT
-	err, msg, code := Run("install", "../badURL.json", "", false, true, "", "archives", true, false)
-	log.Println(err, msg)
-
-	//ASSERT
-	assert.Equal(t, 4, code)
-
 }

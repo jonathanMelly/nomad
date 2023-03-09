@@ -1,0 +1,6 @@
+binaryContent010101010
+#NOMAD#
+{"apps":[{"ApplicationName": "metaJson1"},{"ApplicationName": "metaJson2"}]}
+#NOMAD_TOML#
+[apps.metaToml]
+Version = "123"

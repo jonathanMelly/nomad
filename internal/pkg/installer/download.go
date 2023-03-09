@@ -1,7 +1,7 @@
 package installer
 
 import (
-	"github.com/gookit/config"
+	"github.com/gookit/config/v2"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,8 +13,8 @@ import (
 func getRequestBody(url string) (string, error) {
 	r, err := http.NewRequest("GET", url, nil)
 
-	apiKey, found := config.String("githubApiKey")
-	if strings.Contains(url, "github") && found {
+	apiKey := config.String("githubApiKey")
+	if apiKey != "" && strings.Contains(url, "github") {
 		r.Header.Add("Authorization", "Bearer "+apiKey)
 	}
 	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
