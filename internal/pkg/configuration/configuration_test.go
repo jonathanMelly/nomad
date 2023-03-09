@@ -8,7 +8,7 @@ import (
 )
 
 func TestLoadWithGlobalCustomAndMeta(t *testing.T) {
-	settings = data.NewSettings()
+	Settings = data.NewSettings()
 	log.EnableLevelsByNumber(10)
 	//log.Println(os.Getwd())
 
@@ -20,27 +20,27 @@ func TestLoadWithGlobalCustomAndMeta(t *testing.T) {
 	Load(testDataPath+"global_test.toml", customPath, testDataPath+"fakePatchedBinaryWithMeta")
 
 	//THEN
-	assert.Len(t, settings.AppDefinitions, 7)
+	assert.Len(t, Settings.AppDefinitions, 7)
 
-	//Global settings
-	assert.ContainsKey(t, settings.AppDefinitions, "ccleaner")
-	app := settings.AppDefinitions["ccleaner"]
+	//Global Settings
+	assert.ContainsKey(t, Settings.AppDefinitions, "ccleaner")
+	app := Settings.AppDefinitions["ccleaner"]
 	assert.Equal(t, "606", app.Version)
-	assert.Equal(t, settings.GithubApiKey, "12345")
+	assert.Equal(t, Settings.GithubApiKey, "12345")
 
 	//TODO custom defs
-	assert.ContainsKey(t, settings.AppDefinitions, "customJson")
-	assert.ContainsKey(t, settings.AppDefinitions, "customToml")
+	assert.ContainsKey(t, Settings.AppDefinitions, "customJson")
+	assert.ContainsKey(t, Settings.AppDefinitions, "customToml")
 
 	//App Defs from META
-	assert.ContainsKey(t, settings.AppDefinitions, "metaJson1")
-	assert.ContainsKey(t, settings.AppDefinitions, "metaJson2")
-	assert.ContainsKey(t, settings.AppDefinitions, "metaToml")
+	assert.ContainsKey(t, Settings.AppDefinitions, "metaJson1")
+	assert.ContainsKey(t, Settings.AppDefinitions, "metaJson2")
+	assert.ContainsKey(t, Settings.AppDefinitions, "metaToml")
 
 }
 
 func TestLoadWithMetaOnly(t *testing.T) {
-	settings = data.NewSettings()
+	Settings = data.NewSettings()
 	log.EnableLevelsByNumber(10)
 	//log.Println(os.Getwd())
 
@@ -51,6 +51,6 @@ func TestLoadWithMetaOnly(t *testing.T) {
 	Load("404", "404", testDataPath+"fakePatchedBinaryWithMeta")
 
 	//THEN
-	assert.Len(t, settings.AppDefinitions, 3)
+	assert.Len(t, Settings.AppDefinitions, 3)
 
 }

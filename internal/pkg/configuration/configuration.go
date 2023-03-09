@@ -14,23 +14,25 @@ import (
 	"strings"
 )
 
-var settings = data.NewSettings()
+var Settings = data.NewSettings()
 
 func Load(globalSettingsPath string, customDefinitionsDirectory string, binaryPath string) {
 	loadGlobalSettings(func(config2 *config.Config) {
-		config2.BindStruct("", &settings)
-		if log.GetLevel("debug") {
-			for k, _ := range settings.AppDefinitions {
+		err := config2.BindStruct("", &Settings)
+		if err != nil {
+			log.Errorln("Cannot bind struct", err)
+		} else if log.GetLevel("debug") {
+			for k := range Settings.AppDefinitions {
 				log.Debugln("Added", k, "definition")
 			}
 		}
 	}, globalSettingsPath)
 
 	ghKeyFromEnv := os.Getenv("GITHUB_PAT")
-	if settings.GithubApiKey == "" && ghKeyFromEnv != "" {
+	if Settings.GithubApiKey == "" && ghKeyFromEnv != "" {
 		log.Debugln("Using github key from ENV")
-		settings.GithubApiKey = ghKeyFromEnv
-	} else if ghKeyFromEnv != "" && settings.GithubApiKey != ghKeyFromEnv {
+		Settings.GithubApiKey = ghKeyFromEnv
+	} else if ghKeyFromEnv != "" && Settings.GithubApiKey != ghKeyFromEnv {
 		log.Debugln("Github key from config file and ENV differ... Using config file")
 	}
 
@@ -47,7 +49,12 @@ func loadEmbeddedAppDefinitions(binaryPath string) {
 		log.Errorln("Cannot read binary", binaryPath, "|", err)
 		return
 	}
-	defer exeFile.Close()
+	defer func(exeFile *os.File) {
+		err := exeFile.Close()
+		if err != nil {
+			log.Errorln("Cannot close", exeFile, err)
+		}
+	}(exeFile)
 	exeStat, err := exeFile.Stat()
 	if err != nil {
 		log.Errorln("Cannot stat binary", binaryPath, "|", err)
@@ -56,7 +63,10 @@ func loadEmbeddedAppDefinitions(binaryPath string) {
 
 	reader := bufio.NewReader(exeFile)
 	if exeStat.Size() > 1024*100 { //Test files do not contain binary...
-		reader.Discard(int(float32(exeStat.Size()) * 0.8)) //config data should not be > than 80% of binary iohelper...
+		_, err := reader.Discard(int(float32(exeStat.Size()) * 0.8))
+		if err != nil {
+			log.Warnln("Cannot skip 80% binary data", err)
+		} //config data should not be > than 80% of binary iohelper...
 	}
 	buf := make([]byte, 16)
 	var exeContent = strings.Builder{}
@@ -118,13 +128,13 @@ func loadCustomAppDefinitions(customDefinitionsDirectory string) {
 			if !f.IsDir() {
 				appDefinitionPath := path.Join(customDefinitionsDirectory, f.Name())
 				if strings.HasSuffix(f.Name(), ".json") {
-					json, err := os.ReadFile(appDefinitionPath)
+					jsonContent, err := os.ReadFile(appDefinitionPath)
 					if jsonMerge.String() == "" {
 						jsonMerge.WriteString(`{"apps":[`)
 					} else {
 						jsonMerge.WriteString(`,`)
 					}
-					jsonMerge.Write(json)
+					jsonMerge.Write(jsonContent)
 					if err != nil {
 						log.Errorln("Cannot load custom json config", appDefinitionPath, "|", err)
 					}
@@ -175,7 +185,7 @@ func addJsonAppDefinitionsFromConfig(jsonConfig *config.Config) {
 }
 
 func fillDefinitions(app string, definition data.AppDefinition) {
-	_, exist := settings.AppDefinitions[app]
+	_, exist := Settings.AppDefinitions[app]
 	if !exist {
 		log.Traceln("Adding", app, "definition")
 
@@ -183,7 +193,7 @@ func fillDefinitions(app string, definition data.AppDefinition) {
 		if definition.ApplicationName == "" {
 			definition.ApplicationName = app
 		}
-		settings.AppDefinitions[app] = definition
+		Settings.AppDefinitions[app] = definition
 	} else {
 		log.Traceln(app, "already defined->not adding it")
 	}
@@ -202,20 +212,20 @@ func initConfig() *config.Config {
 	return ephemeralConfig
 }
 
-func loadGlobalSettings(do func(config2 *config.Config), paths ...string) {
-	log.Traceln("Loading global config from", paths)
+func loadGlobalSettings(do func(config2 *config.Config), settingsPaths ...string) {
+	log.Traceln("Loading global config from", settingsPaths)
 	configTmp := initConfig()
-	for _, path := range paths {
-		if iohelper.FileOrDirExists(path) {
-			err := configTmp.LoadFiles(path)
+	for _, settingsPath := range settingsPaths {
+		if iohelper.FileOrDirExists(settingsPath) {
+			err := configTmp.LoadFiles(settingsPath)
 			if err != nil {
-				log.Errorln("Cannot read config iohelper", path, "|", err)
+				log.Errorln("Cannot read config iohelper", settingsPath, "|", err)
 			} else {
 				do(configTmp)
 				configTmp.ClearAll()
 			}
 		} else {
-			log.Debugln(path, "not found/existing, skipping")
+			log.Debugln(settingsPath, "not found/existing, skipping")
 		}
 	}
 }

@@ -1,9 +1,9 @@
 package installer
 
 import (
-	"github.com/gookit/config/v2"
+	"github.com/gologme/log"
+	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -13,7 +13,7 @@ import (
 func getRequestBody(url string) (string, error) {
 	r, err := http.NewRequest("GET", url, nil)
 
-	apiKey := config.String("githubApiKey")
+	apiKey := configuration.Settings.GithubApiKey
 	if apiKey != "" && strings.Contains(url, "github") {
 		r.Header.Add("Authorization", "Bearer "+apiKey)
 	}
@@ -25,13 +25,18 @@ func getRequestBody(url string) (string, error) {
 	}
 
 	client, err := http.DefaultClient.Do(r)
-	defer client.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Warn("Cannot close http request body", err)
+		}
+	}(client.Body)
 
 	if err != nil {
 		return "", err
 	}
 
-	body, err := ioutil.ReadAll(client.Body)
+	body, err := io.ReadAll(client.Body)
 
 	if err != nil {
 		return "", err
@@ -43,7 +48,12 @@ func getRequestBody(url string) (string, error) {
 // downloadFile downloads a file from a URL
 func downloadFile(url string, fileName string) (int64, error) {
 	out, err := os.Create(fileName)
-	defer out.Close()
+	defer func(out *os.File) {
+		err := out.Close()
+		if err != nil {
+			log.Errorln("Cannot close", fileName, "|", err)
+		}
+	}(out)
 	if err != nil {
 		return 0, err
 	}
@@ -61,7 +71,12 @@ func downloadFile(url string, fileName string) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	defer client.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Errorln("Cannot close http body", err)
+		}
+	}(client.Body)
 
 	n, err := io.Copy(out, client.Body)
 
