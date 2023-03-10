@@ -16,15 +16,16 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"syscall"
 )
+
+var AppPath = "apps"
 
 func init() {
 	// Verbose logging with file name and line number
 	//log.SetFlags(log.Lshortfile)
 }
 
-// Run will execute commands from a app-definitions file
+// Run will execute commands from an app-definitions file
 func Run(action string, app data.AppDefinition, versionOverwrite string, forceExtract bool, skipDownload bool,
 	customAppLocationForShortcut string, archivesSubDir string, useLatestVersion bool, confirm bool) (error error, errorMessage string, exitCode int) {
 
@@ -52,9 +53,6 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 
 	log.SetPrefix("|" + appName + "| ")
 
-	// Set the folder name
-	const DefaultAppPath = "apps"
-
 	//VERSION HANDLING
 	var targetVersion *version.Version = nil
 	symlink := ""
@@ -78,7 +76,7 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 	//Current version
 	var currentInstalledVersion *version.Version = nil
 	if app.Symlink != "" {
-		symlink = path.Join(DefaultAppPath, app.Symlink)
+		symlink = path.Join(AppPath, app.Symlink)
 		if iohelper.FileOrDirExists(symlink) {
 			target, _ := os.Readlink(symlink)
 			split := strings.Split(filepath.Base(target), "-")
@@ -157,21 +155,21 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 			}
 		}
 
-		if !iohelper.FileOrDirExists(DefaultAppPath) {
-			log.Debugln("Creating " + DefaultAppPath + " directory")
-			err := os.Mkdir(DefaultAppPath, os.ModePerm)
+		if !iohelper.FileOrDirExists(AppPath) {
+			log.Debugln("Creating", AppPath, "directory")
+			err := os.Mkdir(AppPath, os.ModePerm)
 			if err != nil {
-				return err, fmt.Sprint("Cannot create ", DefaultAppPath), 0
+				return err, fmt.Sprint("Cannot create ", AppPath), 0
 			}
 		}
 
 		var appNameWithVersion = fmt.Sprint(appName, "-", targetVersion)
 
-		var folderName = path.Join(DefaultAppPath, appNameWithVersion)
+		var folderName = path.Join(AppPath, appNameWithVersion)
 
 		// Set the zip name based off the folder
 		// Note: The original file download name will be changed
-		var zip = path.Join(DefaultAppPath, archivesSubDir, appName+app.DownloadExtension)
+		var zip = path.Join(AppPath, archivesSubDir, appName+app.DownloadExtension)
 
 		// If the zip file DOES exist on disk
 		if iohelper.FileOrDirExists(zip) {
@@ -274,19 +272,9 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 					return err, "Error getting folder full path ", 9
 				}
 
-				// Manually set the arguments since Go escaping does not work with MSI arguments
-				argString := fmt.Sprintf(`/a "%v" /qb TARGETDIR="%v"`, zip, fullFolderPath)
-				// Build the command
-				log.Traceln("msi args: ", argString)
-				cmd := exec.Command("msiexec", argString)
-
-				cmd.SysProcAttr = &syscall.SysProcAttr{
-					Foreground: false,
-					Ctty:       0,
-				}
-
-				if err = cmd.Run(); err != nil {
-					return err, "Error extracting from msi |", 11
+				err2, s, i, done := msiExec(zip, fullFolderPath, err)
+				if done {
+					return err2, s, i
 				}
 
 				// If RemoveRootFolder is set to true
@@ -307,7 +295,7 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 							return err, "Error restore from msi folder |", 13
 						}
 
-						// Set the working folder so the rename will work later
+						// Set the working folder so the renaming will work later
 						workingFolder = fullFolderPath + "_temp"
 
 						if err := os.RemoveAll(fullFolderPath); err != nil {
@@ -435,6 +423,19 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 		return errors.New("Invalid action" + action), "", 81
 	}
 
+}
+
+func msiExec(zip string, fullFolderPath string, err error) (error, string, int, bool) {
+	// Manually set the arguments since Go escaping does not work with MSI arguments
+	argString := fmt.Sprintf(`/a "%v" /qb TARGETDIR="%v"`, zip, fullFolderPath)
+	// Build the command
+	log.Traceln("msi args: ", argString)
+	cmd := exec.Command("msiexec", argString)
+
+	if err = cmd.Run(); err != nil {
+		return err, "Error extracting from msi |", 11, true
+	}
+	return nil, "", 0, false
 }
 
 func extractRegex(extension string, zip string, folder string, re *regexp.Regexp) (interface{}, error) {
