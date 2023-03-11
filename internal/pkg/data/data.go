@@ -56,6 +56,9 @@ func (definition *AppDefinition) Validate() error {
 	if definition.DownloadExtension == "" {
 		missing = append(missing, "download extension")
 	}
+	if definition.VersionCheck.Url == "" && definition.Version == "" {
+		missing = append(missing, "version")
+	}
 	if len(missing) > 0 {
 		return errors.New(fmt.Sprint("mandatory data missing: ", missing))
 	}

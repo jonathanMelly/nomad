@@ -1,22 +1,34 @@
 package configuration
 
 import (
-	"bufio"
+	"embed"
+	"fmt"
 	"github.com/gologme/log"
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/json"
 	"github.com/gookit/config/v2/toml"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/iohelper"
-	"io"
+	"github.com/jonathanMelly/nomad/pkg/version"
+	"io/fs"
 	"os"
 	"path"
 	"strings"
 )
 
 var Settings = data.NewSettings()
+var AppDefinitionDirectoryName = "app-definitions"
 
-func Load(globalSettingsPath string, customDefinitionsDirectory string, binaryPath string) {
+func Load(globalSettingsPath string, customDefinitionsDirectory string, embeddedSrc embed.FS) {
+
+	//Load key from ENV
+	ghKeyFromEnv := os.Getenv("GITHUB_PAT")
+	if ghKeyFromEnv != "" && ghKeyFromEnv != Settings.GithubApiKey {
+		log.Debugln("Using github key from ENV")
+		Settings.GithubApiKey = ghKeyFromEnv
+	}
+
+	//Key can be overridden here
 	loadGlobalSettings(func(config2 *config.Config) {
 		err := config2.BindStruct("", &Settings)
 		if err != nil {
@@ -27,138 +39,88 @@ func Load(globalSettingsPath string, customDefinitionsDirectory string, binaryPa
 			}
 		}
 	}, globalSettingsPath)
-
-	ghKeyFromEnv := os.Getenv("GITHUB_PAT")
-	if Settings.GithubApiKey == "" && ghKeyFromEnv != "" {
-		log.Debugln("Using github key from ENV")
-		Settings.GithubApiKey = ghKeyFromEnv
-	} else if ghKeyFromEnv != "" && Settings.GithubApiKey != ghKeyFromEnv {
-		log.Debugln("Github key from config file and ENV differ... Using config file")
+	if log.GetLevel("debug") && ghKeyFromEnv != Settings.GithubApiKey {
+		log.Debugln("Overriding github key with config")
 	}
 
 	loadCustomAppDefinitions(customDefinitionsDirectory)
 
-	//Embedded defs
-	loadEmbeddedAppDefinitions(binaryPath)
+	if &embeddedSrc != nil {
+		log.Traceln("Loading embedded definitions")
+		loadEmbeddedDefinitions(embeddedSrc)
+	}
+
 }
 
-func loadEmbeddedAppDefinitions(binaryPath string) {
-	log.Traceln("Looking into ", binaryPath, "for app definition metadata")
-	exeFile, err := os.Open(binaryPath)
-	if err != nil {
-		log.Errorln("Cannot read binary", binaryPath, "|", err)
-		return
-	}
-	defer func(exeFile *os.File) {
-		err := exeFile.Close()
-		if err != nil {
-			log.Errorln("Cannot close", exeFile, err)
-		}
-	}(exeFile)
-	exeStat, err := exeFile.Stat()
-	if err != nil {
-		log.Errorln("Cannot stat binary", binaryPath, "|", err)
-		return
-	}
-
-	reader := bufio.NewReader(exeFile)
-	if exeStat.Size() > 1024*100 { //Test files do not contain binary...
-		_, err := reader.Discard(int(float32(exeStat.Size()) * 0.8))
-		if err != nil {
-			log.Warnln("Cannot skip 80% binary data", err)
-		} //config data should not be > than 80% of binary iohelper...
-	}
-	buf := make([]byte, 16)
-	var exeContent = strings.Builder{}
-	for {
-		n, err := reader.Read(buf)
-		if err != nil {
-			if err != io.EOF {
-				log.Error(err)
-				return
-			}
-			break
-		}
-		exeContent.WriteString(string(buf[0:n]))
-	}
-
-	split := strings.Split(exeContent.String(), "#NOMAD#")
-	if len(split) != 2 {
-		log.Debugln("No metadata in binary", binaryPath)
-	} else {
-		nomadData := split[1]
-		split = strings.Split(nomadData, "#NOMAD_TOML#")
-		if len(split) != 2 {
-			log.Errorln("Bad metadata in binary", binaryPath)
-		} else {
-			jsonContent := split[0]
-			importFromConfigString(config.JSON, jsonContent, func(jsonConfig *config.Config) {
-				jsonApps := data.JsonApps{}
-				err := jsonConfig.BindStruct("", &jsonApps)
-				if err != nil {
-					log.Errorln("Cannot bind JsonApps struct from config", "|", err)
-				}
-				for _, definition := range jsonApps.Definitions {
-					fillDefinitions(definition.ApplicationName, definition)
-				}
-			})
-
-			tomlContent := split[1]
-			importFromConfigString(config.Toml, tomlContent, func(tomlConfig *config.Config) {
-				addTomlAppDefinitionsFromConfig(tomlConfig)
-			})
-		}
-	}
+func loadEmbeddedDefinitions(embeddedSrc embed.FS) {
+	loadAppDefinitions(AppDefinitionDirectoryName, embeddedSrc)
 }
 
 func loadCustomAppDefinitions(customDefinitionsDirectory string) {
 	//Custom Definitions files (json or toml)
 	if customDefinitionsDirectory != "" && iohelper.FileOrDirExists(customDefinitionsDirectory) {
 		log.Debugln("Looking into", customDefinitionsDirectory, "for custom app definitions")
-		files, err := os.ReadDir(customDefinitionsDirectory)
+		wd, err := os.Getwd()
 		if err != nil {
-			log.Errorln("Cannot read", customDefinitionsDirectory, "|", err)
+			log.Errorln("Cannot get current dir", err)
 			return
 		}
-
-		tomlConfig := initConfig()
-		jsonMerge := strings.Builder{} //merge json contents to reduce config.Load mechanism...
-
-		for _, f := range files {
-			if !f.IsDir() {
-				appDefinitionPath := path.Join(customDefinitionsDirectory, f.Name())
-				if strings.HasSuffix(f.Name(), ".json") {
-					jsonContent, err := os.ReadFile(appDefinitionPath)
-					if jsonMerge.String() == "" {
-						jsonMerge.WriteString(`{"apps":[`)
-					} else {
-						jsonMerge.WriteString(`,`)
-					}
-					jsonMerge.Write(jsonContent)
-					if err != nil {
-						log.Errorln("Cannot load custom json config", appDefinitionPath, "|", err)
-					}
-				} else if strings.HasSuffix(f.Name(), ".toml") {
-					err := tomlConfig.LoadFiles(appDefinitionPath)
-					if err != nil {
-						log.Errorln("Cannot load custom toml config", appDefinitionPath, "|", err)
-					}
-				}
-			}
-		}
-
-		//JSON
-		jsonMerge.WriteString(`]}`)
-		importFromConfigString(config.JSON, jsonMerge.String(), func(jsonConfig *config.Config) {
-			addJsonAppDefinitionsFromConfig(jsonConfig)
-		})
-
-		//TOML
-		addTomlAppDefinitionsFromConfig(tomlConfig)
+		loadAppDefinitions(customDefinitionsDirectory, os.DirFS(wd))
 
 	} else {
 		log.Debugln("No custom app definition found in", customDefinitionsDirectory)
 	}
+}
+
+func loadAppDefinitions(directoryPath string, fs2 fs.FS) {
+
+	files, err := fs.ReadDir(fs2, directoryPath)
+	if err != nil {
+		log.Errorln("Cannot read dir", directoryPath, "with fs", fs2, "|", err)
+		return
+	}
+
+	jsonMerge := strings.Builder{} //merge json contents to reduce config.Load mechanism...
+	tomlMerge := strings.Builder{}
+	for _, f := range files {
+		if !f.IsDir() {
+			appDefinitionPath := path.Join(directoryPath, f.Name())
+			if strings.HasSuffix(f.Name(), ".json") {
+				jsonContent, err := fs.ReadFile(fs2, appDefinitionPath)
+				if err != nil {
+					log.Errorln("Cannot load custom json config", appDefinitionPath, "|", err)
+					continue
+				}
+				if jsonMerge.String() == "" {
+					jsonMerge.WriteString(`{"apps":[`)
+				} else {
+					jsonMerge.WriteString(`,`)
+				}
+				jsonMerge.Write(jsonContent)
+
+			} else if strings.HasSuffix(f.Name(), ".toml") {
+				tomlContent, err := fs.ReadFile(fs2, appDefinitionPath)
+				if err != nil {
+					log.Errorln("Cannot load custom toml config", appDefinitionPath, "|", err)
+					continue
+				}
+				tomlMerge.Write(tomlContent)
+				tomlMerge.WriteString(fmt.Sprintln())
+			}
+		}
+	}
+
+	//JSON
+	jsonMerge.WriteString(`]}`)
+	importFromConfigString(config.JSON, jsonMerge.String(), func(jsonConfig *config.Config) {
+		addJsonAppDefinitionsFromConfig(jsonConfig)
+	})
+
+	//TOML
+	importFromConfigString(config.Toml, tomlMerge.String(), func(tomlConfig *config.Config) {
+		addTomlAppDefinitionsFromConfig(tomlConfig)
+	})
+
 }
 
 func addTomlAppDefinitionsFromConfig(tomlConfig *config.Config) {
@@ -185,6 +147,13 @@ func addJsonAppDefinitionsFromConfig(jsonConfig *config.Config) {
 }
 
 func fillDefinitions(app string, definition data.AppDefinition) {
+	//Old config format
+	if strings.Contains(app, version.VERSION_PLACEHOLDER) {
+		app = app[0:strings.LastIndex(app, "-")]
+		definition.ApplicationName = app
+		log.Warnln("Please upgrade config : remove -{{VERSION}} from app name")
+	}
+
 	_, exist := Settings.AppDefinitions[app]
 	if !exist {
 		log.Traceln("Adding", app, "definition")

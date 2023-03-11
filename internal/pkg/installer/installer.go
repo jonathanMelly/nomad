@@ -41,16 +41,7 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 		return err, "Error creating regular expression from list", 2
 	}
 
-	//Old config format
-	//TODO TEST THAT
-	var appName string
-	if strings.Contains(app.ApplicationName, version.VERSION_PLACEHOLDER) {
-		appName = app.ApplicationName[0:strings.LastIndex(app.ApplicationName, "-")]
-		log.Warnln("Please upgrade config : remove -{{VERSION}} from app name")
-	} else {
-		appName = app.ApplicationName
-	}
-
+	appName := app.ApplicationName
 	log.SetPrefix("|" + appName + "| ")
 
 	//VERSION HANDLING
@@ -128,7 +119,7 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 	if currentInstalledVersionString != targetVersion.String() {
 
 		if currentInstalledVersion == nil {
-			action := "installing"
+			action := "not installed >> will install"
 			log.Infoln(action, "version", targetVersion)
 		} else {
 			action := "upgrading"
@@ -169,7 +160,7 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 
 		// Set the zip name based off the folder
 		// Note: The original file download name will be changed
-		var zip = path.Join(AppPath, archivesSubDir, appName+app.DownloadExtension)
+		var zip = path.Join(AppPath, archivesSubDir, fmt.Sprint(appNameWithVersion, app.DownloadExtension))
 
 		// If the zip file DOES exist on disk
 		if iohelper.FileOrDirExists(zip) {

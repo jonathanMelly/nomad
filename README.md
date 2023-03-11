@@ -32,7 +32,6 @@ It is working (I’m using it at my work) but still need some improvements befor
 
 # How
  1. Download [latest release](https://github.com/jonathanMelly/portable-app-installer/releases/latest)
-2. Activate [developer mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) (if needed) [this is for symlink]
  2. To install / update / get status an app (*Filezilla* for instance), start a terminal and run
 ```bash 
 nomad install filezilla
@@ -40,7 +39,7 @@ nomad update filezilla
 nomad status filezilla
 ```
 
-(available apps are listed [here](app-definitions) and you can add yours by adding any valid json file...)
+(available apps are listed [here](cmd/nomad/app-definitions) and you can add yours by adding any valid json file...)
 
 # Essential options
 
@@ -62,16 +61,15 @@ nomad --help
 ## Github
 To reduce network traffic, when possible, GitHub API is used to retrieve last release info.
 As GitHub API limit traffic to guest requests, a PAT (GitHub token) is very useful.
-If you have a PAT, please add it in your env (GITHUB_PAT) and put the following [file](config/nomad.toml) in 
-the same directory as the binary (you may also write it directly into the file).
+If you have a PAT, please add it in your env (GITHUB_PAT) or put the following [file](config/nomad.toml) in 
+the same directory as the binary.
 
 ### Create a PAT
 Please follow [this link](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to create a basic PAT.
 
-
 # App definition structure
-Please refer to [this file](internal/pkg/installer/config.go).
+Please refer to [this file](internal/pkg/data/data.go).
 
 # Next steps
-Append defs to binary, get info from their if no custom is found...
+List available apps, better current app scan... and why not a UI (+lots of new apps !!!)
 

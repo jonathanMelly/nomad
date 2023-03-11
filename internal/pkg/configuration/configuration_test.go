@@ -1,11 +1,15 @@
 package configuration
 
 import (
+	"embed"
 	"github.com/gologme/log"
 	"github.com/gookit/goutil/testutil/assert"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"testing"
 )
+
+//go:embed configuration_test_embeddedDefs
+var embeddedDefs embed.FS
 
 func TestLoadWithGlobalCustomAndMeta(t *testing.T) {
 	Settings = data.NewSettings()
@@ -14,10 +18,11 @@ func TestLoadWithGlobalCustomAndMeta(t *testing.T) {
 
 	//GIVEN
 	testDataPath := "../../../test/data/"
-	customPath := testDataPath + "customDefs"
+	customPath := "configuration_test_customDefs"
+	AppDefinitionDirectoryName = "configuration_test_embeddedDefs"
 
 	//WHEN
-	Load(testDataPath+"global_test.toml", customPath, testDataPath+"fakePatchedBinaryWithMeta")
+	Load(testDataPath+"global_test.toml", customPath, embeddedDefs)
 
 	//THEN
 	assert.Len(t, Settings.AppDefinitions, 7)
@@ -45,10 +50,10 @@ func TestLoadWithMetaOnly(t *testing.T) {
 	//log.Println(os.Getwd())
 
 	//GIVEN
-	testDataPath := "../../../test/data/"
+	AppDefinitionDirectoryName = "configuration_test_embeddedDefs"
 
 	//WHEN
-	Load("404", "404", testDataPath+"fakePatchedBinaryWithMeta")
+	Load("404", "404", embeddedDefs)
 
 	//THEN
 	assert.Len(t, Settings.AppDefinitions, 3)
