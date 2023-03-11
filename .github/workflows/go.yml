@@ -15,6 +15,9 @@ jobs:
         id: release
         with:
           release-type: go
+          extra-files: |
+            cmd/nomad/nomad.go
+
 
       - uses: actions/checkout@v3
 
