@@ -29,7 +29,7 @@ jobs:
         run: |
             echo "$TOKEN" > cmd/nomad/ghkey.txt
             go test ./...
-            GOOS=windows GOARCH=amd64 go build -o build-win64/ nomad.go
+            GOOS=windows GOARCH=amd64 go build -o build-win64/ ./cmd/nomad
 
       - name: Package
         if: ${{ steps.release.outputs.release_created }}
