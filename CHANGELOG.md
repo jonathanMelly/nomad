@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.2.0](https://github.com/jonathanMelly/nomad/compare/v1.1.1...v1.2.0) (2023-03-11)
+
+
+### Features
+
+* **apps:** new apps (still to be validated/completed) ([705be0e](https://github.com/jonathanMelly/nomad/commit/705be0e54b377a5fb6484300ed1b39c1df0b4a93))
+* **cmd:** add install/update/status for further improvements ([572ef61](https://github.com/jonathanMelly/nomad/commit/572ef614f4cb18068ef60d886e8656010fc1f49b))
+* **config:** added basic config to handle GitHub token for API ([c32d714](https://github.com/jonathanMelly/nomad/commit/c32d7149670803a1b10c3cbe517610a83ce2f7a6))
+* **definitions:** 3 levels of appdefs (global conf, custom,embedded). ([39cbd5f](https://github.com/jonathanMelly/nomad/commit/39cbd5fac12bffdd948cb4bd6334ae5f08a9729b))
+* **go:** upgrade to 1.20 and removed useless local mod rename... ([823c627](https://github.com/jonathanMelly/nomad/commit/823c627c4c142fcffdb6f423ee663a8ab147a6b6))
+* **latest:** useLatest is now a cmd flag (still available on config) ([bc3fe42](https://github.com/jonathanMelly/nomad/commit/bc3fe427a59756527fbf6d8f0b22ae1ce70a6df6))
+* **putty:** only 1 instance at a time ([5083937](https://github.com/jonathanMelly/nomad/commit/5083937596699d7d895d5fe275a7fc0bc452a62e))
+* **readme:** pas -&gt; nomad ([a289fe9](https://github.com/jonathanMelly/nomad/commit/a289fe9055a8a52660962b7583da805cd88e5a9a))
+* **readme:** revamped readme with the latest news ([6f9aaa6](https://github.com/jonathanMelly/nomad/commit/6f9aaa69e45714770f440e064b53b573f0ce501e))
+* **standalone:** first alpha of a standalone installer (should run out of the box) ([bdc58b5](https://github.com/jonathanMelly/nomad/commit/bdc58b50f91470a5fe1d8c0b068f17daae094b4e)), closes [#5](https://github.com/jonathanMelly/nomad/issues/5)
+* **symlink:** use junction in windows (available to any user without any conf..) ([30f3227](https://github.com/jonathanMelly/nomad/commit/30f3227f36b01577b0467c3f3c66c40f552e6944))
+* **tests:** added automated tests basics ([572ef61](https://github.com/jonathanMelly/nomad/commit/572ef614f4cb18068ef60d886e8656010fc1f49b))
+* **version:** complete version parsing for action decision (upgrade, downgrade) ([a9c8f7b](https://github.com/jonathanMelly/nomad/commit/a9c8f7b20b07ff4fbb1e8b85205e619cdffe8728))
+* **version:** full version parts parsing (and available for app config) ([572ef61](https://github.com/jonathanMelly/nomad/commit/572ef614f4cb18068ef60d886e8656010fc1f49b))
+
+
+### Bug Fixes
+
+* **ccleaner:** moved to full toml (discard json) ([3b648c0](https://github.com/jonathanMelly/nomad/commit/3b648c0d96a45bcf60f5540235f38dd57b457284))
+* **devmode:** add devmode info on readme ([6969967](https://github.com/jonathanMelly/nomad/commit/6969967cb907e99304dc7b28da6a446e4203c993))
+* **download:** no more error on download error ([ff24f2d](https://github.com/jonathanMelly/nomad/commit/ff24f2d79a3d19493984693ca136b3a21fafac7e))
+* **ghapikey:** get from correct config ([f09b8be](https://github.com/jonathanMelly/nomad/commit/f09b8becae6e31895d12908335877deaeb4641ed))
+
 ## [1.1.1](https://github.com/jonathanMelly/portable-app-installer/compare/v1.1.0...v1.1.1) (2023-01-20)
 
 
