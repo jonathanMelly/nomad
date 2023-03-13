@@ -17,7 +17,7 @@ import (
 )
 
 // x-release-please-start-version
-var version = "0.0.0"
+var version = "1.2.1"
 
 //x-release-please-end
 
