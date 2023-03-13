@@ -16,7 +16,10 @@ import (
 	"os"
 )
 
-var version = /*x-release-please-version*/ "0.0.0"
+// x-release-please-start-version
+var version = "0.0.0"
+
+//x-release-please-end
 
 //go:embed app-definitions
 var embeddedDefs embed.FS
