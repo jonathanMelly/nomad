@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.0](https://github.com/jonathanMelly/nomad/compare/v1.3.0...v1.4.0) (2023-03-14)
+
+
+### Features
+
+* **state:** get current state even if symlink is missing ([7315712](https://github.com/jonathanMelly/nomad/commit/73157128f4de0c4434448c2bf0481b333b8a75a0))
+
+
+### Bug Fixes
+
+* **config:** remove unnecessary version from app name and symlink (as will be auto) ([a50f076](https://github.com/jonathanMelly/nomad/commit/a50f0762607db7104347eeeee45cbaff2e1bf8f4))
+* **token:** remove embedded token line ending... ([f0985cb](https://github.com/jonathanMelly/nomad/commit/f0985cb68cdda6c17cbbfde8d458c349e2f74372))
+
 ## [1.3.0](https://github.com/jonathanMelly/nomad/compare/v1.2.2...v1.3.0) (2023-03-14)
 
 
