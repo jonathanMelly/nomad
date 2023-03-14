@@ -27,6 +27,10 @@ func getRequestBody(url string) (string, error) {
 
 	client, err := http.DefaultClient.Do(r)
 	if err != nil {
+		//avoid too much visibility even if secret is not encrypted in binary...
+		if r.Header.Get("Authorization") != "" {
+			r.Header.Set("Authorization", "*****")
+		}
 		return "", errors.New(fmt.Sprintln("HTTP error:", r, "|", err))
 	}
 

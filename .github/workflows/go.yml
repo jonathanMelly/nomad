@@ -30,7 +30,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.GH_API_TOKEN }}
         run: |
-            echo "$TOKEN" > cmd/nomad/ghkey.txt
+            echo -n "$TOKEN" > cmd/nomad/ghkey.txt
             go test ./...
             GOOS=windows GOARCH=amd64 go build -o build-win64/ ./cmd/nomad
 
