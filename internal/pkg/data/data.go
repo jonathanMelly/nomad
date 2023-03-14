@@ -6,9 +6,10 @@ import (
 )
 
 type Settings struct {
-	MyApps         []string                 `json:"myapps"`
-	GithubApiKey   string                   `json:"githubApiKey"`
-	AppDefinitions map[string]AppDefinition `json:"apps"`
+	MyApps            []string                 `json:"myapps"`
+	GithubApiKey      string                   `json:"githubApiKey"`
+	AppDefinitions    map[string]AppDefinition `json:"apps"`
+	ArchivesDirectory string                   `json:"archivesDirectory"`
 }
 
 func NewSettings() *Settings {
@@ -37,7 +38,7 @@ type AppDefinition struct {
 	VersionCheck      VersionCheck      `json:"VersionCheck"`
 	RemoveRootFolder  bool              `json:"RemoveRootFolder"`
 	RootFolderName    string            `json:"RootFolderName"`
-	Symlink           string            `json:"Symlink"` //if specified add/update symlink to point to appname folder
+	Symlink           string            `json:"Symlink"` //use it instead of appname for symlink (if given)
 	Shortcut          string            `json:"Shortcut"`
 	ShortcutIcon      string            `json:"ShortcutIcon"`
 	DownloadUrl       string            `json:"DownloadUrl"`

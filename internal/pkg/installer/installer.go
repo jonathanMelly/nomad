@@ -7,6 +7,7 @@ import (
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/iohelper"
+	"github.com/jonathanMelly/nomad/internal/pkg/state"
 	"github.com/jonathanMelly/nomad/pkg/bytesize"
 	"github.com/jonathanMelly/nomad/pkg/version"
 	junction "github.com/nyaosorg/go-windows-junction"
@@ -46,7 +47,6 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 
 	//VERSION HANDLING
 	var targetVersion *version.Version = nil
-	symlink := ""
 
 	// Overwrite the targetVersion if available
 	var versionOverwriteVersion *version.Version = nil
@@ -66,17 +66,28 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 
 	//Current version
 	var currentInstalledVersion *version.Version = nil
+	var symlink string
 	if app.Symlink != "" {
+		log.Debugln("Using custom symlink", app.Symlink)
 		symlink = path.Join(AppPath, app.Symlink)
-		if iohelper.FileOrDirExists(symlink) {
-			target, _ := os.Readlink(symlink)
-			split := strings.Split(filepath.Base(target), "-")
-			if len(split) > 1 {
-				currentInstalledVersion, err = version.FromString(split[1])
-				log.Debugln("Version installed: ", currentInstalledVersion)
-			}
+	} else {
+		symlink = appName
+	}
+
+	if iohelper.FileOrDirExists(symlink) {
+		target, _ := os.Readlink(symlink)
+		split := strings.Split(filepath.Base(target), "-")
+		if len(split) > 1 {
+			currentInstalledVersion, err = version.FromString(split[1])
+		}
+	} else {
+		apps := state.GetCurrentApps(".")
+		cappVersion, exist := apps[appName]
+		if exist {
+			currentInstalledVersion = cappVersion
 		}
 	}
+	log.Debugln("Version installed: ", currentInstalledVersion)
 
 	var latestVersionFromRemote *version.Version = nil
 	// If Version Check parameters are specified
@@ -327,83 +338,77 @@ func Run(action string, app data.AppDefinition, versionOverwrite string, forceEx
 			}
 		}
 
-		if app.Symlink != "" {
-			//create/update symlink app-1.0.2 => app ...
-			log.Traceln("Handling symlink and restores")
+		//create/update symlink app-1.0.2 => app ...
+		log.Traceln("Handling symlink and restores")
 
-			//Can only restore from previous symlink (targetVersion)....
-			if iohelper.FileOrDirExists(symlink) {
-				absoluteFolderName, _ := filepath.Abs(folderName)
-				evalSymlink, _ := filepath.EvalSymlinks(symlink)
-				absoluteSymlink, _ := filepath.Abs(evalSymlink)
-				if absoluteFolderName != absoluteSymlink {
-					if len(app.RestoreFiles) > 0 {
-						//(handles customs/configurations that are overwritten upon upgrade)
-						log.Debugln("Restoring ", app.RestoreFiles)
-						if err := restoreFiles(app.RestoreFiles, symlink, folderName); err != nil {
-							return err, "Error restoring files |", 22
-						}
+		//Can only restore from previous symlink (targetVersion)....
+		if iohelper.FileOrDirExists(symlink) {
+			absoluteFolderName, _ := filepath.Abs(folderName)
+			evalSymlink, _ := filepath.EvalSymlinks(symlink)
+			absoluteSymlink, _ := filepath.Abs(evalSymlink)
+			if absoluteFolderName != absoluteSymlink {
+				if len(app.RestoreFiles) > 0 {
+					//(handles customs/configurations that are overwritten upon upgrade)
+					log.Debugln("Restoring ", app.RestoreFiles)
+					if err := restoreFiles(app.RestoreFiles, symlink, folderName); err != nil {
+						return err, "Error restoring files |", 22
 					}
-				} else {
-					log.Debugln("No version change, skipping restore")
 				}
-
-				//Remove old
-				err := os.Remove(symlink)
-				if err != nil {
-					return err, fmt.Sprint("Cannot remove symlink ", symlink, " for update to latest version..."), 0
-				}
-			}
-
-			//err = os.Mkdir(symlink)
-			target := appNameWithVersion + "/"
-			log.Debugln("Linking " + symlink + " -> " + target)
-
-			if isWindowsPlatform() {
-				err = junction.Create(target, symlink)
 			} else {
-				err = os.Symlink(target, symlink)
+				log.Debugln("No version change, skipping restore")
 			}
+
+			//Remove old
+			err := os.Remove(symlink)
 			if err != nil {
-				return err, "Error symlink/junction to " + target, 23
+				return err, fmt.Sprint("Cannot remove symlink ", symlink, " for update to latest version..."), 0
+			}
+		}
+
+		//err = os.Mkdir(symlink)
+		target := appNameWithVersion + "/"
+		log.Debugln("Linking " + symlink + " -> " + target)
+
+		err = junction.Create(target, symlink)
+		if err != nil {
+			return err, "Error symlink/junction to " + target, 23
+		}
+
+		if app.Shortcut != "" {
+			const DefaultShortcutsDir = "shortcuts"
+			if !iohelper.FileOrDirExists(DefaultShortcutsDir) {
+				log.Debugln("Creating shortcutDir ", DefaultShortcutsDir)
+				err := os.Mkdir(DefaultShortcutsDir, os.ModePerm)
+				if err != nil {
+					return err, fmt.Sprint("Cannot create shortcut dir ", DefaultShortcutsDir), 0
+				}
 			}
 
-			if app.Shortcut != "" {
-				const DefaultShortcutsDir = "shortcuts"
-				if !iohelper.FileOrDirExists(DefaultShortcutsDir) {
-					log.Debugln("Creating shortcutDir ", DefaultShortcutsDir)
-					err := os.Mkdir(DefaultShortcutsDir, os.ModePerm)
-					if err != nil {
-						return err, fmt.Sprint("Cannot create shortcut dir ", DefaultShortcutsDir), 0
-					}
-				}
+			absSymlink, _ := filepath.Abs(symlink)
 
-				absSymlink, _ := filepath.Abs(symlink)
+			pwd, _ := os.Getwd()
 
-				pwd, _ := os.Getwd()
-
-				targetForShortcut := path.Join(absSymlink, app.Shortcut)
-				if customAppLocationForShortcut != "" {
-					targetForShortcut = path.Join(customAppLocationForShortcut, filepath.Base(pwd), symlink, app.Shortcut)
-				}
-
-				absShortcutsDir, _ := filepath.Abs(DefaultShortcutsDir)
-
-				icon := ""
-				if app.ShortcutIcon != "" {
-					icon = path.Join(path.Dir(targetForShortcut), app.ShortcutIcon)
-				}
-
-				log.Debugln("Creating shortcut ", app.Shortcut, " -> ", targetForShortcut)
-				createShortcut(
-					app.Shortcut,
-					targetForShortcut,
-					"",
-					filepath.Dir(targetForShortcut),
-					"portable-"+app.Shortcut,
-					absShortcutsDir,
-					icon)
+			targetForShortcut := path.Join(absSymlink, app.Shortcut)
+			if customAppLocationForShortcut != "" {
+				targetForShortcut = path.Join(customAppLocationForShortcut, filepath.Base(pwd), symlink, app.Shortcut)
 			}
+
+			absShortcutsDir, _ := filepath.Abs(DefaultShortcutsDir)
+
+			icon := ""
+			if app.ShortcutIcon != "" {
+				icon = path.Join(path.Dir(targetForShortcut), app.ShortcutIcon)
+			}
+
+			log.Debugln("Creating shortcut ", app.Shortcut, " -> ", targetForShortcut)
+			createShortcut(
+				app.Shortcut,
+				targetForShortcut,
+				"",
+				filepath.Dir(targetForShortcut),
+				"portable-"+app.Shortcut,
+				absShortcutsDir,
+				icon)
 		}
 
 		return nil, "", 0

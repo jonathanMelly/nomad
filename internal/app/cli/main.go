@@ -7,10 +7,10 @@ import (
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
 	"github.com/jonathanMelly/nomad/internal/pkg/installer"
+	"github.com/jonathanMelly/nomad/internal/pkg/state"
 	"math"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 var Version = "unreleased"
@@ -79,6 +79,7 @@ func Main() int {
 	} else {
 		log.EnableLevelsByNumber(4)
 	}
+	configuration.Settings.ArchivesDirectory = *flagArchivesSubDir
 
 	//Prefix is used to show app name...
 	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
@@ -102,29 +103,8 @@ func Main() int {
 		if len(apps) == 0 || apps[0] == "all" {
 			log.Traceln("No app given, searching for all apps in", installer.AppPath)
 			apps = []string{}
-			files, err := os.ReadDir(installer.AppPath)
-			if err != nil {
-				log.Fatal(err)
-			}
-			installedApps := map[string]byte{}
-			for _, f := range files {
-				if f.IsDir() {
-					log.Traceln("Inspecting dir", f.Name())
-					//Hope that app name do not contain a dash ;-)
-					guessedApp := strings.Split(f.Name(), "-")[0]
-					_, alreadyFound := installedApps[guessedApp]
 
-					if guessedApp != *flagArchivesSubDir && !alreadyFound {
-						_, knownApp := configuration.Settings.AppDefinitions[guessedApp]
-						if knownApp {
-							installedApps[guessedApp] = 0
-						} else {
-							log.Warnln("Unknown app", guessedApp)
-						}
-					}
-				}
-			}
-			for k := range installedApps {
+			for k := range state.GetCurrentApps(installer.AppPath) {
 				apps = append(apps, k)
 			}
 		}
