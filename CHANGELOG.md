@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/jonathanMelly/nomad/compare/v1.2.1...v1.2.2) (2023-03-14)
+
+
+### Bug Fixes
+
+* **download:** report error instead of nil if needed ([81ab2d7](https://github.com/jonathanMelly/nomad/commit/81ab2d7c8e65aa58b99f9124faca2b88739651b3))
+
 ## [1.2.1](https://github.com/jonathanMelly/nomad/compare/v1.2.0...v1.2.1) (2023-03-13)
 
 
