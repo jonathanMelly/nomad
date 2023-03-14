@@ -7,6 +7,7 @@ import (
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
 	"github.com/jonathanMelly/nomad/internal/pkg/installer"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -92,6 +93,8 @@ func Main() int {
 
 	case "version":
 		printVersion()
+		key := configuration.Settings.GithubApiKey
+		log.Debug("Using token ", key[0:int(math.Min(float64(len(key)), 15))], "...\n")
 		return 0
 
 	case "status", "install", "update":

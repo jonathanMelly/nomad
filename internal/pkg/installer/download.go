@@ -12,6 +12,9 @@ import (
 // getRequestBody returns the page HTML
 func getRequestBody(url string) (string, error) {
 	r, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
 
 	apiKey := configuration.Settings.GithubApiKey
 	if apiKey != "" && strings.Contains(url, "github") {
@@ -20,11 +23,11 @@ func getRequestBody(url string) (string, error) {
 	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
 	r.Header.Add("User-Agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`)
 
+	client, err := http.DefaultClient.Do(r)
 	if err != nil {
 		return "", err
 	}
 
-	client, err := http.DefaultClient.Do(r)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -32,12 +35,7 @@ func getRequestBody(url string) (string, error) {
 		}
 	}(client.Body)
 
-	if err != nil {
-		return "", err
-	}
-
 	body, err := io.ReadAll(client.Body)
-
 	if err != nil {
 		return "", err
 	}
