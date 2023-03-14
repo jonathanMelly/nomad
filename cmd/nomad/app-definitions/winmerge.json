@@ -1,7 +1,6 @@
 {
 	"Version": "2.16.24",
-	"ApplicationName": "winmerge-{{VERSION}}",
-	"Symlink": "winmerge",
+	"ApplicationName": "winmerge",
 	"Shortcut": "WinMergeU.exe",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/WinMerge/winmerge/releases/download/v{{VERSION}}/winmerge-{{VERSION}}-exe.zip",

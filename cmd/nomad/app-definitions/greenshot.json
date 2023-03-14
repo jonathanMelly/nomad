@@ -1,7 +1,6 @@
 {
 	"Version": "1.2.10.6",
-	"ApplicationName": "greenshot-{{VERSION}}",
-	"Symlink": "greenshot",
+	"ApplicationName": "greenshot",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/greenshot/greenshot/releases/download/v{{VERSION}}/ShareX-{{VERSION}}-portable.zip",
 	"RemoveRootFolder": false,

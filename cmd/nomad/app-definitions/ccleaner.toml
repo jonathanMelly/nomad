@@ -1,6 +1,5 @@
 [apps.ccleaner]
 Version = "606"
-Symlink="ccleaner"
 Shortcut="ccleaner.exe"
 DownloadExtension=".zip"
 DownloadUrl="https://download.ccleaner.com/portable/ccsetup{{VERSION}}.zip"

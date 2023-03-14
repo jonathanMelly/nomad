@@ -1,7 +1,6 @@
 {
 	"Version": "1.1",
-	"ApplicationName": "autohotkey-{{VERSION}}",
-	"Symlink": "autohotkey",
+	"ApplicationName": "autohotkey",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://www.autohotkey.com/download/ahk.zip",
 	"RemoveRootFolder": false,

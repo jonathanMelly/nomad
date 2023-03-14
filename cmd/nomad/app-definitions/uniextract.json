@@ -1,7 +1,6 @@
 {
 	"Version": "2.0.0-rc.3",
-	"ApplicationName": "uniextract-{{VERSION}}",
-	"Symlink": "uniextract",
+	"ApplicationName": "uniextract",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/Bioruebe/UniExtract2/releases/download/v{{VERSION}}/UniExtractRC3.zip",
 	"VersionCheck":

@@ -1,7 +1,6 @@
 {
 	"Version": "12.3",
-	"ApplicationName": "heidisql-{{VERSION}}",
-	"Symlink": "heidisql",
+	"ApplicationName": "heidisql",
 	"Shortcut": "heidisql.exe",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://www.heidisql.com/downloads/releases/HeidiSQL_{{VERSION}}_64_Portable.zip",

@@ -1,7 +1,6 @@
 {
 	"Version": "1.0.2",
 	"ApplicationName": "treesheets",
-	"Symlink": "regextestbench",
 	"Shortcut": "RegexTestBench.Wpf.exe",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/aardappel/treesheets/releases/download/{{VERSION}}/linux_treesheets_clang++-12.zip",

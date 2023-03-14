@@ -1,7 +1,6 @@
 {
 	"Version": "0.78",
-	"ApplicationName": "putty-{{VERSION}}",
-	"Symlink": "putty",
+	"ApplicationName": "putty",
 	"Shortcut": "PUTTY.bat",
 	"ShortcutIcon": "PUTTY.EXE,0",
 	"DownloadExtension": ".zip",

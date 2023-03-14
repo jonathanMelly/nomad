@@ -1,7 +1,6 @@
 {
 	"Version": "2.38.1",
-	"ApplicationName": "git-{{VERSION}}",
-	"Symlink": "git",
+	"ApplicationName": "git",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/git-for-windows/git/releases/download/v{{VERSION}}.windows.1/MinGit-{{VERSION}}-busybox-64-bit.zip",
 	"RemoveRootFolder": false,

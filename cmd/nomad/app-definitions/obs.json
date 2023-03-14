@@ -1,7 +1,6 @@
 {
 	"Version": "29.0",
-	"ApplicationName": "obs-{{VERSION}}",
-	"Symlink": "obs",
+	"ApplicationName": "obs",
 	"Shortcut": "obs.bat",
 	"ShortcutIcon": "bin/64bit/obs64.exe,0",
 	"DownloadExtension": ".zip",

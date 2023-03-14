@@ -1,7 +1,6 @@
 {
 	"Version": "3.62.2",
-	"ApplicationName": "filezilla-{{VERSION}}",
-	"Symlink": "filezilla",
+	"ApplicationName": "filezilla",
 	"Shortcut": "filezilla.exe",
 	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://download.filezilla-project.org/client/FileZilla_{{VERSION}}_win64.zip",
