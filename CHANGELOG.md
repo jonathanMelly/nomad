@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/jonathanMelly/nomad/compare/v1.2.2...v1.3.0) (2023-03-14)
+
+
+### Features
+
+* **download:** more info on error ([cda7412](https://github.com/jonathanMelly/nomad/commit/cda74128a7305dbf88b1fe6f8d8db87d16036766))
+
 ## [1.2.2](https://github.com/jonathanMelly/nomad/compare/v1.2.1...v1.2.2) (2023-03-14)
 
 
