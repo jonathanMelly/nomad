@@ -1,1 +1,3 @@
 [apps.customToml]
+Version="123"
+DownloadExtension= ".zip"

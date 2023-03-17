@@ -1,8 +1,7 @@
 package installer
 
 import (
-	"github.com/jonathanMelly/nomad/internal/pkg/iohelper"
-	"io/ioutil"
+	"github.com/jonathanMelly/nomad/internal/pkg/helper"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,7 +18,7 @@ func writeScripts(scripts map[string]string, workingFolder string, version strin
 		relativePath := strings.Replace(filepath.Join(workingFolder, name), "{{VERSION}}", version, -1)
 
 		// Write to file
-		if iohelper.FileOrDirExists(relativePath) {
+		if helper.FileOrDirExists(relativePath) {
 			log.Println(relativePath + " already in destination, skipping")
 		} else {
 			err := os.WriteFile(relativePath, []byte(strings.Replace(body, "{{VERSION}}", version, -1)), os.ModePerm)
@@ -60,7 +59,7 @@ func createFolders(folders []string, dstFolder string) error {
 		// Path of file
 		newPath := filepath.Join(dstFolder, folder)
 
-		if !iohelper.FileOrDirExists(newPath) {
+		if !helper.FileOrDirExists(newPath) {
 			err := os.MkdirAll(newPath, os.ModePerm)
 			if err != nil {
 				return err
@@ -74,11 +73,11 @@ func createFolders(folders []string, dstFolder string) error {
 // restore files from previous version (mainly for config)
 func restoreFiles(files []string, source string, destination string) error {
 
-	if destination == "" || !iohelper.FileOrDirExists(destination) {
+	if destination == "" || !helper.FileOrDirExists(destination) {
 		log.Println("Missing destination " + destination + " for restore => restore operation cancelled")
 		return nil
 	}
-	if source == "" || !iohelper.FileOrDirExists(source) {
+	if source == "" || !helper.FileOrDirExists(source) {
 		log.Println("Missing source " + source + " for restore => restore operation cancelled")
 		return nil
 	}
@@ -88,12 +87,12 @@ func restoreFiles(files []string, source string, destination string) error {
 
 		sourcePath := filepath.Join(source, file)
 
-		if iohelper.FileOrDirExists(sourcePath) {
-			if iohelper.IsDirectory(sourcePath) {
+		if helper.FileOrDirExists(sourcePath) {
+			if helper.IsDirectory(sourcePath) {
 				err := filepath.Walk(sourcePath, func(walkingPath string, _ os.FileInfo, _ error) error {
 
 					//walk walks given folder as well...
-					if walkingPath != sourcePath && !iohelper.IsDirectory(walkingPath) {
+					if walkingPath != sourcePath && !helper.IsDirectory(walkingPath) {
 						//log.Println("=>Walking " + walkingPath)
 						destSubPath := strings.Join(strings.Split(walkingPath, string(os.PathSeparator))[2:], string(os.PathSeparator))
 						restore(walkingPath, filepath.Join(destination, destSubPath))
@@ -126,11 +125,11 @@ func restore(sourcePath string, destinationPath string) {
 		log.Println("Cannot stat source "+sourcePath+", skipping|", err)
 		return
 	}
-	bytesRead, err := ioutil.ReadFile(sourcePath)
+	bytesRead, err := os.ReadFile(sourcePath)
 	if err != nil {
 		log.Println("Cannot read source "+sourcePath+", skipping|", err)
 	} else {
-		if iohelper.FileOrDirExists(destinationPath) {
+		if helper.FileOrDirExists(destinationPath) {
 			log.Println("===> " + destinationPath + " already exists, trying to backup")
 			newpath := destinationPath + "-" + time.Now().Format("2006-01-02-15h04m05s")
 			err := os.Rename(destinationPath, newpath)
@@ -144,7 +143,7 @@ func restore(sourcePath string, destinationPath string) {
 
 		//Warning, filepath.Dir is not os separator agnostic...
 		destinationDirectory := filepath.Dir(filepath.ToSlash(destinationPath))
-		if !iohelper.FileOrDirExists(destinationDirectory) {
+		if !helper.FileOrDirExists(destinationDirectory) {
 			err := os.MkdirAll(destinationDirectory, os.ModePerm)
 			if err != nil {
 				log.Println("Cannot mkdir "+destinationDirectory+", aborting restore of "+destinationPath+" |", err)

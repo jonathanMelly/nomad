@@ -3,28 +3,15 @@ package installer
 import (
 	"bytes"
 	"fmt"
-	"log"
+	"github.com/gologme/log"
+
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 )
-
-// combineRegex will take a string array of regular expressions and compile them
-// into a single regular expressions
-func combineRegex(s []string) (*regexp.Regexp, error) {
-	joined := strings.Join(s, "|")
-
-	re, err := regexp.Compile(joined)
-	if err != nil {
-		return nil, err
-	}
-
-	return re, nil
-}
 
 func isWindowsPlatform() bool {
 	return strings.Contains(runtime.GOOS, "windows")
@@ -72,19 +59,35 @@ func createShortcut(linkName string, target string, arguments string, workingDir
 		//fmt.Println(scriptTxt.String())
 
 		filename := fmt.Sprintf("lnkTo%s.vbs", linkName)
-		os.WriteFile(filename, scriptTxt.Bytes(), 0777)
-		cmd := exec.Command("wscript", filename)
-		err := cmd.Run()
+		err := os.WriteFile(filename, scriptTxt.Bytes(), 0777)
 		if err != nil {
-			fmt.Println(err)
+			log.Errorln(err)
+			return
+		}
+		cmd := exec.Command("wscript", filename)
+		err = cmd.Run()
+		if err != nil {
+			log.Errorln("Wscript error", err)
 		} else {
-			log.Println("Shortcut " + linkName + " generated/updated")
-			cmd.Wait()
-			os.Remove(filename)
+			log.Debugln("Shortcut ", linkName, "generated/updated")
+			err := cmd.Wait()
+			if err != nil {
+				log.Errorln(err)
+				return
+			}
+			err = os.Remove(filename)
+			if err != nil {
+				log.Errorln(err)
+				return
+			}
 		}
 
 	} else {
-		os.Symlink(target, path.Join(destination, linkName))
+		err := os.Symlink(target, path.Join(destination, linkName))
+		if err != nil {
+			log.Errorln("cannot generate symlink to", target, err)
+			return
+		}
 	}
 
 }

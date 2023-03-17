@@ -1,3 +1,5 @@
 {
-  "ApplicationName": "customJson2"
+  "ApplicationName": "customJson2",
+  "DownloadExtension": ".zip",
+  "Version": "0.0.0"
 }

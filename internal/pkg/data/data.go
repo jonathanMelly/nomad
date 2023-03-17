@@ -3,20 +3,40 @@ package data
 import (
 	"errors"
 	"fmt"
+	"github.com/jonathanMelly/nomad/pkg/version"
+	"regexp"
+	"strings"
 )
 
+type AppStates struct {
+	States map[string]*AppState
+}
+
+func NewAppStates() *AppStates {
+	return &AppStates{
+		States: map[string]*AppState{},
+	}
+}
+
+type AppState struct {
+	Definition     AppDefinition
+	SymlinkFound   bool
+	CurrentVersion *version.Version
+	TargetVersion  *version.Version
+}
+
 type Settings struct {
-	MyApps            []string                 `json:"myapps"`
-	GithubApiKey      string                   `json:"githubApiKey"`
-	AppDefinitions    map[string]AppDefinition `json:"apps"`
-	ArchivesDirectory string                   `json:"archivesDirectory"`
+	MyApps            []string                  `json:"myapps"`
+	GithubApiKey      string                    `json:"githubApiKey"`
+	AppDefinitions    map[string]*AppDefinition `json:"apps"`
+	ArchivesDirectory string                    `json:"archivesDirectory"`
 }
 
 func NewSettings() *Settings {
 	return &Settings{
 		MyApps:         []string{},
 		GithubApiKey:   "",
-		AppDefinitions: map[string]AppDefinition{},
+		AppDefinitions: map[string]*AppDefinition{},
 	}
 }
 
@@ -47,22 +67,38 @@ type AppDefinition struct {
 	CreateFiles       map[string]string `json:"CreateFiles"`
 	MoveObjects       map[string]string `json:"MoveObjects"`
 	RestoreFiles      []string          `json:"RestoreFiles"` //Copy/Paste (overwrite) files from previous symlinked directory (needs symlink)
+	Validated         bool
+	ExtractRegex      *regexp.Regexp
 }
 
 func (definition *AppDefinition) Validate() error {
-	var missing []string
+	var errs []string
 	if definition.ApplicationName == "" {
-		missing = append(missing, "application name")
+		errs = append(errs, "missing application name")
+	}
+	if strings.Contains(definition.ApplicationName, "-") {
+		errs = append(errs, "app name cannot contain - (dash), please replace with something else (ex. _)")
 	}
 	if definition.DownloadExtension == "" {
-		missing = append(missing, "download extension")
+		errs = append(errs, "missimg download extension")
 	}
 	if definition.VersionCheck.Url == "" && definition.Version == "" {
-		missing = append(missing, "version")
+		errs = append(errs, "missing version info (either fixed or by url)")
 	}
-	if len(missing) > 0 {
-		return errors.New(fmt.Sprint("mandatory data missing: ", missing))
+
+	regex, err := combineRegex(definition.ExtractRegExList)
+	if err != nil {
+		errs = append(errs, fmt.Sprint("invalid regex for zip files ", definition.ExtractRegExList, " | ", err))
+	} else {
+		definition.ExtractRegex = regex
 	}
+
+	if len(errs) > 0 {
+		return errors.New(fmt.Sprint("data errors: ", strings.Join(errs, ",")))
+	} else {
+		definition.Validated = true
+	}
+
 	return nil
 }
 
@@ -72,35 +108,15 @@ type VersionCheck struct {
 	UseLatestVersion bool   `json:"UseLatestVersion"`
 }
 
-/*
-// ParseJSON parses the given bytes
-func (appInfo *AppDefinition) parseJSON(jsonBytes []byte) error {
-	return json.Unmarshal([]byte(jsonBytes), &appInfo)
-}
+// CombineRegex will take a string array of regular expressions and compile them
+// into a single regular expressions
+func combineRegex(s []string) (*regexp.Regexp, error) {
+	joined := strings.Join(s, "|")
 
-// LoadConfig returns the struct from the app-definitions file
-func LoadConfig(configFile string) (*AppDefinition, error) {
-	var err error
-	var input = io.ReadCloser(os.Stdin)
-	if input, err = os.Open(configFile); err != nil {
-		return nil, err
-	}
-
-	// Read the app-definitions file
-	jsonBytes, err := ioutil.ReadAll(input)
-	input.Close()
+	re, err := regexp.Compile(joined)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create a upcoming container
-	pi := &AppDefinition{}
-
-	// Parse the app-definitions
-	if err := pi.parseJSON(jsonBytes); err != nil {
-		return nil, err
-	}
-
-	return pi, nil
+	return re, nil
 }
-*/

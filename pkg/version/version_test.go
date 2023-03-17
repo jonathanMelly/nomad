@@ -9,8 +9,8 @@ import (
 )
 
 func assertOne(t *testing.T, input string, prependRegex string, expected string) {
-	version, error := FromStringCustom(input, prependRegex+VERSION_PLACEHOLDER)
-	assert.Nil(t, error)
+	version, err := FromStringCustom(input, prependRegex+VERSION_PLACEHOLDER)
+	assert.Nil(t, err)
 	assert.Equal(t, expected, version.String())
 }
 
@@ -30,8 +30,8 @@ func assertVersionComparison(t *testing.T, v2 string, v1 string) {
 
 func TestGitReleaseParsing(t *testing.T) {
 
-	// Read entire iohelper content, giving us little control but
-	// making it very simple. No need to close the iohelper.
+	// Read entire helper content, giving us little control but
+	// making it very simple. No need to close the helper.
 	content, err := os.ReadFile("../../test/data/git-release.json")
 	if err != nil {
 		log.Fatal(err)
@@ -65,9 +65,9 @@ func TestVersionComparisons(t *testing.T) {
 		"1.2.3-beta": "1.2.3-alpha",
 		"2":          "1",
 		"1.2.9":      "1.2"}
-	for new, old := range assets {
-		t.Run(new+">"+old, func(t *testing.T) {
-			assertVersionComparison(t, new, old)
+	for newVersion, old := range assets {
+		t.Run(newVersion+">"+old, func(t *testing.T) {
+			assertVersionComparison(t, newVersion, old)
 		})
 	}
 

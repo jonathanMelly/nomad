@@ -2,3 +2,4 @@
 /.idea/
 /Test.go
 /poc.go
+/cmd/nomad/date.txt

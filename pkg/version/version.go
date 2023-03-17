@@ -74,7 +74,6 @@ func FromStringCustom(source string, regex string) (*Version, error) {
 	version := new(Version)
 
 	re := buildVersionRegex(regex)
-
 	matches := re.FindStringSubmatch(source)
 
 	version.Text = getTextPart(matches, re, "full")
@@ -84,7 +83,7 @@ func FromStringCustom(source string, regex string) (*Version, error) {
 		return nil, err
 	}
 	if versionPart == nil {
-		return nil, errors.New("No version info found for regex " + regex + " in " + source)
+		return nil, errors.New(fmt.Sprint("No version info found for regex ", re.String(), " (", regex, ")", " in "+source))
 	}
 	version.Major = versionPart
 
@@ -146,8 +145,6 @@ func getUintPart(matches []string, re *regexp.Regexp, partName string) (*uint, e
 		//If part not found, return empty
 		return nil, nil
 	}
-
-	return nil, errors.New("Cannot extract " + partName)
 }
 
 func (version Version) String() string {

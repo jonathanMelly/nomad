@@ -29,10 +29,12 @@ jobs:
       - name: Test and Build
         env:
           TOKEN: ${{ secrets.GH_API_TOKEN }}
+          MAIN_PATH: "./cmd/nomad"
         run: |
-            echo -n "$TOKEN" > cmd/nomad/ghkey.txt
+            echo -n "$TOKEN" > "$MAIN_PATH"/ghkey.txt
+            go generate "$MAIN_PATH"
             go test ./...
-            GOOS=windows GOARCH=amd64 go build -o build-win64/ ./cmd/nomad
+            GOOS=windows GOARCH=amd64 go build -o build-win64/ "$MAIN_PATH"
 
       - name: Package
         if: ${{ steps.release.outputs.release_created }}

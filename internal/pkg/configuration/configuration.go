@@ -8,7 +8,7 @@ import (
 	"github.com/gookit/config/v2/json"
 	"github.com/gookit/config/v2/toml"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
-	"github.com/jonathanMelly/nomad/internal/pkg/iohelper"
+	"github.com/jonathanMelly/nomad/internal/pkg/helper"
 	"github.com/jonathanMelly/nomad/pkg/version"
 	"io/fs"
 	"os"
@@ -18,6 +18,10 @@ import (
 
 var Settings = data.NewSettings()
 var AppDefinitionDirectoryName = "app-definitions"
+
+const DefaultShortcutsDir = "shortcuts"
+
+var AppPath = "apps"
 
 func Load(globalSettingsPath string, customDefinitionsDirectory string, embeddedSrc embed.FS) {
 
@@ -47,18 +51,18 @@ func Load(globalSettingsPath string, customDefinitionsDirectory string, embedded
 
 	if &embeddedSrc != nil {
 		log.Traceln("Loading embedded definitions")
-		loadEmbeddedDefinitions(embeddedSrc)
+		LoadEmbeddedDefinitions(embeddedSrc)
 	}
 
 }
 
-func loadEmbeddedDefinitions(embeddedSrc embed.FS) {
+func LoadEmbeddedDefinitions(embeddedSrc embed.FS) {
 	loadAppDefinitions(AppDefinitionDirectoryName, embeddedSrc)
 }
 
 func loadCustomAppDefinitions(customDefinitionsDirectory string) {
 	//Custom Definitions files (json or toml)
-	if customDefinitionsDirectory != "" && iohelper.FileOrDirExists(customDefinitionsDirectory) {
+	if customDefinitionsDirectory != "" && helper.FileOrDirExists(customDefinitionsDirectory) {
 		log.Debugln("Looking into", customDefinitionsDirectory, "for custom app definitions")
 		wd, err := os.Getwd()
 		if err != nil {
@@ -162,7 +166,18 @@ func fillDefinitions(app string, definition data.AppDefinition) {
 		if definition.ApplicationName == "" {
 			definition.ApplicationName = app
 		}
-		Settings.AppDefinitions[app] = definition
+		//Sets default symlink to app name
+		if definition.Symlink == "" {
+			definition.Symlink = app
+		}
+
+		err := definition.Validate()
+		if err != nil {
+			log.Warnln("Invalid app definition", app, "|", err, "->discarding")
+		} else {
+			Settings.AppDefinitions[app] = &definition
+		}
+
 	} else {
 		log.Traceln(app, "already defined->not adding it")
 	}
@@ -185,10 +200,10 @@ func loadGlobalSettings(do func(config2 *config.Config), settingsPaths ...string
 	log.Traceln("Loading global config from", settingsPaths)
 	configTmp := initConfig()
 	for _, settingsPath := range settingsPaths {
-		if iohelper.FileOrDirExists(settingsPath) {
+		if helper.FileOrDirExists(settingsPath) {
 			err := configTmp.LoadFiles(settingsPath)
 			if err != nil {
-				log.Errorln("Cannot read config iohelper", settingsPath, "|", err)
+				log.Errorln("Cannot read config helper", settingsPath, "|", err)
 			} else {
 				do(configTmp)
 				configTmp.ClearAll()
