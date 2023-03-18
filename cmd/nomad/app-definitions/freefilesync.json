@@ -2,7 +2,6 @@
 	"Version": "11.28",
 	"ApplicationName": "freefilesync",
 	"Shortcut": "freefilesync.exe",
-	"DownloadExtension": ".zip",
 	"DownloadUrl": "manual,go to about in app to get link : https://freefilesync.org/thank-you.php?tx=zzz",
 	"RemoveRootFolder": false,
 	"VersionCheck":

@@ -49,7 +49,7 @@ func InstallOrUpdate(state data.AppState, forceExtract bool, skipDownload bool,
 
 	//Enforce validation
 	if !definition.Validated {
-		err := definition.Validate()
+		err := definition.ValidateAndSetDefaults()
 		if err != nil {
 			return err, "invalid definition", EXIT_INVALID_DEFINITION
 		}
@@ -300,6 +300,15 @@ func downloadArchive(state data.AppState, skipDownload bool, archivePath string,
 	} else {
 		downloadURL := state.TargetVersion.FillVersionsPlaceholders(definition.DownloadUrl)
 		log.Debugln("Downloading from ", downloadURL, " >> ", archivePath)
+
+		if strings.HasPrefix(downloadURL, "manual") {
+			scanner := bufio.NewScanner(os.Stdin)
+			log.Print("Please paste custom URL for download (", downloadURL, ") :")
+			scanner.Scan()
+			answer := scanner.Text()
+			log.Debugln("Custom URL", answer)
+			downloadURL = answer
+		}
 
 		size, err := helper.DownloadFile(downloadURL, archivePath)
 		if err != nil {

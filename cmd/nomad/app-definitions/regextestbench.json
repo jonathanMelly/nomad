@@ -2,7 +2,6 @@
 	"Version": "1.0.2",
 	"ApplicationName": "regextestbench",
 	"Shortcut": "RegexTestBench.Wpf.exe",
-	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/CommonLoon102/RegexTestBench/releases/download/v{{VERSION}}/RegexTestBench-win-x86.zip",
 	"RemoveRootFolder": true,
 	"VersionCheck":

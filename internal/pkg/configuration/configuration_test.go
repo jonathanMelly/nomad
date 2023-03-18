@@ -35,7 +35,11 @@ func TestLoadWithGlobalCustomAndMeta(t *testing.T) {
 
 	//TODO custom defs
 	assert.ContainsKey(t, Settings.AppDefinitions, "customJson")
+	assert.Equal(t, ".bob", Settings.AppDefinitions["customJson"].DownloadExtension) //guessed from url
 	assert.ContainsKey(t, Settings.AppDefinitions, "customToml")
+	assert.Equal(t, ".zip", Settings.AppDefinitions["customToml"].DownloadExtension) //default
+	assert.ContainsKey(t, Settings.AppDefinitions, "customJson2")
+	assert.Equal(t, ".zap", Settings.AppDefinitions["customJson2"].DownloadExtension) //set
 
 	//App Defs from META
 	assert.ContainsKey(t, Settings.AppDefinitions, "metaJson1")

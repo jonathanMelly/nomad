@@ -152,6 +152,9 @@ func (version Version) String() string {
 }
 
 func (version Version) FillVersionsPlaceholders(input string) string {
+	if input == "" {
+		return input
+	}
 
 	major := ""
 	if version.Major != nil {

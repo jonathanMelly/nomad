@@ -3,7 +3,6 @@
 	"ApplicationName": "putty",
 	"Shortcut": "PUTTY.bat",
 	"ShortcutIcon": "PUTTY.EXE,0",
-	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/NoMoreFood/putty-cac/raw/{{VERSION}}/binaries/puttycac-64bit-{{VERSION}}.zip",
 	"RemoveRootFolder": false,
 	"VersionCheck":

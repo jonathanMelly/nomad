@@ -171,7 +171,7 @@ func fillDefinitions(app string, definition data.AppDefinition) {
 			definition.Symlink = app
 		}
 
-		err := definition.Validate()
+		err := definition.ValidateAndSetDefaults()
 		if err != nil {
 			log.Warnln("Invalid app definition", app, "|", err, "->discarding")
 		} else {

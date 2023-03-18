@@ -3,7 +3,6 @@
 	"ApplicationName": "obs",
 	"Shortcut": "obs.bat",
 	"ShortcutIcon": "bin/64bit/obs64.exe,0",
-	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/obsproject/obs-studio/releases/download/{{VERSION}}/OBS-Studio-{{V_MAJOR}}.{{V_MINOR}}-Full-x64.zip",
 	"RemoveRootFolder": false,
 	"VersionCheck":

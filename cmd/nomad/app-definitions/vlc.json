@@ -2,7 +2,6 @@
 	"Version": "3.0.18",
 	"ApplicationName": "vlc",
 	"Shortcut": "vlc.exe",
-	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://download.videolan.org/pub/videolan/vlc/last/win64/vlc-{{VERSION}}-win64.zip",
 	"RemoveRootFolder": true,
 	"VersionCheck":

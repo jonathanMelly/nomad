@@ -71,7 +71,7 @@ type AppDefinition struct {
 	ExtractRegex      *regexp.Regexp
 }
 
-func (definition *AppDefinition) Validate() error {
+func (definition *AppDefinition) ValidateAndSetDefaults() error {
 	var errs []string
 	if definition.ApplicationName == "" {
 		errs = append(errs, "missing application name")
@@ -80,8 +80,19 @@ func (definition *AppDefinition) Validate() error {
 		errs = append(errs, "app name cannot contain - (dash), please replace with something else (ex. _)")
 	}
 	if definition.DownloadExtension == "" {
-		errs = append(errs, "missimg download extension")
+		const defaultExt = ".zip"
+		if definition.DownloadUrl != "" {
+			lastPoint := strings.LastIndex(definition.DownloadUrl, ".")
+			if lastPoint >= 0 {
+				definition.DownloadExtension = definition.DownloadUrl[lastPoint:]
+			} else {
+				definition.DownloadExtension = defaultExt
+			}
+		} else {
+			definition.DownloadExtension = defaultExt
+		}
 	}
+
 	if definition.VersionCheck.Url == "" && definition.Version == "" {
 		errs = append(errs, "missing version info (either fixed or by url)")
 	}

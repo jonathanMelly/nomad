@@ -2,7 +2,6 @@
 	"Version": "2.7.4",
 	"ApplicationName": "keepassxc",
 	"Shortcut": "KeePassXC.exe",
-	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://github.com/keepassxreboot/keepassxc/releases/download/{{VERSION}}/KeePassXC-{{VERSION}}-Win64.zip",
 	"RemoveRootFolder": true,
 	"VersionCheck":

@@ -2,7 +2,6 @@
 	"Version": "12.3",
 	"ApplicationName": "heidisql",
 	"Shortcut": "heidisql.exe",
-	"DownloadExtension": ".zip",
 	"DownloadUrl": "https://www.heidisql.com/downloads/releases/HeidiSQL_{{VERSION}}_64_Portable.zip",
 	"VersionCheck":
 	{

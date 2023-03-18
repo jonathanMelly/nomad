@@ -20,6 +20,6 @@ func TestValidateDefaultAppDefinitions(t *testing.T) {
 
 	//Validate confg
 	for _, def := range definitions {
-		assert.NoError(t, def.Validate())
+		assert.NoError(t, def.ValidateAndSetDefaults())
 	}
 }
