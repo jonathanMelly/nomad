@@ -41,7 +41,7 @@ jobs:
         run: cd build-win64 && zip ../win64.zip *
 
       - name: Upload release binary
-        uses: Bertrand256/upload-release-asset@v1
+        uses: Bertrand256/upload-release-asset@v1.0.4
         if: ${{ steps.release.outputs.release_created }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
