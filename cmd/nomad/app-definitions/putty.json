@@ -18,7 +18,7 @@
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}",
 		"putty.reg":"Windows Registry Editor Version 5.00\r\n\r\n[HKEY_CURRENT_USER\\Software\\SimonTatham\\PuTTY]\r\n",
-		"PUTTY.bat":"@ECHO OFF\r\ntasklist | findstr /I putty || cd %papps%putty && reg import putty.reg && reg import puttyrnd.reg && start /w putty.exe && reg export HKEY_CURRENT_USER\\Software\\SimonTatham\\PuTTY new.reg && copy new.reg putty.reg && del new.reg",
+		"PUTTY.bat":"@ECHO OFF\r\ntasklist | findstr /I putty || reg import putty.reg && reg import puttyrnd.reg && start /w putty.exe && reg export HKEY_CURRENT_USER\\Software\\SimonTatham\\PuTTY new.reg && copy new.reg putty.reg && del new.reg",
 		"PUTTYRND.reg":"Windows Registry Editor Version 5.00\r\n\r\n[HKEY_CURRENT_USER\\Software\\SimonTatham\\PuTTY]\r\n\"RandSeedFile\"=\"%papps%\\\\putty\\\\putty.rnd\""
 	},
 	"RestoreFiles":
