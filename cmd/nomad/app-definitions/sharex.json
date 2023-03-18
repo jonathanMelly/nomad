@@ -2,16 +2,11 @@
 	"Version": "15.0.0",
 	"ApplicationName": "sharex",
 	"DownloadUrl": "https://github.com/ShareX/ShareX/releases/download/v{{VERSION}}/ShareX-{{VERSION}}-portable.zip",
-	"RemoveRootFolder": false,
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/ShareX/ShareX/releases/latest",
 		"RegEx":"\"tag_name\": \"v{{VERSION}}"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

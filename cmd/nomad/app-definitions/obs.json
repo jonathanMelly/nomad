@@ -4,16 +4,11 @@
 	"Shortcut": "obs.bat",
 	"ShortcutIcon": "bin/64bit/obs64.exe,0",
 	"DownloadUrl": "https://github.com/obsproject/obs-studio/releases/download/{{VERSION}}/OBS-Studio-{{V_MAJOR}}.{{V_MINOR}}-Full-x64.zip",
-	"RemoveRootFolder": false,
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/obsproject/obs-studio/releases/latest",
 		"RegEx":"\"tag_name\": \"{{VERSION}}"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}",

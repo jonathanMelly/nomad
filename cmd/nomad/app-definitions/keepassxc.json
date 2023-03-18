@@ -3,16 +3,11 @@
 	"ApplicationName": "keepassxc",
 	"Shortcut": "KeePassXC.exe",
 	"DownloadUrl": "https://github.com/keepassxreboot/keepassxc/releases/download/{{VERSION}}/KeePassXC-{{VERSION}}-Win64.zip",
-	"RemoveRootFolder": true,
 	"VersionCheck":
 	{
 		"Url":"https://keepassxc.org/blog/",
 		"RegEx":"KeePassXC ({{VERSION}}) released"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

@@ -218,7 +218,7 @@ func importFromConfigString(format string, content string, do func(config2 *conf
 	configTmp := initConfig()
 	err := configTmp.LoadStrings(format, content)
 	if err != nil {
-		log.Errorln("Cannot read", format, "config content", "|", err)
+		log.Errorln("Cannot read", format, "config content", content, "|", err)
 	} else {
 		do(configTmp)
 		configTmp.ClearAll()

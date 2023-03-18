@@ -1,13 +1,14 @@
 package main
 
 import (
+	"github.com/gologme/log"
 	"github.com/gookit/goutil/testutil/assert"
 	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
 	"testing"
 )
 
 func TestValidateDefaultAppDefinitions(t *testing.T) {
-
+	log.EnableLevelsByNumber(10)
 	//Check load
 	configuration.LoadEmbeddedDefinitions(embeddedDefs)
 	definitions := configuration.Settings.AppDefinitions

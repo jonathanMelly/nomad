@@ -7,290 +7,165 @@ import (
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
-	"io"
+	"io/fs"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 )
 
-var msiDstFolder string
-var msiSrcFolder string
-var msiAllowRegExp *regexp.Regexp
+func extractArchive(archivePath string, definition data.AppDefinition, appTargetPath string) error {
 
-func extractArchive(archivePath string, definition data.AppDefinition, rootFolder *string, workingFolder *string) error {
-	// If RemoveRootFolder is set to true
-	if definition.RemoveRootFolder {
-		// If the root folder name is specified
-		if len(definition.RootFolderName) > 0 {
-			workingFolder = &definition.RootFolderName
-		} else { // Else the root folder name is not specified so guess it
-			// Return the name of the root folder in the ZIP
-
-			workingFolderUpdated, err := discoverRootFolder(archivePath, definition.DownloadExtension)
-			if err != nil {
-				return errors.New(fmt.Sprint("Error discovering working folder ", err))
-			} else {
-				workingFolder = &workingFolderUpdated
-			}
-		}
-	} else {
-		rootFolder = workingFolder
-	}
-
-	var err error
+	var archiveFileSystem fs.FS
 	switch definition.DownloadExtension {
 	case ".zip":
-		err = extractZipRegex(archivePath, *workingFolder, definition.ExtractRegex)
-	case ".msi":
-		err = extractMsi(workingFolder, definition, archivePath)
+		log.Debugln("ZIP archive")
+		zipReader, err := zip.OpenReader(archivePath)
+		if err != nil {
+			return err
+		}
+		defer func(zipReader *zip.ReadCloser) {
+			err := zipReader.Close()
+			if err != nil {
+				log.Warnln("Cannot close zipReader", err)
+			}
+		}(zipReader)
+		archiveFileSystem = zipReader
 	default:
-		err = errors.New(fmt.Sprint("Unsupported extension ", definition.DownloadExtension))
+		return errors.New(fmt.Sprint("Unsupported extension ", definition.DownloadExtension))
 	}
 
-	return err
-}
-
-func extractMsi(folderName *string, definition data.AppDefinition, archivePath string) error {
-	log.Debugln("MSI archive")
-	// Make the folder
-	err := os.Mkdir(*folderName, os.ModePerm)
-	if err != nil {
-		return errors.New(fmt.Sprint("Error making folder ", err))
-	}
-
-	// Get the full folder path
-	fullFolderPath, err := filepath.Abs(*folderName)
-	if err != nil {
-		return errors.New(fmt.Sprint("Error getting folder full path ", err))
-	}
-
-	err = msiExec(archivePath, fullFolderPath, err)
+	archiveDeepestRootFolder, err := guessDeepestRootFolder(archiveFileSystem)
 	if err != nil {
 		return err
 	}
 
-	// If RemoveRootFolder is set to true
-	if definition.RemoveRootFolder {
-		// If the root folder name is specified
-		if len(definition.RootFolderName) > 0 {
+	log.Debugln("Deepest root in archive:", archiveDeepestRootFolder)
+	return copyFromFS(archiveFileSystem, archiveDeepestRootFolder, appTargetPath, definition.ExtractRegex)
 
-			//Get the full path of the folder to set as the root folder
-			currentPath := filepath.Join(fullFolderPath, definition.RootFolderName)
-
-			// Check to make sure the path is valid
-			if currentPath == fullFolderPath {
-				return errors.New(fmt.Sprint("RootFolderName is invalid:", definition.RootFolderName))
-			}
-
-			// Copy files based on regular expressions
-			if _, err := copyMsiRegex(currentPath, fullFolderPath+"_temp", definition.ExtractRegex); err != nil {
-				return errors.New("Error restore from msi folder ")
-			}
-
-			// Set the working folder so the renaming will work later
-			newWorkingFolder := fmt.Sprint(fullFolderPath, "_temp")
-			folderName = &newWorkingFolder
-
-			if err := os.RemoveAll(fullFolderPath); err != nil {
-				return errors.New(fmt.Sprint("Error removing MSI folder: ", currentPath, " | ", err))
-			}
-
-		} else { // Else the root folder name is not specified
-			return errors.New("tshe string, RemoveRootName, is required for MSIs")
-		}
-	} else {
-		return errors.New("the boolean, RemoveRootFolder, is required for MSIs")
-	}
-
-	return nil
 }
 
-func msiExec(zip string, fullFolderPath string, err error) error {
-	// Manually set the arguments since Go escaping does not work with MSI arguments
-	argString := fmt.Sprintf(`/a "%v" /qb TARGETDIR="%v"`, zip, fullFolderPath)
-	// Build the command
-	log.Traceln("msi args: ", argString)
-	cmd := exec.Command("msiexec", argString)
+// copyFromFS will copyFromFS certain files from a fs to a target based on a regular expression
+func copyFromFS(sourceFileSystem fs.FS, root string, targetDirectory string, allowRegExp *regexp.Regexp) error {
 
-	if err = cmd.Run(); err != nil {
-		return errors.New(fmt.Sprint("msi error, command: msiexec ", argString, "|", err))
-	}
-	return nil
-}
-
-// copyMsiRegex will restore certain files from a directory to another folder based on a regular expression
-func copyMsiRegex(srcFolder string, dstFolder string, allowRegExp *regexp.Regexp) (bool, error) {
-	// Create folder to extract files
-	if !helper.FileOrDirExists(dstFolder) {
-		err := os.MkdirAll(dstFolder, os.ModePerm)
-		if err != nil {
-			return false, err
-		}
-	}
-
-	msiDstFolder = dstFolder
-	msiSrcFolder = srcFolder
-	msiAllowRegExp = allowRegExp
-
-	err := filepath.Walk(srcFolder, visitMsiFile)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func visitMsiFile(fp string, _ os.FileInfo, err error) error {
-	if err != nil {
-		return nil // can't walk here, but continue walking elsewhere
-	}
-
-	// Path AFTER the source directory (not including the src dir)
-	relativePath := strings.TrimLeft(fp, msiSrcFolder)
-
-	// Destination path
-	finalPath := filepath.Join(msiDstFolder, relativePath)
-
-	// Destination path folder
-	basePath := filepath.Dir(finalPath)
-
-	// Check if the file matches the regular expression
-	if !msiAllowRegExp.MatchString(strings.Replace(relativePath, "\\", "/", -1)) {
-		return nil
-	}
-
-	// Create the file directory if it doesn't exist
-	if !helper.FileOrDirExists(basePath) {
-		err = os.MkdirAll(basePath, os.ModePerm)
+	// Create folder to copyFromFS files
+	if !helper.FileOrDirExists(targetDirectory) {
+		log.Debugln("Creating", targetDirectory)
+		err := os.MkdirAll(targetDirectory, os.ModePerm)
 		if err != nil {
 			return err
 		}
 	}
 
-	// Move the file
-	err = os.Rename(fp, finalPath)
-	if err != nil {
-		return err
-	}
+	rootWithTrailingSlash := fmt.Sprint(root, "/")
 
-	return nil
-}
-
-// extractZipRegex will extract certain files from a ZIP file to a folder based on a regular expression
-func extractZipRegex(file string, rootFolder string, allowRegExp *regexp.Regexp) error {
-	// Open a zip archive
-	r, err := zip.OpenReader(file)
-	if err != nil {
-		return err
-	}
-	defer func(r *zip.ReadCloser) {
-		err := r.Close()
-		if err != nil {
-			log.Errorln(err)
+	return fs.WalkDir(sourceFileSystem, root, func(path string, entry fs.DirEntry, err error) error {
+		//Skip initial entry
+		if path == root {
+			return nil
 		}
-	}(r)
 
-	// If the rootFolder is NOT empty,
-	if rootFolder != "" {
-		// Create folder to extract files
-		if !helper.FileOrDirExists(rootFolder) {
-			err = os.MkdirAll(rootFolder, os.ModePerm)
-			if err != nil {
-				return err
+		relativePathInArchive := path
+		if root != "." {
+			relativePathInArchive, _ = strings.CutPrefix(path, rootWithTrailingSlash) // removes root from path
+		}
+
+		if !allowRegExp.MatchString(relativePathInArchive) {
+			log.Traceln(relativePathInArchive, "discarded because of regex", allowRegExp.String())
+			if entry.IsDir() {
+				return filepath.SkipDir
+			} else {
+				return nil
 			}
 		}
-	}
-
-	// Loop through all files
-	for _, f := range r.File {
-
-		if !allowRegExp.MatchString(f.Name) {
-			continue
-		}
-
-		// Path of file
-		relativePath := filepath.Join(rootFolder, f.Name)
-
-		// Path of file directory
-		basePath := filepath.Dir(relativePath)
 
 		// If the object is a directory, create it
-		if f.FileInfo().IsDir() {
-			err = os.MkdirAll(relativePath, os.ModePerm)
+		if entry.IsDir() {
+			return os.MkdirAll(filepath.Join(targetDirectory, relativePathInArchive), os.ModePerm)
+		} else {
+			// Path of file directory
+			basePathInTarget := filepath.Join(targetDirectory, filepath.Dir(relativePathInArchive))
+
+			//Creates file directory
+			if !helper.FileOrDirExists(basePathInTarget) {
+				err = os.MkdirAll(basePathInTarget, os.ModePerm)
+				if err != nil {
+					return err
+				}
+			}
+
+			archiveFileContent, err := fs.ReadFile(sourceFileSystem, path)
 			if err != nil {
 				return err
 			}
-			continue
-		}
 
-		// Create the file directory if it doesn't exist
-		if !helper.FileOrDirExists(basePath) {
-			err = os.MkdirAll(basePath, os.ModePerm)
+			// Create the file
+			targetCopy, err := os.Create(filepath.Join(targetDirectory, relativePathInArchive))
+			defer func(out *os.File) {
+				err := out.Close()
+				if err != nil {
+					log.Errorln(err)
+				}
+			}(targetCopy)
 			if err != nil {
 				return err
 			}
-		}
 
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-
-		// Create the file
-		out, err := os.Create(relativePath)
-		defer func(out *os.File) {
-			err := out.Close()
+			// Write the file
+			_, err = targetCopy.Write(archiveFileContent)
 			if err != nil {
-				log.Errorln(err)
+				return err
 			}
-		}(out)
-		if err != nil {
-			return err
+			return targetCopy.Close()
 		}
 
-		// Write the file
-		_, err = io.Copy(out, rc)
-		if err != nil {
-			return err
-		}
-		err = rc.Close()
-		if err != nil {
-			return err
-		}
-	}
+	})
 
-	return nil
 }
 
-func discoverRootFolder(archive string, extension string) (string, error) {
-	switch extension {
-	case ".zip":
-		return guessZipRootFolder(archive)
-	default:
-		return "", errors.New("Unsupported extension " + extension)
-	}
-}
+// Some archive contain a single folder at root, which then contains content...
+// We want to avoid unnecessary sub paths...
+func guessDeepestRootFolder(fsys fs.FS) (string, error) {
+	filesCount := 0
+	candidates := map[string]int{}
+	root := "."
+	err := fs.WalkDir(fsys, root, func(path string, d fs.DirEntry, err error) error {
+		if path == root {
+			return nil
+		}
 
-// guessZipRootFolder will extract a folder from a ZIP file
-func guessZipRootFolder(file string) (string, error) {
-	// Open a zip archive
-	r, err := zip.OpenReader(file)
+		if !d.IsDir() {
+			paths := strings.Builder{}
+			split := strings.Split(path, "/")
+			directoryParts := split[:len(split)-1 /*discard file*/]
+			for _, dir := range directoryParts { /*zip spec asks for slash for path sep...*/
+				paths.WriteString(fmt.Sprint(dir, "/"))
+				candidates[paths.String()]++
+			}
+			filesCount++
+		}
+
+		return nil
+	})
 	if err != nil {
-		return "", err
+		return root, err
 	}
-	defer func(r *zip.ReadCloser) {
-		err := r.Close()
-		if err != nil {
-			log.Errorln(err)
+	var winners []string //to handle multiple subdirectories...
+	for candidate, viewCount := range candidates {
+		if viewCount == filesCount {
+			winners = append(winners, candidate[:len(candidate)-1 /*remove last trailing slash*/])
 		}
-	}(r)
-
-	if len(r.File) > 0 {
-		pathArray := strings.Split(r.File[0].Name, "/")
-		return pathArray[0], nil
 	}
 
-	return "", errors.New("working folder not found in first file path")
+	length := 0
+	champion := root
+	for _, winner := range winners {
+		newLength := len(winner)
+		if newLength > length {
+			champion = winner
+			length = newLength
+		}
+	}
+
+	return champion, nil
 }

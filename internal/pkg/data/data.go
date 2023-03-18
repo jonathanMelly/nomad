@@ -56,8 +56,6 @@ type AppDefinition struct {
 	DownloadExtension string            `json:"DownloadExtension"`
 	Version           string            `json:"Version"`
 	VersionCheck      VersionCheck      `json:"VersionCheck"`
-	RemoveRootFolder  bool              `json:"RemoveRootFolder"`
-	RootFolderName    string            `json:"RootFolderName"`
 	Symlink           string            `json:"Symlink"` //use it instead of appname for symlink (if given)
 	Shortcut          string            `json:"Shortcut"`
 	ShortcutIcon      string            `json:"ShortcutIcon"`
@@ -97,6 +95,9 @@ func (definition *AppDefinition) ValidateAndSetDefaults() error {
 		errs = append(errs, "missing version info (either fixed or by url)")
 	}
 
+	if definition.ExtractRegExList == nil || len(definition.ExtractRegExList) == 0 {
+		definition.ExtractRegExList = []string{"(.*)"}
+	}
 	regex, err := combineRegex(definition.ExtractRegExList)
 	if err != nil {
 		errs = append(errs, fmt.Sprint("invalid regex for zip files ", definition.ExtractRegExList, " | ", err))

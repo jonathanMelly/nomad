@@ -3,16 +3,11 @@
 	"ApplicationName": "vlc",
 	"Shortcut": "vlc.exe",
 	"DownloadUrl": "https://download.videolan.org/pub/videolan/vlc/last/win64/vlc-{{VERSION}}-win64.zip",
-	"RemoveRootFolder": true,
 	"VersionCheck":
 	{
 		"Url":"https://www.videolan.org/news.html",
 		"RegEx":">VLC {{VERSION}}</a"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

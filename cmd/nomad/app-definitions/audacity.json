@@ -3,16 +3,11 @@
 	"ApplicationName": "audacity",
 	"Shortcut": "Audacity.exe",
 	"DownloadUrl": "https://github.com/audacity/audacity/releases/download/Audacity-{{VERSION}}/audacity-win-{{VERSION}}-x64.zip",
-	"RemoveRootFolder": true,
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/audacity/audacity/releases/latest",
 		"RegEx":"\"tag_name\": \"Audacity-{{VERSION}}"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

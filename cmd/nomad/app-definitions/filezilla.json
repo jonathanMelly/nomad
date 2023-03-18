@@ -8,11 +8,6 @@
 		"Url":"https://filezilla-project.org/versions.php",
 		"RegEx":"name=\"{{VERSION}}\""
 	},
-	"RemoveRootFolder": true,
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}",

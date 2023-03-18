@@ -3,16 +3,11 @@
 	"ApplicationName": "xnview",
 	"Shortcut": "xnview.exe",
 	"DownloadUrl": "https://download.xnview.com/XnViewMP-win-x64.zip",
-	"RemoveRootFolder": true,
 	"VersionCheck":
 	{
 		"Url":"https://www.xnview.com/en/xnviewmp/#changelog",
 		"RegEx":"<span class=\"h5 fw-bold\">{{VERSION}} <small"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

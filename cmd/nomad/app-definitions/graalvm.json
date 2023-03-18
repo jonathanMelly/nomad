@@ -2,16 +2,11 @@
 	"Version": "22.3.1",
 	"ApplicationName": "graalvm",
 	"DownloadUrl": "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-{{VERSION}}/graalvm-ce-java19-windows-amd64-{{VERSION}}.zip",
-	"RemoveRootFolder": true,
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/graalvm/graalvm-ce-builds/releases/latest",
 		"RegEx":"\"tag_name\": \"vm-{{VERSION}}"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

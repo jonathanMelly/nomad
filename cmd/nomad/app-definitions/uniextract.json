@@ -7,11 +7,6 @@
 		"Url":"https://api.github.com/repos/Bioruebe/UniExtract2/releases",
 		"RegEx":"\"tag_name\": \"v{{VERSION}}"
 	},
-	"RemoveRootFolder": true,
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

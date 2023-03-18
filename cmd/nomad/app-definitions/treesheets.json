@@ -3,16 +3,11 @@
 	"ApplicationName": "treesheets",
 	"Shortcut": "RegexTestBench.Wpf.exe",
 	"DownloadUrl": "https://github.com/aardappel/treesheets/releases/download/{{VERSION}}/linux_treesheets_clang++-12.zip",
-	"RemoveRootFolder": true,
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/aardappel/treesheets/releases/latest",
 		"RegEx":"\"tag_name\": \"{{VERSION}}"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

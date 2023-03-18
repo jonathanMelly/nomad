@@ -2,14 +2,9 @@
 	"Version": "v9.1.0.0p1-Beta",
 	"ApplicationName": "openssh",
 	"DownloadUrl": "https://github.com/PowerShell/Win32-OpenSSH/releases/download/{{VERSION}}/OpenSSH-Win64.zip",
-	"RemoveRootFolder": true,
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/PowerShell/Win32-OpenSSH/releases/latest",
 		"RegEx":"\"tag_name\": \"([vV]\\d+(?:\\.\\d+)*..-Beta)"
-	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	]
+	}
 }

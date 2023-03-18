@@ -3,16 +3,11 @@
 	"ApplicationName": "freefilesync",
 	"Shortcut": "freefilesync.exe",
 	"DownloadUrl": "manual,go to about in app to get link : https://freefilesync.org/thank-you.php?tx=zzz",
-	"RemoveRootFolder": false,
 	"VersionCheck":
 	{
 		"Url":"https://freefilesync.org/download.php",
 		"RegEx":"content=\"Download FreeFileSync {{VERSION}}"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"

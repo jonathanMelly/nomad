@@ -71,10 +71,10 @@ func InstallOrUpdate(state data.AppState, forceExtract bool, skipDownload bool,
 	}
 
 	var appNameWithVersion = fmt.Sprint(appName, "-", targetVersion)
-	var folderName = path.Join(configuration.AppPath, appNameWithVersion)
+	var appPath = path.Join(configuration.AppPath, appNameWithVersion)
 
 	//Extract
-	workingFolder, err := getAndExtractAppIfNeeded(state, forceExtract, skipDownload, folderName, archivesSubDir, appNameWithVersion, definition)
+	workingFolder, err := getAndExtractAppIfNeeded(state, forceExtract, skipDownload, appPath, archivesSubDir, appNameWithVersion, definition)
 	if err != nil {
 		return err, "Cannot install/update app", EXIT_INSTALL_UPDATE_ERROR
 	}
@@ -86,14 +86,14 @@ func InstallOrUpdate(state data.AppState, forceExtract bool, skipDownload bool,
 	}
 
 	//Sets FINAL name
-	if workingFolder != folderName {
-		log.Debugln("Renaming ", workingFolder, " to ", folderName)
-		if err := os.Rename(workingFolder, folderName); err != nil {
+	if workingFolder != appPath {
+		log.Debugln("Renaming ", workingFolder, " to ", appPath)
+		if err := os.Rename(workingFolder, appPath); err != nil {
 			return err, "Error renaming folder", EXIT_RENAME_ERROR
 		}
 	}
 
-	symlink, err := handleSymlink(definition, folderName, appNameWithVersion, state)
+	symlink, err := handleSymlink(definition, appPath, appNameWithVersion, state)
 	if err != nil {
 		return err, "Symlink issue", EXIT_SYMLINK_ERROR
 	}
@@ -211,67 +211,62 @@ func getAndExtractAppIfNeeded(
 	state data.AppState,
 	forceExtract bool,
 	skipDownload bool,
-	folderName string,
+	appPath string,
 	archivesSubDir string,
 	appNameWithVersion string,
 	definition data.AppDefinition,
 ) (string, error) {
 
-	needsExtraction, err := prepareExtractionIfNeeded(folderName, forceExtract)
+	needsExtraction, err := checkAndClearAppPathIfNeeded(appPath, forceExtract)
 	if err != nil {
 		return "", err
 	}
 
-	// Working folder is the root folder where the files will be extracted
-	workingFolder := folderName
-
-	// Root folder is directory relative to the current directory where the files will be extracted to
-	rootFolder := ""
-
 	if needsExtraction {
+		log.Debugln("Starting extraction")
 		// Set the archivePath name based off the folder
 		// Note: The original file download name will be changed
 		archivePath, err := prepareArchiveDestination(archivesSubDir, appNameWithVersion, definition)
 		if err != nil {
-			return workingFolder, err
+			return appPath, err
 		}
 
 		// Download Archive
 		err = downloadArchive(state, skipDownload, archivePath, definition)
 		if err != nil {
-			return workingFolder, errors.New(fmt.Sprint("Cannot download archive | ", err))
+			return appPath, errors.New(fmt.Sprint("Cannot download archive | ", err))
 		}
 
 		//Extract
 		log.Debugln("Extracting files from archive", archivePath)
-		err = extractArchive(archivePath, definition, &rootFolder, &workingFolder)
+		err = extractArchive(archivePath, definition, appPath)
 		if err != nil {
-			return workingFolder, errors.New(fmt.Sprint("Error extracting from archive | ", err))
+			return appPath, errors.New(fmt.Sprint("Error extracting from archive | ", err))
 		}
 	} else {
 		log.Infoln("directory already exists, use -force to regenerate from archive")
 	}
-	return workingFolder, nil
+	return appPath, nil
 }
 
-func prepareExtractionIfNeeded(folderName string, forceExtract bool) (bool, error) {
-	log.Debugln("Extracting to ", folderName)
+func checkAndClearAppPathIfNeeded(appPath string, forceExtract bool) (bool, error) {
+	log.Debugln("Preparing ", appPath)
 	extract := true
 	// If the folder exists
-	if helper.FileOrDirExists(folderName) {
-		if helper.IsDirectory(folderName) {
+	if helper.FileOrDirExists(appPath) {
+		if helper.IsDirectory(appPath) {
 			if forceExtract {
-				log.Infoln("Removing old version:", folderName, " (as force extract asked)")
-				err := os.RemoveAll(folderName)
+				log.Infoln("Removing old version:", appPath, " (as force extract asked)")
+				err := os.RemoveAll(appPath)
 				if err != nil {
 					return false, errors.New(fmt.Sprint("Error removing working folder |", err))
 				}
 			} else {
-				log.Traceln("Directory ", folderName, " already exists, letting original content unmodified (use -force)")
+				log.Traceln("Directory ", appPath, " already exists, letting original content unmodified (use -force)")
 				extract = false
 			}
 		} else {
-			log.Warnln("/!\\WARNINIG, filename (not directory) ", folderName, " already exists. Please remove it manually")
+			log.Warnln("/!\\WARNINIG, filename (not directory) ", appPath, " already exists. Please remove it manually")
 			extract = false
 		}
 	}
@@ -280,14 +275,13 @@ func prepareExtractionIfNeeded(folderName string, forceExtract bool) (bool, erro
 
 func prepareArchiveDestination(archivesSubDir string, appNameWithVersion string, definition data.AppDefinition) (string, error) {
 	var archivePath = path.Join(configuration.AppPath, archivesSubDir, fmt.Sprint(appNameWithVersion, definition.DownloadExtension))
-	if helper.FileOrDirExists(archivePath) {
-		log.Debugln("Download Exists:", archivePath)
-	} else {
-		zipDir := filepath.Dir(archivePath)
-		if !helper.FileOrDirExists(zipDir) {
-			err := os.MkdirAll(zipDir, os.ModePerm)
+	if !helper.FileOrDirExists(archivePath) {
+		archiveDir := filepath.Dir(archivePath)
+		if !helper.FileOrDirExists(archiveDir) {
+			log.Traceln("Creating archive dir", archiveDir)
+			err := os.MkdirAll(archiveDir, os.ModePerm)
 			if err != nil {
-				return archivePath, errors.New(fmt.Sprint("Cannot create ", zipDir))
+				return archivePath, errors.New(fmt.Sprint("Cannot create ", archiveDir))
 			}
 		}
 	}

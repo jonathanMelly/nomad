@@ -2,16 +2,11 @@
 	"Version": "2.38.1",
 	"ApplicationName": "git",
 	"DownloadUrl": "https://github.com/git-for-windows/git/releases/download/v{{VERSION}}.windows.1/MinGit-{{VERSION}}-busybox-64-bit.zip",
-	"RemoveRootFolder": false,
 	"VersionCheck":
 	{
 		"Url":"https://api.github.com/repos/git-for-windows/git/releases/latest",
 		"RegEx":"\"tag_name\": \"v{{VERSION}}"
 	},
-	"ExtractRegExList":
-	[
-		"(.*)"
-	],
 	"CreateFiles":
 	{
 		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
