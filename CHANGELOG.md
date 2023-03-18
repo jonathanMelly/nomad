@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.0](https://github.com/jonathanMelly/nomad/compare/v1.5.2...v1.6.0) (2023-03-18)
+
+
+### Features
+
+* **config:** extension optional (default to zip and guessed from url) ([0bdabb1](https://github.com/jonathanMelly/nomad/commit/0bdabb1aa9f4e61e9f137e93475e1a6c6a0145ec))
+* **custom url:** ask for URL ([0bdabb1](https://github.com/jonathanMelly/nomad/commit/0bdabb1aa9f4e61e9f137e93475e1a6c6a0145ec))
+
+
+### Bug Fixes
+
+* **bad url:** report error instead of nil ([ffb62c1](https://github.com/jonathanMelly/nomad/commit/ffb62c19bb3c2ffc49e2d382d5779dfcb9dbbcd7))
+* **install:** only install what is asked ([292e0a1](https://github.com/jonathanMelly/nomad/commit/292e0a1bceaf838487a0e09e34050016fe553fc5))
+
 ## [1.5.2](https://github.com/jonathanMelly/nomad/compare/v1.5.1...v1.5.2) (2023-03-18)
 
 
