@@ -9,16 +9,16 @@ import (
 
 func main() {
 	log.EnableLevelsByNumber(10)
-	now := time.Now()
 	cwd, _ := os.Getwd()
 	target := filepath.Join(cwd, "date.txt")
 
-	err := os.WriteFile(target, []byte(now.Format("2006-06-02 15:04:05")), os.ModePerm)
+	datetimeStr := time.Now().Format("2006-01-02 15:04:05")
+	err := os.WriteFile(target, []byte(datetimeStr), os.ModePerm)
 	if err != nil {
-		log.Errorln("Cannot print", now, "to", target, err)
+		log.Errorln("Cannot print", datetimeStr, "to", target, err)
 		return
 	}
-	log.Println(now, "->", target)
+	log.Println(datetimeStr, "->", target)
 	return
 
 }
