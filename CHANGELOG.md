@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.1](https://github.com/jonathanMelly/nomad/compare/v1.5.0...v1.5.1) (2023-03-18)
+
+
+### Bug Fixes
+
+* **build:** use latest github actions to avoid warning ([36e1412](https://github.com/jonathanMelly/nomad/commit/36e1412dc724488b18e3f010e83701fe2b3d017d))
+* **version:** build date month fixed ([72ea9b5](https://github.com/jonathanMelly/nomad/commit/72ea9b5c546ed6bdbdcc4a0de3465e4249e42f97))
+
 ## [1.5.0](https://github.com/jonathanMelly/nomad/compare/v1.4.0...v1.5.0) (2023-03-18)
 
 
