@@ -67,17 +67,12 @@ func createShortcut(linkName string, target string, arguments string, workingDir
 		cmd := exec.Command("wscript", filename)
 		err = cmd.Run()
 		if err != nil {
-			log.Errorln("Wscript error", err)
+			log.Errorln("Wscript error, see generator content in", filename, err)
 		} else {
 			log.Debugln("Shortcut ", linkName, "generated/updated")
-			err := cmd.Wait()
-			if err != nil {
-				log.Errorln(err)
-				return
-			}
 			err = os.Remove(filename)
 			if err != nil {
-				log.Errorln(err)
+				log.Errorln("Cannot delete temp vbs shortcut generator", err)
 				return
 			}
 		}
