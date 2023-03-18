@@ -26,7 +26,7 @@ func ScanCurrentApps(directory string) *data.AppStates {
 			if f.IsDir() {
 				subDirectory := filepath.Join(directory, f.Name())
 				log.Traceln("Inspecting dir", subDirectory)
-				analyzeEntry(directory, f.Name(), *installedApps, false)
+				analyzeEntry(directory, f.Name(), installedApps, false)
 			}
 		}
 	} else {
@@ -36,7 +36,7 @@ func ScanCurrentApps(directory string) *data.AppStates {
 	return installedApps
 }
 
-func AppendInstallableApps(candidates []string, bucketToPatch data.AppStates) {
+func AppendInstallableApps(candidates []string, bucketToPatch *data.AppStates) {
 	for _, app := range candidates {
 		_, installed := bucketToPatch.States[app]
 		if !installed {
@@ -45,7 +45,7 @@ func AppendInstallableApps(candidates []string, bucketToPatch data.AppStates) {
 	}
 }
 
-func analyzeEntry(rootPath string, appDirectory string, bucket data.AppStates, isSymlink bool) {
+func analyzeEntry(rootPath string, appDirectory string, bucket *data.AppStates, isSymlink bool) {
 	fullPath := filepath.Join(rootPath, appDirectory)
 	guessedApp, guessedVersionString, dashFound := strings.Cut(appDirectory, "-")
 	if dashFound {
@@ -81,7 +81,7 @@ func analyzeEntry(rootPath string, appDirectory string, bucket data.AppStates, i
 	}
 }
 
-func updateAppState(guessedApp string, bucket data.AppStates, currentVersion *version.Version, isSymlink bool) {
+func updateAppState(guessedApp string, bucket *data.AppStates, currentVersion *version.Version, isSymlink bool) {
 	knownAppDef, knownApp := configuration.Settings.AppDefinitions[guessedApp]
 	if knownApp {
 		updatedState := buildState(*knownAppDef, isSymlink, currentVersion)
