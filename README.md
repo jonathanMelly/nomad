@@ -28,7 +28,7 @@ Otherwise, go ahead :-)
 | single go binary                | no    | yes   | Scoop is a list of ps scripts                                     |
 
 # Status
-It is working (I’m using it at my work) but still need some improvements before being "prod nicely" :-)
+It is working (I’m using it at my work). Basic UI is the next big step.
 
 # How
  1. Download [latest release](https://github.com/jonathanMelly/portable-app-installer/releases/latest)
@@ -38,8 +38,14 @@ nomad install filezilla
 nomad update filezilla
 nomad status filezilla
 ```
+ 3. To list available apps
 
-(available apps are listed [here](cmd/nomad/app-definitions) and you can add yours by adding any valid json file...)
+```bash 
+nomad list
+```
+
+*Available apps are listed [here](cmd/nomad/app-definitions), and you can add yours by adding any valid json file 
+in a folder named app-definitions OR in a [config file](config/nomad.toml) that must be placed in the same folder as the executable)*
 
 # Essential options
 
@@ -68,8 +74,12 @@ the same directory as the binary.
 Please follow [this link](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to create a basic PAT.
 
 # App definition structure
-Please refer to [this file](internal/pkg/data/data.go).
+Please refer to [this file](internal/pkg/data/data.go) or to [real examples](cmd/nomad/app-definitions).
 
 # Next steps
-List available apps, better current app scan... and why not a UI (+lots of new apps !!!)
+UI and lots of new apps
+
+# Contribute
+Please open an issue if you see a bug or think of a nice improvement.
+PR are also welcome.
 
