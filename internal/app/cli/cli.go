@@ -177,20 +177,24 @@ func doAction(
 		log.Infoln("Available apps:", strings.Join(result, ","))
 	case "install", "update":
 		//Do the job
-		for app, appState := range availableAppStates.States {
+		for _, app := range askedApps {
 			log.Debugln("Processing", app)
-
-			exitCode := HandleRun(
-				installer.InstallOrUpdate(
-					*appState,
-					*flagForceExtract,
-					*flagSkipDownload,
-					*flagEnvVarForAppsLocation,
-					*flagArchivesSubDir,
-					*flagConfirm,
-				))
-			if exitCode > 0 && !(*flagOptimist) {
-				return exitCode
+			appState, appIsValid := availableAppStates.States[app]
+			if appIsValid {
+				exitCode := HandleRun(
+					installer.InstallOrUpdate(
+						*appState,
+						*flagForceExtract,
+						*flagSkipDownload,
+						*flagEnvVarForAppsLocation,
+						*flagArchivesSubDir,
+						*flagConfirm,
+					))
+				if exitCode > 0 && !(*flagOptimist) {
+					return exitCode
+				}
+			} else {
+				log.Warnln("discarding unrecognized app", app)
 			}
 		}
 		return 0
