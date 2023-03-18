@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/jonathanMelly/nomad/compare/v1.6.0...v1.7.0) (2023-03-18)
+
+
+### Features
+
+* **archive root dir:** auto guess archive rootdir ([5974c9c](https://github.com/jonathanMelly/nomad/commit/5974c9c1e8f9920643485061cf3780c558cd8fc5))
+* **extract regex list:** default to all ([5974c9c](https://github.com/jonathanMelly/nomad/commit/5974c9c1e8f9920643485061cf3780c558cd8fc5))
+
+
+### Bug Fixes
+
+* **putty:** fixed bad starting script (useless bad cd...) ([eaf26c2](https://github.com/jonathanMelly/nomad/commit/eaf26c210c04710f8a4214241c638e9df34044b9))
+
 ## [1.6.0](https://github.com/jonathanMelly/nomad/compare/v1.5.2...v1.6.0) (2023-03-18)
 
 
