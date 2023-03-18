@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0](https://github.com/jonathanMelly/nomad/compare/v1.4.0...v1.5.0) (2023-03-18)
+
+
+### Features
+
+* **info:** better info on missing symlink for instance ([7e0e044](https://github.com/jonathanMelly/nomad/commit/7e0e04477341c17653981d86c5cfb85faf1dc430))
+* **list:** list available apps ([7e0e044](https://github.com/jonathanMelly/nomad/commit/7e0e04477341c17653981d86c5cfb85faf1dc430))
+* **readme:** update with latest news (list,config,...) ([f1ed10b](https://github.com/jonathanMelly/nomad/commit/f1ed10b43770bd1d9f813a983159e947d3d8eb67))
+
+
+### Bug Fixes
+
+* **alot:** many bugs fixed ([7e0e044](https://github.com/jonathanMelly/nomad/commit/7e0e04477341c17653981d86c5cfb85faf1dc430))
+
 ## [1.4.0](https://github.com/jonathanMelly/nomad/compare/v1.3.0...v1.4.0) (2023-03-14)
 
 
