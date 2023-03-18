@@ -137,19 +137,19 @@ func doAction(
 
 	//Scan installed APPS
 	log.Traceln("Searching for current installed askedApps in", configuration.AppPath)
-	appsBucket := state.ScanCurrentApps(configuration.AppPath)
-	log.Debugln("Found", len(appsBucket.States), "askedApps")
+	availableAppStates := state.ScanCurrentApps(configuration.AppPath)
+	log.Debugln("Found", len(availableAppStates.States), "installed apps")
 
 	//Filter askedApps
 	askedApps := flag.Args()[1:]
 	if len(askedApps) == 0 || askedApps[0] == "all" {
 		log.Debugln("Working on all installed apps")
-		for app := range appsBucket.States {
+		for app := range availableAppStates.States {
 			askedApps = append(askedApps, app)
 		}
 	}
 	log.Debugln("Selected apps:", askedApps)
-	state.AppendInstallableApps(askedApps, *appsBucket)
+	state.AppendInstallableApps(askedApps, availableAppStates)
 
 	//Load Versioning info
 	forcedVersion, err := validateForcedVersionIfNeeded(*flagVersion)
@@ -158,7 +158,7 @@ func doAction(
 		return EXIT_BAD_FORCED_VERSION
 	}
 	state.DetermineActionToBePerformed(
-		*appsBucket,
+		*availableAppStates,
 		forcedVersion,
 		*flagLatestVersion,
 		/*action == "status"*/ true, /*Any action is interested into status...?*/
@@ -177,8 +177,8 @@ func doAction(
 		log.Infoln("Available apps:", strings.Join(result, ","))
 	case "install", "update":
 		//Do the job
-		for app, appState := range appsBucket.States {
-			log.Debugln("Processing", app, appState)
+		for app, appState := range availableAppStates.States {
+			log.Debugln("Processing", app)
 
 			exitCode := HandleRun(
 				installer.InstallOrUpdate(
