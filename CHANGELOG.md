@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.2](https://github.com/jonathanMelly/nomad/compare/v1.5.1...v1.5.2) (2023-03-18)
+
+
+### Bug Fixes
+
+* **build:** use CET timezone ([478e18e](https://github.com/jonathanMelly/nomad/commit/478e18e0dc5f24474cffb6b5b58b6d9e68f48ae0))
+* **shortcut:** temp shortcut not removed (useless call to wait with exec-&gt;run) ([d01a828](https://github.com/jonathanMelly/nomad/commit/d01a8285c6eab58629bca0b4b049a534a95147de))
+
 ## [1.5.1](https://github.com/jonathanMelly/nomad/compare/v1.5.0...v1.5.1) (2023-03-18)
 
 
