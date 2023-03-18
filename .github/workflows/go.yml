@@ -41,7 +41,7 @@ jobs:
         run: cd build-win64 && zip ../win64.zip *
 
       - name: Upload release binary
-        uses: actions/upload-release-asset@v1.0.2
+        uses: Bertrand256/upload-release-asset@v1
         if: ${{ steps.release.outputs.release_created }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -49,4 +49,4 @@ jobs:
           upload_url: ${{ steps.release.outputs.upload_url }}
           asset_path: win64.zip
           asset_name: nomad-${{ steps.release.outputs.major }}.${{steps.release.outputs.minor}}.${{steps.release.outputs.patch}}-win64.zip
-          asset_content_type: application/octet-stream
+          asset_content_type: application/zip
