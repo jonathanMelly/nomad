@@ -7,6 +7,7 @@ import (
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -94,25 +95,25 @@ func copyFromFS(sourceFileSystem fs.FS, root string, targetDirectory string, all
 				}
 			}
 
-			archiveFileContent, err := fs.ReadFile(sourceFileSystem, path)
+			sourceReader, err := sourceFileSystem.Open(path)
 			if err != nil {
 				return err
 			}
+			defer func(sourceReader fs.File) {
+				err := sourceReader.Close()
+				if err != nil {
+					log.Warnln("Cannot close", path, "from archive")
+				}
+			}(sourceReader)
 
 			// Create the file
 			targetCopy, err := os.Create(filepath.Join(targetDirectory, relativePathInArchive))
-			defer func(out *os.File) {
-				err := out.Close()
-				if err != nil {
-					log.Errorln(err)
-				}
-			}(targetCopy)
 			if err != nil {
 				return err
 			}
 
 			// Write the file
-			_, err = targetCopy.Write(archiveFileContent)
+			_, err = io.Copy(targetCopy, sourceReader)
 			if err != nil {
 				return err
 			}
