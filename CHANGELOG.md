@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/jonathanMelly/nomad/compare/v1.7.0...v1.8.0) (2023-03-19)
+
+
+### Features
+
+* **extract:** avoid loading all content into memory -&gt; use io.copy... ([83cdf6c](https://github.com/jonathanMelly/nomad/commit/83cdf6c227f582a19bde120741fe00026cab6e62))
+
 ## [1.7.0](https://github.com/jonathanMelly/nomad/compare/v1.6.0...v1.7.0) (2023-03-18)
 
 
