@@ -23,6 +23,7 @@ type AppState struct {
 	SymlinkFound   bool
 	CurrentVersion *version.Version
 	TargetVersion  *version.Version
+	ActionMessage  string
 }
 
 type Settings struct {

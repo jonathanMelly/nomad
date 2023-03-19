@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
+	"github.com/jonathanMelly/nomad/internal/pkg/helper"
 	"github.com/jonathanMelly/nomad/internal/pkg/installer"
 	"github.com/jonathanMelly/nomad/internal/pkg/state"
 	"github.com/jonathanMelly/nomad/pkg/version"
@@ -161,13 +162,17 @@ func doAction(
 		*availableAppStates,
 		forcedVersion,
 		*flagLatestVersion,
-		/*action == "status"*/ true, /*Any action is interested into status...?*/
 		configuration.Settings.GithubApiKey)
 
 	switch action {
 	case "status":
 		if len(askedApps) == 0 {
 			log.Println("No app yet installed")
+		} else {
+			for _, app := range askedApps {
+				appState, _ := availableAppStates.States[app]
+				log.Print(helper.BuildPrefix(app), appState.ActionMessage)
+			}
 		}
 	case "list":
 		var result []string

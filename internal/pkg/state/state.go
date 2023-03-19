@@ -103,7 +103,7 @@ func buildState(knownAppDef data.AppDefinition, isSymlink bool, currentVersion *
 func DetermineActionToBePerformed(
 	bucket data.AppStates,
 	forceVersion *version.Version,
-	useLatestVersion bool, printAction bool, apiKey string) {
+	useLatestVersion bool, apiKey string) {
 
 	defer log.SetPrefix("")
 
@@ -157,10 +157,7 @@ func DetermineActionToBePerformed(
 		state.TargetVersion = targetVersion
 
 		message := BuildActionMessage(currentInstalledVersion, targetVersion)
-
-		if printAction {
-			log.Println(message)
-		}
+		state.ActionMessage = message
 
 	}
 
@@ -173,20 +170,19 @@ func BuildActionMessage(currentInstalledVersion *version.Version, targetVersion 
 		currentInstalledVersionString = currentInstalledVersion.String()
 	}
 	if currentInstalledVersionString != targetVersion.String() {
-
 		if currentInstalledVersion == nil {
 			action := "not installed >> will install"
-			message = fmt.Sprintln(action, "version", targetVersion)
+			message = fmt.Sprint(action, " version ", targetVersion)
 		} else {
 			action := "upgrading"
 			if currentInstalledVersion.IsNewerThan(*targetVersion) {
 				action = "downgrading"
 			}
-			message = fmt.Sprintln(action, "version from", currentInstalledVersionString, ">>", targetVersion)
+			message = fmt.Sprint(action, " version from ", currentInstalledVersionString, " >> ", targetVersion)
 		}
 
 	} else {
-		message = fmt.Sprintln("staying at version", targetVersion)
+		message = fmt.Sprint("installed version ", targetVersion, " is already up to date")
 	}
 	return message
 }

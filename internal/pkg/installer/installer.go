@@ -45,7 +45,7 @@ func InstallOrUpdate(state data.AppState, forceExtract bool, skipDownload bool,
 	appName := definition.ApplicationName
 
 	//Prepend app name to logs
-	log.SetPrefix("|" + appName + "| ")
+	log.SetPrefix(helper.BuildPrefix(appName))
 
 	//Enforce validation
 	if !definition.Validated {
