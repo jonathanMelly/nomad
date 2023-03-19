@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.2](https://github.com/jonathanMelly/nomad/compare/v1.8.1...v1.8.2) (2023-03-19)
+
+
+### Bug Fixes
+
+* **status:** show only status of asked apps and still show status when installing/updating ([913dc52](https://github.com/jonathanMelly/nomad/commit/913dc52a95f4ccf36cfc7acc43adf2790ec3ede0))
+
 ## [1.8.1](https://github.com/jonathanMelly/nomad/compare/v1.8.0...v1.8.1) (2023-03-19)
 
 
