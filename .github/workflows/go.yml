@@ -46,7 +46,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
+          tag: ${{ steps.release.outputs.tag_name }}
           asset_path: win64.zip
           asset_name: nomad-${{ steps.release.outputs.major }}.${{steps.release.outputs.minor}}.${{steps.release.outputs.patch}}-win64.zip
-          asset_content_type: application/zip
