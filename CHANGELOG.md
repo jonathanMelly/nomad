@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/jonathanMelly/nomad/compare/v1.8.0...v1.8.1) (2023-03-19)
+
+
+### Bug Fixes
+
+* **release:** use latest release api ([7c21092](https://github.com/jonathanMelly/nomad/commit/7c2109267bd9dad05e40ac7e8f5159379a65ed89))
+
 ## [1.8.0](https://github.com/jonathanMelly/nomad/compare/v1.7.0...v1.8.0) (2023-03-19)
 
 
