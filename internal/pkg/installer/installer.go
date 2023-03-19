@@ -55,6 +55,9 @@ func InstallOrUpdate(state data.AppState, forceExtract bool, skipDownload bool,
 		}
 	}
 
+	//Show status
+	log.Println(state.ActionMessage)
+
 	//User confirm
 	abort := !userWantsToContinue(askForConfirmation)
 	if abort {
