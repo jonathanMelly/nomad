@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.9.0](https://github.com/jonathanMelly/nomad/compare/v1.8.3...v1.9.0) (2023-03-23)
+
+
+### Features
+
+* **log:** added very verbose option (max debug) ([6296278](https://github.com/jonathanMelly/nomad/commit/6296278700b4bae0ec3c256bdb27dad79a708168))
+* **winmerge:** switched to toml config (to be able to add comments) ([6296278](https://github.com/jonathanMelly/nomad/commit/6296278700b4bae0ec3c256bdb27dad79a708168))
+
+
+### Bug Fixes
+
+* **status:** only compute status for asked apps ([6296278](https://github.com/jonathanMelly/nomad/commit/6296278700b4bae0ec3c256bdb27dad79a708168))
+* **symlink:** symlink correctly updated upon version change ([6296278](https://github.com/jonathanMelly/nomad/commit/6296278700b4bae0ec3c256bdb27dad79a708168))
+* **version regex:** allow characters after prerelease number (openssh and putty) ([6296278](https://github.com/jonathanMelly/nomad/commit/6296278700b4bae0ec3c256bdb27dad79a708168))
+
 ## [1.8.3](https://github.com/jonathanMelly/nomad/compare/v1.8.2...v1.8.3) (2023-03-19)
 
 
