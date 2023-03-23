@@ -166,10 +166,6 @@ func fillDefinitions(app string, definition data.AppDefinition) {
 		if definition.ApplicationName == "" {
 			definition.ApplicationName = app
 		}
-		//Sets default symlink to app name
-		if definition.Symlink == "" {
-			definition.Symlink = app
-		}
 
 		err := definition.ValidateAndSetDefaults()
 		if err != nil {

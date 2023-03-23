@@ -12,41 +12,131 @@ import (
 	"strings"
 )
 
-// ScanCurrentApps Look for installed apps matching available definitions
-func ScanCurrentApps(directory string) *data.AppStates {
-	installedApps := data.NewAppStates()
+const (
+	NOT_SET = Status(-1)
 
-	if helper.FileOrDirExists(directory) {
-		files, err := os.ReadDir(directory)
+	KEEP = Status(0)
+
+	INSTALL = Status(1)
+
+	UPGRADE   = Status(2)
+	DOWNGRADE = Status(3)
+
+	// NOT YET IMPLEMENTED UNINSTALL=4
+)
+
+type Status int
+
+type AppStates map[string]*AppState
+
+func NewAppStates() AppStates {
+	return AppStates{}
+}
+
+type AppState struct {
+	Definition           data.AppDefinition
+	SymlinkFound         bool
+	CurrentVersion       *version.Version
+	TargetVersion        *version.Version
+	CurrentVersionFolder string
+	Status               Status
+}
+
+func LoadAskedAppsInitialStates(askedApps ...string) AppStates {
+	//Scan installed APPS
+	alreadyInstalledStates := ScanCurrentApps(configuration.AppPath)
+	log.Debugln("Found", len(alreadyInstalledStates), "installed apps")
+
+	//Handle * asked apps
+	if len(askedApps) == 0 || askedApps[0] == "all" {
+		log.Debugln("Working on all alreadyInstalledStates apps")
+		for app := range alreadyInstalledStates {
+			askedApps = append(askedApps, app)
+		}
+	}
+	log.Debugln("Selected apps:", askedApps)
+
+	//Merge installed and not installed states for asked apps
+	askedAppsStates := NewAppStates()
+	for _, app := range askedApps {
+		_state, exist := alreadyInstalledStates[app]
+		if exist {
+			askedAppsStates[app] = _state
+		} else {
+			addOrUpdateState("", app, askedAppsStates, nil, false)
+		}
+	}
+
+	return askedAppsStates
+
+}
+
+// ScanCurrentApps Look for installed apps matching available definitions
+func ScanCurrentApps(baseDirectory string) AppStates {
+	log.Traceln("Searching for currently installed apps in", baseDirectory)
+
+	installedApps := NewAppStates()
+
+	if helper.FileOrDirExists(baseDirectory) {
+		files, err := os.ReadDir(baseDirectory)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		alreadyAnalyzedThroughSymlinks := map[string]bool{}
 		for _, f := range files {
-			if f.IsDir() {
-				subDirectory := filepath.Join(directory, f.Name())
-				log.Traceln("Inspecting dir", subDirectory)
-				analyzeEntry(directory, f.Name(), installedApps, false)
+			var targetDirectory string
+			fullPath := filepath.Join(baseDirectory, f.Name())
+			//First dereference link if it's one
+			isLink := helper.IsSymlink(fullPath)
+			if isLink {
+				log.Traceln("Found link", fullPath)
+				link, err := os.Readlink(fullPath)
+				if err != nil {
+					log.Errorln("Cannot read link", fullPath, "|", err)
+					continue
+				} else {
+					linkInfo, err := os.Stat(link)
+					if err != nil {
+						log.Errorln("Cannot stat", link, "|", err)
+						continue
+					} else if linkInfo.IsDir() {
+						log.Traceln("Link", fullPath, "is pointing to valid directory", link)
+						cwd, err := os.Getwd()
+
+						//guarantee that path is relative (with win junction it may be abs)
+						relPath, err := filepath.Rel(filepath.Join(cwd, baseDirectory), link)
+						if err != nil {
+							log.Errorln("Cannot get relative path, base=", cwd, "target=", link, "|", err)
+							continue
+						} else {
+							targetDirectory = relPath
+							alreadyAnalyzedThroughSymlinks[targetDirectory] = true
+						}
+					}
+				}
+			} else if isDir := f.IsDir(); isDir {
+				if _, already := alreadyAnalyzedThroughSymlinks[f.Name()]; !already {
+					targetDirectory = f.Name()
+				} else {
+					log.Traceln("Discarding", f.Name(), "folder as already scanned through symlink")
+				}
+			}
+
+			if targetDirectory != "" {
+				analyzeEntry(baseDirectory, targetDirectory, installedApps, isLink)
 			}
 		}
 	} else {
-		log.Debugln("Directory", directory, "does not exist (no apps yet installed)")
+		log.Debugln("Directory", baseDirectory, "does not exist (no apps yet installed)")
 	}
 
 	return installedApps
 }
 
-func AppendInstallableApps(candidates []string, bucketToPatch *data.AppStates) {
-	for _, app := range candidates {
-		_, installed := bucketToPatch.States[app]
-		if !installed {
-			updateAppState(app, bucketToPatch, nil, false)
-		}
-	}
-}
-
-func analyzeEntry(rootPath string, appDirectory string, bucket *data.AppStates, isSymlink bool) {
+func analyzeEntry(rootPath string, appDirectory string, states AppStates, isSymlink bool) {
 	fullPath := filepath.Join(rootPath, appDirectory)
+	log.Traceln("Analyzing", fullPath, "(from symlink:", isSymlink, ")")
 	guessedApp, guessedVersionString, dashFound := strings.Cut(appDirectory, "-")
 	if dashFound {
 		guessedVersion, err := version.FromString(guessedVersionString)
@@ -55,59 +145,63 @@ func analyzeEntry(rootPath string, appDirectory string, bucket *data.AppStates, 
 		} else {
 			//Symlink is "MASTER"
 			if isSymlink {
-				updateAppState(guessedApp, bucket, guessedVersion, isSymlink)
+				log.Traceln("Setting current app", guessedApp, "to", guessedVersion, " (symlink found)")
+				addOrUpdateState(fullPath, guessedApp, states, guessedVersion, isSymlink)
 			} else {
-				identifiedApp, alreadyFound := bucket.States[guessedApp]
+				identifiedApp, alreadyFound := states[guessedApp]
 
+				//Is it a better candidate for current active version ? (remember, symlink is MASTER)
 				if alreadyFound {
 					if !identifiedApp.SymlinkFound && !identifiedApp.CurrentVersion.IsNewerThan(*guessedVersion) {
-						updateAppState(guessedApp, bucket, guessedVersion, isSymlink)
+						addOrUpdateState(fullPath, guessedApp, states, guessedVersion, isSymlink)
 					} else {
-						log.Debugln("Discarding older version", guessedApp, guessedVersion)
+						log.Debugln("Discarding existing app", guessedApp, "with version", guessedVersion, "as current version candidate (symlinked or newer with version", identifiedApp.CurrentVersion, "already found)")
 					}
 				} else {
-					updateAppState(guessedApp, bucket, guessedVersion, isSymlink)
+					addOrUpdateState(fullPath, guessedApp, states, guessedVersion, isSymlink)
 				}
 			}
 		}
-	} else if helper.IsSymlink(fullPath) {
-		log.Debugln("Analyzing symlink", fullPath)
-		target, err := os.Readlink(fullPath)
-		if err != nil {
-			log.Errorln("Cannot read link", fullPath, err)
-		} else {
-			analyzeEntry(rootPath, target, bucket, true)
-		}
+	} else {
+		log.Traceln("No dash found in", fullPath, ", discarding entry")
 	}
 }
 
-func updateAppState(guessedApp string, bucket *data.AppStates, currentVersion *version.Version, isSymlink bool) {
+func addOrUpdateState(appPath string, guessedApp string, states AppStates, currentVersion *version.Version, isSymlink bool) {
 	knownAppDef, knownApp := configuration.Settings.AppDefinitions[guessedApp]
 	if knownApp {
-		updatedState := buildState(*knownAppDef, isSymlink, currentVersion)
-		bucket.States[guessedApp] = &updatedState
+		updatedState := buildState(appPath, *knownAppDef, isSymlink, currentVersion)
+		states[guessedApp] = &updatedState
 	} else {
 		log.Warnln("Unknown app", guessedApp)
 	}
 }
 
-func buildState(knownAppDef data.AppDefinition, isSymlink bool, currentVersion *version.Version) data.AppState {
-	return data.AppState{
-		Definition:     knownAppDef,
-		SymlinkFound:   isSymlink,
-		CurrentVersion: currentVersion,
-		TargetVersion:  nil,
+func buildState(appPath string, knownAppDef data.AppDefinition, isSymlink bool, currentVersion *version.Version) AppState {
+	return AppState{
+		Definition:           knownAppDef,
+		SymlinkFound:         isSymlink,
+		CurrentVersion:       currentVersion,
+		CurrentVersionFolder: appPath,
+		TargetVersion:        nil,
 	}
 }
 
-func DetermineActionToBePerformed(
-	bucket data.AppStates,
-	forceVersion *version.Version,
-	useLatestVersion bool, apiKey string) {
+func DeterminePossibleActions(
+	apps AppStates,
+	forceVersion string,
+	useLatestVersion bool, apiKey string) error {
+
+	//Load Versioning info
+	forcedVersion, err := validateForcedVersionIfNeeded(forceVersion)
+	if err != nil {
+		log.Errorln("Bad forced version format:", forceVersion)
+		return err
+	}
 
 	defer log.SetPrefix("")
 
-	for appName, state := range bucket.States {
+	for appName, state := range apps {
 		log.SetPrefix(fmt.Sprint("|", appName, "| "))
 
 		configVersion, err := version.FromString(state.Definition.Version)
@@ -134,8 +228,8 @@ func DetermineActionToBePerformed(
 		}
 
 		var targetVersion *version.Version
-		if forceVersion != nil {
-			targetVersion = forceVersion
+		if forcedVersion != nil {
+			targetVersion = forcedVersion
 		} else {
 			//not yet installed
 			if currentInstalledVersion == nil {
@@ -155,34 +249,75 @@ func DetermineActionToBePerformed(
 			}
 		}
 		state.TargetVersion = targetVersion
-
-		message := BuildActionMessage(currentInstalledVersion, targetVersion)
-		state.ActionMessage = message
+		state.computeStatus()
 
 	}
+
+	return nil
 
 }
 
-func BuildActionMessage(currentInstalledVersion *version.Version, targetVersion *version.Version) string {
-	var message string
-	currentInstalledVersionString := "not installed"
-	if currentInstalledVersion != nil {
-		currentInstalledVersionString = currentInstalledVersion.String()
+func (state *AppState) StatusMessage() string {
+	if state.Status == NOT_SET {
+		state.computeStatus()
 	}
-	if currentInstalledVersionString != targetVersion.String() {
-		if currentInstalledVersion == nil {
-			action := "not installed >> will install"
-			message = fmt.Sprint(action, " version ", targetVersion)
+	switch state.Status {
+	case KEEP:
+		return fmt.Sprint("installed version ", state.CurrentVersion, " is already up to date")
+	case INSTALL:
+		return fmt.Sprint("not installed >> will install version ", state.TargetVersion)
+	case UPGRADE:
+		return fmt.Sprint("upgrading version from ", state.CurrentVersion, " >> ", state.TargetVersion)
+	case DOWNGRADE:
+		return fmt.Sprint("downgrading version from ", state.CurrentVersion, " >> ", state.TargetVersion)
+	default:
+		return ""
+	}
+}
+
+func (state *AppState) SuccessMessage() string {
+	if state.Status == NOT_SET {
+		state.computeStatus()
+	}
+	switch state.Status {
+	case KEEP:
+		return fmt.Sprint("successfully kept at version ", state.CurrentVersion)
+	case INSTALL:
+		return fmt.Sprint("version ", state.TargetVersion, " successfully installed ")
+	case UPGRADE:
+		return fmt.Sprint("successfully upgraded from ", state.CurrentVersion, " to ", state.TargetVersion)
+	case DOWNGRADE:
+		return fmt.Sprint("successfully downgraded from ", state.CurrentVersion, " to ", state.TargetVersion)
+	default:
+		return ""
+	}
+}
+
+func (state *AppState) computeStatus() {
+	if state.CurrentVersion == nil {
+		state.Status = INSTALL
+	} else {
+		if state.TargetVersion.IsNewerThan(*state.CurrentVersion) {
+			state.Status = UPGRADE
+		} else if state.CurrentVersion.IsNewerThan(*state.TargetVersion) {
+			state.Status = DOWNGRADE
 		} else {
-			action := "upgrading"
-			if currentInstalledVersion.IsNewerThan(*targetVersion) {
-				action = "downgrading"
-			}
-			message = fmt.Sprint(action, " version from ", currentInstalledVersionString, " >> ", targetVersion)
+			state.Status = KEEP
+		}
+	}
+}
+
+func validateForcedVersionIfNeeded(forceVersion string) (*version.Version, error) {
+	if forceVersion != "" {
+		versionOverwriteVersion, err := version.FromString(forceVersion)
+		if err != nil {
+			log.Errorln("Bad forced version format: ", forceVersion, "|", err)
+			return nil, err
+		} else {
+			log.Debugln("Version from cmd:", versionOverwriteVersion)
+			return versionOverwriteVersion, nil
 		}
 
-	} else {
-		message = fmt.Sprint("installed version ", targetVersion, " is already up to date")
 	}
-	return message
+	return nil, nil
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
 	"github.com/jonathanMelly/nomad/internal/pkg/installer"
 	"github.com/jonathanMelly/nomad/internal/pkg/state"
-	"github.com/jonathanMelly/nomad/pkg/version"
 	"math"
 	"os"
 	"path/filepath"
@@ -66,8 +65,9 @@ func Main() int {
 	flagLatestVersion := flag.Bool("latest", true, "If version URL is set, check and use latest version available")
 	flagOptimist := flag.Bool("optimist", true, "If true and multiple config given, continue after one failed")
 	flagConfirm := flag.Bool("confirm", true, "Asks user to confirm operation")
-	flagArchivesSubDir := flag.String("archives", "archives", "Set archives subdir")
-	flagVerbose := flag.Bool("verbose", false, "Gives info for debug")
+	flagArchivesSubDir := flag.String("archives", "archives", "Set archives sub dir")
+	flagVerbose := flag.Bool("verbose", false, "Verbose mode (mainly for debug)")
+	flagVeryVerbose := flag.Bool("vverbose", false, "Very verbose mode (debug)")
 
 	flag.Parse()
 
@@ -79,8 +79,10 @@ func Main() int {
 	   Level 2 = panic, fatal & error
 	   Level 1 = panic, fatal
 	*/
-	if *flagVerbose {
+	if *flagVeryVerbose {
 		log.EnableLevelsByNumber(10)
+	} else if *flagVerbose {
+		log.EnableLevelsByNumber(5)
 	} else {
 		log.EnableLevelsByNumber(4)
 	}
@@ -136,42 +138,27 @@ func doAction(
 	//LOAD CONFIG
 	configuration.Load("nomad.toml", *flagDefinitionsDirectory, EmbeddedDefinitions)
 
-	//Scan installed APPS
-	log.Traceln("Searching for current installed askedApps in", configuration.AppPath)
-	availableAppStates := state.ScanCurrentApps(configuration.AppPath)
-	log.Debugln("Found", len(availableAppStates.States), "installed apps")
+	//Load APPS states
+	askedStates := state.LoadAskedAppsInitialStates(flag.Args()[1:]...)
 
-	//Filter askedApps
-	askedApps := flag.Args()[1:]
-	if len(askedApps) == 0 || askedApps[0] == "all" {
-		log.Debugln("Working on all installed apps")
-		for app := range availableAppStates.States {
-			askedApps = append(askedApps, app)
-		}
-	}
-	log.Debugln("Selected apps:", askedApps)
-	state.AppendInstallableApps(askedApps, availableAppStates)
-
-	//Load Versioning info
-	forcedVersion, err := validateForcedVersionIfNeeded(*flagVersion)
-	if err != nil {
-		log.Errorln("Bad forced version format:", *flagVersion, "|", err)
-		return EXIT_BAD_FORCED_VERSION
-	}
-	state.DetermineActionToBePerformed(
-		*availableAppStates,
-		forcedVersion,
+	err := state.DeterminePossibleActions(
+		askedStates,
+		*flagVersion,
 		*flagLatestVersion,
 		configuration.Settings.GithubApiKey)
 
+	if err != nil {
+		log.Errorln("Bad forced version", *flagVersion, "|", err)
+		return EXIT_BAD_FORCED_VERSION
+	}
+
 	switch action {
 	case "status":
-		if len(askedApps) == 0 {
-			log.Println("No app yet installed")
+		if len(askedStates) == 0 {
+			log.Infoln("No app yet alreadyInstalled")
 		} else {
-			for _, app := range askedApps {
-				appState, _ := availableAppStates.States[app]
-				log.Print(helper.BuildPrefix(app), appState.ActionMessage)
+			for app, appState := range askedStates {
+				log.Info(helper.BuildPrefix(app), appState.StatusMessage())
 			}
 		}
 	case "list":
@@ -180,26 +167,22 @@ func doAction(
 			result = append(result, app)
 		}
 		log.Infoln("Available apps:", strings.Join(result, ","))
-	case "install", "update":
+	case "install", "update", "upgrade":
 		//Do the job
-		for _, app := range askedApps {
+		for app, appState := range askedStates {
 			log.Debugln("Processing", app)
-			appState, appIsValid := availableAppStates.States[app]
-			if appIsValid {
-				exitCode := HandleRun(
-					installer.InstallOrUpdate(
-						*appState,
-						*flagForceExtract,
-						*flagSkipDownload,
-						*flagEnvVarForAppsLocation,
-						*flagArchivesSubDir,
-						*flagConfirm,
-					))
-				if exitCode > 0 && !(*flagOptimist) {
-					return exitCode
-				}
-			} else {
-				log.Warnln("discarding unrecognized app", app)
+
+			exitCode := HandleRun(
+				installer.InstallOrUpdate(
+					*appState,
+					*flagForceExtract,
+					*flagSkipDownload,
+					*flagEnvVarForAppsLocation,
+					*flagArchivesSubDir,
+					*flagConfirm,
+				))
+			if exitCode != EXIT_OK && !(*flagOptimist) {
+				return exitCode
 			}
 		}
 		return 0
@@ -229,18 +212,4 @@ func HandleRun(err error, errorMessage string, exitCode int) int {
 	}
 
 	return exitCode
-}
-
-func validateForcedVersionIfNeeded(forceVersion string) (*version.Version, error) {
-	if forceVersion != "" {
-		versionOverwriteVersion, err := version.FromString(forceVersion)
-		if err != nil {
-			log.Errorln("Bad forced version format: ", forceVersion, "|", err)
-			return nil, err
-		} else {
-			return versionOverwriteVersion, nil
-		}
-
-	}
-	return nil, nil
 }

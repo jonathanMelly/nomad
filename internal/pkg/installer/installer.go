@@ -8,12 +8,13 @@ import (
 	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
+	"github.com/jonathanMelly/nomad/internal/pkg/state"
 	"github.com/jonathanMelly/nomad/pkg/bytesize"
-	"github.com/jonathanMelly/nomad/pkg/version"
 	junction "github.com/nyaosorg/go-windows-junction"
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 )
 
@@ -27,21 +28,17 @@ const (
 
 	EXIT_INSTALL_UPDATE_ERROR = 53
 
-	EXIT_MOVE_OBJECTS_ERROR   = 54
-	EXIT_CREATE_FILES_ERROR   = 55
-	EXIT_CREATE_FOLDERS_ERROR = 56
-	EXIT_RENAME_ERROR         = 57
-	EXIT_SYMLINK_ERROR        = 58
-	EXIT_SHORTCUT_ERROR       = 59
+	EXIT_SYMLINK_ERROR  = 58
+	EXIT_SHORTCUT_ERROR = 59
 )
 
 // InstallOrUpdate will execute commands from an app-definitions file
-func InstallOrUpdate(state data.AppState, forceExtract bool, skipDownload bool,
+func InstallOrUpdate(appState state.AppState, forceExtract bool, skipDownload bool,
 	customAppLocationForShortcut string, archivesSubDir string, askForConfirmation bool) (error error, errorMessage string, exitCode int) {
 
 	//Aliases
-	definition := state.Definition
-	targetVersion := state.TargetVersion
+	definition := appState.Definition
+	targetVersion := appState.TargetVersion
 	appName := definition.ApplicationName
 
 	//Prepend app name to logs
@@ -56,7 +53,7 @@ func InstallOrUpdate(state data.AppState, forceExtract bool, skipDownload bool,
 	}
 
 	//Show status
-	log.Println(state.ActionMessage)
+	log.Infoln(appState.StatusMessage())
 
 	//User confirm
 	abort := !userWantsToContinue(askForConfirmation)
@@ -74,39 +71,32 @@ func InstallOrUpdate(state data.AppState, forceExtract bool, skipDownload bool,
 	}
 
 	var appNameWithVersion = fmt.Sprint(appName, "-", targetVersion)
-	var appPath = path.Join(configuration.AppPath, appNameWithVersion)
+	var targetAppPath = path.Join(configuration.AppPath, appNameWithVersion)
+	var archivesDir = path.Join(configuration.AppPath, archivesSubDir)
 
 	//Extract
-	workingFolder, err := getAndExtractAppIfNeeded(state, forceExtract, skipDownload, appPath, archivesSubDir, appNameWithVersion, definition)
+	err := getAndExtractAppIfNeeded(appState, forceExtract, skipDownload, targetAppPath, archivesDir, appNameWithVersion, &definition)
 	if err != nil {
 		return err, "Cannot install/update app", EXIT_INSTALL_UPDATE_ERROR
 	}
 
 	//Custom file actions
-	err, message, code := handleCustomFileOperations(definition, workingFolder, targetVersion)
-	if err != nil {
-		return err, message, code
-	}
+	handleRestoreAndCustomFiles(appState, targetAppPath)
 
-	//Sets FINAL name
-	if workingFolder != appPath {
-		log.Debugln("Renaming ", workingFolder, " to ", appPath)
-		if err := os.Rename(workingFolder, appPath); err != nil {
-			return err, "Error renaming folder", EXIT_RENAME_ERROR
-		}
-	}
-
-	symlink, err := handleSymlink(definition, appPath, appNameWithVersion, state)
+	//Symlink
+	symlink, err := handleSymlink(appState, targetAppPath)
 	if err != nil {
 		return err, "Symlink issue", EXIT_SYMLINK_ERROR
 	}
 
+	//Shortcut
 	err = handleShortcut(definition, symlink, customAppLocationForShortcut, configuration.DefaultShortcutsDir)
 	if err != nil {
 		return err, fmt.Sprint("Cannot create shortcut dir ", configuration.DefaultShortcutsDir), EXIT_SHORTCUT_ERROR
 	}
 
-	return nil, "", 0
+	log.Infoln(appState.SuccessMessage())
+	return nil, "", EXIT_OK
 
 }
 
@@ -150,110 +140,125 @@ func handleShortcut(definition data.AppDefinition, symlink string, customAppLoca
 	return nil
 }
 
-func handleCustomFileOperations(definition data.AppDefinition, workingFolder string, targetVersion *version.Version) (error, string, int) {
+func handleRestoreAndCustomFiles(appState state.AppState, workingFolder string) {
+
+	definition := appState.Definition
+	if appState.Status != state.KEEP {
+		log.Traceln("Restoring files folders:", definition.RestoreFiles)
+		if err := restoreFiles(definition.RestoreFiles, appState.CurrentVersionFolder, workingFolder); err != nil {
+			log.Errorln("Error restoring files:", definition.RestoreFiles, "|", err)
+		}
+	} else {
+		log.Debugln("No version change, skipping restore")
+	}
+
 	log.Traceln("Creating folders:", definition.CreateFolders)
 	if err := createFolders(definition.CreateFolders, workingFolder); err != nil {
-		return err, "Error creating folders", EXIT_CREATE_FOLDERS_ERROR
+		log.Errorln("Error creating folders:", definition.CreateFolders, "|", err)
 	}
 
 	log.Traceln("Creating files:", definition.CreateFiles)
-	if err := writeScripts(definition.CreateFiles, workingFolder, targetVersion.String()); err != nil {
-		return err, "Error writing files", EXIT_CREATE_FILES_ERROR
+	if err := writeScripts(definition.CreateFiles, workingFolder, appState.TargetVersion.String()); err != nil {
+		log.Errorln("Error creating files:", definition.CreateFiles, "|", err)
 	}
 
 	log.Traceln("Moving objects:", definition.MoveObjects)
 	if err := moveObjects(definition.MoveObjects, workingFolder); err != nil {
-		return err, "Error moving objects ", EXIT_MOVE_OBJECTS_ERROR
+		log.Errorln("Error moving objects:", definition.MoveObjects, "|", err)
 	}
-	return nil, "", EXIT_OK
 }
 
-func handleSymlink(definition data.AppDefinition, folderName string, appNameWithVersion string, state data.AppState) (string, error) {
+func handleSymlink(appState state.AppState, newTarget string) (string, error) {
 	//create/update symlink app-1.0.2 => app ...
-	log.Traceln("Handling symlink and restores")
+	symlink := filepath.Join(configuration.AppPath, appState.Definition.Symlink)
+	log.Debugln("Handling symlink", symlink, "(already discovered:", appState.SymlinkFound, ")")
 
-	//Can only restore from previous symlink (targetVersion)....
-	symlink := path.Join(configuration.AppPath, definition.Symlink)
-	if helper.FileOrDirExists(symlink) {
-		absoluteFolderName, _ := filepath.Abs(folderName)
-		evalSymlink, _ := filepath.EvalSymlinks(symlink)
-		absoluteSymlink, _ := filepath.Abs(evalSymlink)
-		if absoluteFolderName != absoluteSymlink {
-			if len(definition.RestoreFiles) > 0 {
-				//(handles customs/configurations that are overwritten upon upgrade)
-				log.Debugln("Restoring ", definition.RestoreFiles)
-				if err := restoreFiles(definition.RestoreFiles, symlink, folderName); err != nil {
-					return symlink, errors.New(fmt.Sprint("Error restoring files |", err))
-				}
-			}
-		} else {
-			log.Debugln("No version change, skipping restore")
-		}
-
+	if appState.SymlinkFound /*&& helper.FileOrDirExists(symlink) should not be possible...*/ {
 		//Remove old
 		err := os.Remove(symlink)
 		if err != nil {
-			return symlink, errors.New(fmt.Sprint("Cannot remove symlink ", symlink, " for update to latest version... | ", err))
+			log.Errorln("Cannot remove symlink ", symlink, "|", err)
+		} else {
+			log.Debugln("Removed symlink", symlink)
 		}
-	} else if state.CurrentVersion == state.TargetVersion { /*no symlink and same version,... */
-		log.Infoln("missing symlink will be regenerated")
+	} else if reflect.DeepEqual(appState.CurrentVersion, appState.TargetVersion) { /*no symlink and same version,... */
+		log.Infoln("missing symlink", symlink, "will be regenerated")
 	}
 
 	//SYMLINK
-	target := filepath.Join(configuration.AppPath, appNameWithVersion, "")
-	log.Debugln("Linking " + symlink + " -> " + target)
-	err := junction.Create(target, symlink)
+	log.Debugln("Linking " + symlink + " -> " + newTarget)
+	err := junction.Create(newTarget, symlink)
 	if err != nil {
-		return symlink, errors.New(fmt.Sprint("Error symlink/junction to ", target, " | ", err))
+		return symlink, errors.New(fmt.Sprint("Error symlink/junction to ", newTarget, " | ", err))
 	}
 
 	return symlink, nil
 }
 
 func getAndExtractAppIfNeeded(
-	state data.AppState,
+	appState state.AppState,
 	forceExtract bool,
 	skipDownload bool,
-	appPath string,
-	archivesSubDir string,
+	targetAppPath string,
+	archivesDir string,
 	appNameWithVersion string,
-	definition data.AppDefinition,
-) (string, error) {
+	definition *data.AppDefinition,
+) error {
 
-	needsExtraction, err := checkAndClearAppPathIfNeeded(appPath, forceExtract)
+	needsExtraction, err := checkAndEraseCurrentVersionIfNeeded(targetAppPath, forceExtract)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	if needsExtraction {
-		log.Debugln("Starting extraction")
-		// Set the archivePath name based off the folder
-		// Note: The original file download name will be changed
-		archivePath, err := prepareArchiveDestination(archivesSubDir, appNameWithVersion, definition)
-		if err != nil {
-			return appPath, err
+		log.Debugln("Preparing for extraction")
+
+		//Create archives base directory if needed (only first time)
+		if !helper.FileOrDirExists(archivesDir) {
+			log.Traceln("Creating archive dir", archivesDir)
+			err := os.MkdirAll(archivesDir, os.ModePerm)
+			if err != nil {
+				return errors.New(fmt.Sprint("Cannot create ", archivesDir))
+			}
 		}
 
-		// Download Archive
-		err = downloadArchive(state, skipDownload, archivePath, definition)
+		//Get downloadURL (from human if needed)
+		downloadURL := appState.TargetVersion.FillVersionsPlaceholders(definition.DownloadUrl)
+		if strings.HasPrefix(downloadURL, "manual") {
+			scanner := bufio.NewScanner(os.Stdin)
+			log.Print("Please paste custom URL for download (", downloadURL, ") :")
+			scanner.Scan()
+			answer := scanner.Text()
+			log.Debugln("Custom URL", answer)
+
+			downloadURL = appState.TargetVersion.FillVersionsPlaceholders(answer)
+			definition.DownloadUrl = downloadURL
+			definition.ComputeDownloadExtension()
+		}
+
+		// Set the archivePath name based off the folder
+		// Note: The original file download name will be changed
+		var archivePath = path.Join(archivesDir, fmt.Sprint(appNameWithVersion, definition.DownloadExtension))
+		log.Infoln("Downloading ", downloadURL, " >> ", archivePath)
+		err = downloadArchive(downloadURL, skipDownload, archivePath)
 		if err != nil {
-			return appPath, errors.New(fmt.Sprint("Cannot download archive | ", err))
+			return errors.New(fmt.Sprint("Cannot download archive | ", err))
 		}
 
 		//Extract
-		log.Debugln("Extracting files from archive", archivePath)
-		err = extractArchive(archivePath, definition, appPath)
+		log.Debugln("Extracting files from ", archivePath)
+		err = extractArchive(archivePath, *definition, targetAppPath)
 		if err != nil {
-			return appPath, errors.New(fmt.Sprint("Error extracting from archive | ", err))
+			return errors.New(fmt.Sprint("Error extracting from archive | ", err))
 		}
 	} else {
 		log.Infoln("directory already exists, use -force to regenerate from archive")
 	}
-	return appPath, nil
+	return nil
 }
 
-func checkAndClearAppPathIfNeeded(appPath string, forceExtract bool) (bool, error) {
-	log.Debugln("Preparing ", appPath)
+func checkAndEraseCurrentVersionIfNeeded(appPath string, forceExtract bool) (bool, error) {
+	log.Debugln("Checking ", appPath)
 	extract := true
 	// If the folder exists
 	if helper.FileOrDirExists(appPath) {
@@ -276,37 +281,10 @@ func checkAndClearAppPathIfNeeded(appPath string, forceExtract bool) (bool, erro
 	return extract, nil
 }
 
-func prepareArchiveDestination(archivesSubDir string, appNameWithVersion string, definition data.AppDefinition) (string, error) {
-	var archivePath = path.Join(configuration.AppPath, archivesSubDir, fmt.Sprint(appNameWithVersion, definition.DownloadExtension))
-	if !helper.FileOrDirExists(archivePath) {
-		archiveDir := filepath.Dir(archivePath)
-		if !helper.FileOrDirExists(archiveDir) {
-			log.Traceln("Creating archive dir", archiveDir)
-			err := os.MkdirAll(archiveDir, os.ModePerm)
-			if err != nil {
-				return archivePath, errors.New(fmt.Sprint("Cannot create ", archiveDir))
-			}
-		}
-	}
-	return archivePath, nil
-}
-
-func downloadArchive(state data.AppState, skipDownload bool, archivePath string, definition data.AppDefinition) error {
+func downloadArchive(downloadURL string, skipDownload bool, archivePath string) error {
 	if skipDownload && helper.FileOrDirExists(archivePath) {
 		log.Debugln("Skipping download as ", archivePath, " archive already exists (use -force to override)")
 	} else {
-		downloadURL := state.TargetVersion.FillVersionsPlaceholders(definition.DownloadUrl)
-		log.Debugln("Downloading from ", downloadURL, " >> ", archivePath)
-
-		if strings.HasPrefix(downloadURL, "manual") {
-			scanner := bufio.NewScanner(os.Stdin)
-			log.Print("Please paste custom URL for download (", downloadURL, ") :")
-			scanner.Scan()
-			answer := scanner.Text()
-			log.Debugln("Custom URL", answer)
-			downloadURL = answer
-		}
-
 		size, err := helper.DownloadFile(downloadURL, archivePath)
 		if err != nil {
 			return errors.New(fmt.Sprint("Error download file ", err))
@@ -319,7 +297,7 @@ func downloadArchive(state data.AppState, skipDownload bool, archivePath string,
 func userWantsToContinue(askForConfirmation bool) bool {
 	if askForConfirmation {
 		scanner := bufio.NewScanner(os.Stdin)
-		log.Print("Proceed [Y,n] ?")
+		log.Print("Proceed [Y,n] (Enter=Yes) ? ")
 		scanner.Scan()
 		answer := scanner.Text()
 		log.Debugln("Answer", answer)

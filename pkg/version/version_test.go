@@ -5,6 +5,7 @@ import (
 	"github.com/gookit/goutil/testutil/assert"
 	"log"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -14,14 +15,14 @@ func assertOne(t *testing.T, input string, prependRegex string, expected string)
 	assert.Equal(t, expected, version.String())
 }
 
-func assertVersionComparison(t *testing.T, v2 string, v1 string) {
-	newer, err := FromString(v2)
+func assertVersionComparison(t *testing.T, new string, old string) {
+	newer, err := FromString(new)
 	if err != nil {
-		assert.Fail(t, "Cannot extract version from "+v2, err)
+		assert.Fail(t, "Cannot extract version from "+new, err)
 	}
-	older, err := FromString(v1)
+	older, err := FromString(old)
 	if err != nil {
-		assert.Fail(t, "Cannot extract version from "+v1, err)
+		assert.Fail(t, "Cannot extract version from "+old, err)
 	}
 
 	assert.True(t, newer.IsNewerThan(*older), fmt.Sprint("Version ", newer, " should be reported as newer than ", older))
@@ -76,7 +77,7 @@ func TestVersionComparisons(t *testing.T) {
 func TestVersionDetailsPatterns(t *testing.T) {
 
 	t.Run("MajorMinorPatchWithNoise", func(t *testing.T) {
-		assertOne(t, "hello1.2.3bob", "", "1.2.3")
+		assertOne(t, "hello1.2.3bob", "", "1.2.3bob")
 	})
 
 	t.Run("Major.Minor.Patch.Patch2", func(t *testing.T) {
@@ -109,6 +110,10 @@ func TestVersionDetailsPatterns(t *testing.T) {
 		assertOne(t, `"tag_name": "v2.39.2.windows.1"`, `"tag_name": "v`, "2.39.2.windows.1")
 	})
 
+	t.Run("openssh beta version", func(t *testing.T) {
+		assertOne(t, `"tag_name": "v9.2.0.0p1-Beta"`, `"tag_name": "(?:[vV])`, "9.2.0.0p1-Beta")
+	})
+
 }
 
 func TestVersionPatterns(t *testing.T) {
@@ -125,4 +130,15 @@ func TestSafeGetIntPart(t *testing.T) {
 	assert.Equal(t, 1, version.safeGetIntProperty("Major"))
 	assert.Equal(t, 2, version.safeGetIntProperty("Minor"))
 	assert.Equal(t, 3, version.safeGetIntProperty("Patch"))
+}
+
+func TestEquality(t *testing.T) {
+	assets := []string{"0.78", "0.79"}
+	for _, version := range assets {
+		t.Run(version, func(t *testing.T) {
+			v1, _ := FromString(version)
+			v2, _ := FromString(version)
+			assert.True(t, reflect.DeepEqual(v1, v2), v1, " not == to ", v2)
+		})
+	}
 }

@@ -3,28 +3,9 @@ package data
 import (
 	"errors"
 	"fmt"
-	"github.com/jonathanMelly/nomad/pkg/version"
 	"regexp"
 	"strings"
 )
-
-type AppStates struct {
-	States map[string]*AppState
-}
-
-func NewAppStates() *AppStates {
-	return &AppStates{
-		States: map[string]*AppState{},
-	}
-}
-
-type AppState struct {
-	Definition     AppDefinition
-	SymlinkFound   bool
-	CurrentVersion *version.Version
-	TargetVersion  *version.Version
-	ActionMessage  string
-}
 
 type Settings struct {
 	MyApps            []string                  `json:"myapps"`
@@ -72,30 +53,29 @@ type AppDefinition struct {
 
 func (definition *AppDefinition) ValidateAndSetDefaults() error {
 	var errs []string
+	//NAME
 	if definition.ApplicationName == "" {
 		errs = append(errs, "missing application name")
 	}
 	if strings.Contains(definition.ApplicationName, "-") {
 		errs = append(errs, "app name cannot contain - (dash), please replace with something else (ex. _)")
 	}
-	if definition.DownloadExtension == "" {
-		const defaultExt = ".zip"
-		if definition.DownloadUrl != "" {
-			lastPoint := strings.LastIndex(definition.DownloadUrl, ".")
-			if lastPoint >= 0 {
-				definition.DownloadExtension = definition.DownloadUrl[lastPoint:]
-			} else {
-				definition.DownloadExtension = defaultExt
-			}
-		} else {
-			definition.DownloadExtension = defaultExt
-		}
+
+	//SYMLINK
+	//Sets default symlink to app name
+	if definition.Symlink == "" {
+		definition.Symlink = definition.ApplicationName
 	}
 
+	//DOWNLOAD EXT
+	definition.ComputeDownloadExtension()
+
+	//VERSION
 	if definition.VersionCheck.Url == "" && definition.Version == "" {
 		errs = append(errs, "missing version info (either fixed or by url)")
 	}
 
+	//REGEX
 	if definition.ExtractRegExList == nil || len(definition.ExtractRegExList) == 0 {
 		definition.ExtractRegExList = []string{"(.*)"}
 	}
@@ -110,9 +90,29 @@ func (definition *AppDefinition) ValidateAndSetDefaults() error {
 		return errors.New(fmt.Sprint("data errors: ", strings.Join(errs, ",")))
 	} else {
 		definition.Validated = true
+		return nil
 	}
 
-	return nil
+}
+
+func (definition *AppDefinition) ComputeDownloadExtension() {
+	if definition.DownloadExtension == "" {
+		const defaultExt = ".zip"
+		if definition.DownloadUrl != "" {
+			if !strings.HasPrefix(definition.DownloadUrl, "manual") { //Let manual extension be determined later
+				lastPoint := strings.LastIndex(definition.DownloadUrl, ".")
+				if lastPoint >= 0 {
+					cutExtension, _, _ := strings.Cut(definition.DownloadUrl[lastPoint:], "?")
+					definition.DownloadExtension = cutExtension
+				} else {
+					definition.DownloadExtension = defaultExt
+				}
+			}
+
+		} else {
+			definition.DownloadExtension = defaultExt
+		}
+	}
 }
 
 type VersionCheck struct {
