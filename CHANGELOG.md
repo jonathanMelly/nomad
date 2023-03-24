@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.10.0](https://github.com/jonathanMelly/nomad/compare/v1.9.0...v1.10.0) (2023-03-24)
+
+
+### Features
+
+* **debug:** add some traces for latest version http request ([c5db2b0](https://github.com/jonathanMelly/nomad/commit/c5db2b01e081a539c534edadac1751ec2888e35a))
+* **latest:** reduce network traffic using github graphQL to get latest release tag ([c5db2b0](https://github.com/jonathanMelly/nomad/commit/c5db2b01e081a539c534edadac1751ec2888e35a))
+* **status:** inform on status computing ([c5db2b0](https://github.com/jonathanMelly/nomad/commit/c5db2b01e081a539c534edadac1751ec2888e35a))
+
+
+### Bug Fixes
+
+* **status:** show computing info message before computation ;-) (protect against compilation optimizations...) ([713e749](https://github.com/jonathanMelly/nomad/commit/713e74914fe13a52d2b8614d1a4fdb70642a460f))
+* **version:** correct comparison between older and newer version (11.81&lt;12.1 now) ([1cdcad1](https://github.com/jonathanMelly/nomad/commit/1cdcad19279737c59e8513b3164b3df8c4b55067))
+
 ## [1.9.0](https://github.com/jonathanMelly/nomad/compare/v1.8.3...v1.9.0) (2023-03-23)
 
 
