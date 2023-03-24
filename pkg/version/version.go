@@ -32,16 +32,32 @@ const VERSION_REGEX = `(?P<full>` +
 
 const VERSION_PLACEHOLDER = "{{VERSION}}"
 
+// IsNewerThan could probably be optimized...
 func (version Version) IsNewerThan(other Version) bool {
+	//int part
+	for _, numericField := range []string{"Major", "Minor", "Patch", "Patch2"} {
+		newer := version.safeGetIntProperty(numericField)
+		older := other.safeGetIntProperty(numericField)
+		log.Debugln(newer, older)
+		if newer < older {
+			return false
+		} else if newer > older {
+			return true
+		}
+	}
+	//string parts
+	var stringParts = [][]string{{version.Prerelease, other.Prerelease}, {version.Build, other.Build}}
+	for _, stringPart := range stringParts {
+		comparison := strings.Compare(stringPart[0], stringPart[1])
+		if comparison < 0 {
+			return false
+		} else if comparison > 0 {
+			return true
+		}
+	}
 
-	log.Traceln("Comparing ", version, " to ", other)
-
-	return version.Major != nil && int(*version.Major) > other.safeGetIntProperty("Major") ||
-		version.Minor != nil && int(*version.Minor) > other.safeGetIntProperty("Minor") ||
-		version.Patch != nil && int(*version.Patch) > other.safeGetIntProperty("Patch") ||
-		version.Patch2 != nil && int(*version.Patch2) > other.safeGetIntProperty("Patch2") ||
-		strings.Compare(version.Prerelease, other.Prerelease) == 1 ||
-		strings.Compare(version.Build, other.Build) == 1
+	//Equals
+	return false
 }
 
 func (version Version) safeGetIntProperty(propertyName string) int {
