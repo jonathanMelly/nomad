@@ -155,7 +155,7 @@ func analyzeEntry(rootPath string, appDirectory string, states AppStates, isSyml
 					if !identifiedApp.SymlinkFound && !identifiedApp.CurrentVersion.IsNewerThan(*guessedVersion) {
 						addOrUpdateState(fullPath, guessedApp, states, guessedVersion, isSymlink)
 					} else {
-						log.Debugln("Discarding existing app", guessedApp, "with version", guessedVersion, "as current version candidate (symlinked or newer with version", identifiedApp.CurrentVersion, "already found)")
+						log.Traceln("Discarding existing app", guessedApp, "with version", guessedVersion, "as current version candidate (symlinked or newer with version", identifiedApp.CurrentVersion, "already found)")
 					}
 				} else {
 					addOrUpdateState(fullPath, guessedApp, states, guessedVersion, isSymlink)
@@ -173,7 +173,7 @@ func addOrUpdateState(appPath string, guessedApp string, states AppStates, curre
 		updatedState := buildState(appPath, *knownAppDef, isSymlink, currentVersion)
 		states[guessedApp] = &updatedState
 	} else {
-		log.Warnln("Unknown app", guessedApp)
+		log.Traceln("Unknown app", guessedApp)
 	}
 }
 
@@ -217,9 +217,10 @@ func DeterminePossibleActions(
 		var latestVersionFromRemote *version.Version = nil
 		// If Version Check parameters are specified
 		if useLatestVersion && state.Definition.VersionCheck.Url != "" && state.Definition.VersionCheck.RegEx != "" {
-
+			url, body := state.Definition.VersionCheck.Parse()
 			// Extract the targetVersion from the webpage
-			latestVersionFromRemote, err = helper.ExtractFromRequest(state.Definition.VersionCheck.Url, state.Definition.VersionCheck.RegEx, apiKey)
+			latestVersionFromRemote, err =
+				helper.ExtractFromRequest(url, state.Definition.VersionCheck.RegEx, apiKey, body)
 			if err != nil {
 				log.Errorln("Error retrieving last version from remote", err)
 			}
@@ -242,12 +243,14 @@ func DeterminePossibleActions(
 				if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) && latestVersionFromRemote.IsNewerThan(*currentInstalledVersion) {
 					targetVersion = latestVersionFromRemote
 				} else if configVersion.IsNewerThan(*currentInstalledVersion) {
+					log.Debugln("Config ", configVersion, " is newer than currentInstalled", currentInstalledVersion)
 					targetVersion = configVersion
 				} else {
 					targetVersion = currentInstalledVersion
 				}
 			}
 		}
+		log.Debugln("target version", targetVersion)
 		state.TargetVersion = targetVersion
 		state.computeStatus()
 

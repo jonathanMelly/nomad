@@ -39,7 +39,7 @@ func Load(globalSettingsPath string, customDefinitionsDirectory string, embedded
 			log.Errorln("Cannot bind struct", err)
 		} else if log.GetLevel("debug") {
 			for k := range Settings.AppDefinitions {
-				log.Debugln("Added", k, "definition")
+				log.Debugln("Added", k, "custom definition from", globalSettingsPath)
 			}
 		}
 	}, globalSettingsPath)
@@ -57,7 +57,7 @@ func Load(globalSettingsPath string, customDefinitionsDirectory string, embedded
 }
 
 func LoadEmbeddedDefinitions(embeddedSrc embed.FS) {
-	loadAppDefinitions(AppDefinitionDirectoryName, embeddedSrc)
+	loadAppDefinitions("embedded", AppDefinitionDirectoryName, embeddedSrc)
 }
 
 func loadCustomAppDefinitions(customDefinitionsDirectory string) {
@@ -69,14 +69,14 @@ func loadCustomAppDefinitions(customDefinitionsDirectory string) {
 			log.Errorln("Cannot get current dir", err)
 			return
 		}
-		loadAppDefinitions(customDefinitionsDirectory, os.DirFS(wd))
+		loadAppDefinitions("custom", customDefinitionsDirectory, os.DirFS(wd))
 
 	} else {
 		log.Debugln("No custom app definition found in", customDefinitionsDirectory)
 	}
 }
 
-func loadAppDefinitions(directoryPath string, fs2 fs.FS) {
+func loadAppDefinitions(sourceIdentifier string, directoryPath string, fs2 fs.FS) {
 
 	files, err := fs.ReadDir(fs2, directoryPath)
 	if err != nil {
@@ -92,7 +92,7 @@ func loadAppDefinitions(directoryPath string, fs2 fs.FS) {
 			if strings.HasSuffix(f.Name(), ".json") {
 				jsonContent, err := fs.ReadFile(fs2, appDefinitionPath)
 				if err != nil {
-					log.Errorln("Cannot load custom json config", appDefinitionPath, "|", err)
+					log.Errorln("Cannot load json", sourceIdentifier, "config", appDefinitionPath, "|", err)
 					continue
 				}
 				if jsonMerge.String() == "" {
@@ -105,7 +105,7 @@ func loadAppDefinitions(directoryPath string, fs2 fs.FS) {
 			} else if strings.HasSuffix(f.Name(), ".toml") {
 				tomlContent, err := fs.ReadFile(fs2, appDefinitionPath)
 				if err != nil {
-					log.Errorln("Cannot load custom toml config", appDefinitionPath, "|", err)
+					log.Errorln("Cannot load toml", sourceIdentifier, "config", appDefinitionPath, "|", err)
 					continue
 				}
 				tomlMerge.Write(tomlContent)
@@ -117,17 +117,17 @@ func loadAppDefinitions(directoryPath string, fs2 fs.FS) {
 	//JSON
 	jsonMerge.WriteString(`]}`)
 	importFromConfigString(config.JSON, jsonMerge.String(), func(jsonConfig *config.Config) {
-		addJsonAppDefinitionsFromConfig(jsonConfig)
+		addJsonAppDefinitionsFromConfig(sourceIdentifier, jsonConfig)
 	})
 
 	//TOML
 	importFromConfigString(config.Toml, tomlMerge.String(), func(tomlConfig *config.Config) {
-		addTomlAppDefinitionsFromConfig(tomlConfig)
+		addTomlAppDefinitionsFromConfig(sourceIdentifier, tomlConfig)
 	})
 
 }
 
-func addTomlAppDefinitionsFromConfig(tomlConfig *config.Config) {
+func addTomlAppDefinitionsFromConfig(identifier string, tomlConfig *config.Config) {
 	tomlApps := data.Apps{}
 	err := tomlConfig.BindStruct("", &tomlApps)
 	if err != nil {
@@ -135,22 +135,22 @@ func addTomlAppDefinitionsFromConfig(tomlConfig *config.Config) {
 	}
 	//Cannot use copy as we don’t want to override (first config come, first served)
 	for app, definition := range tomlApps.Definitions {
-		fillDefinitions(app, definition)
+		fillDefinitions(identifier, app, definition)
 	}
 }
 
-func addJsonAppDefinitionsFromConfig(jsonConfig *config.Config) {
+func addJsonAppDefinitionsFromConfig(identifier string, jsonConfig *config.Config) {
 	jsonApps := data.JsonApps{}
 	err := jsonConfig.BindStruct("", &jsonApps)
 	if err != nil {
 		log.Errorln("Cannot bind JsonApps struct from config", "|", err)
 	}
 	for _, definition := range jsonApps.Definitions {
-		fillDefinitions(definition.ApplicationName, definition)
+		fillDefinitions(identifier, definition.ApplicationName, definition)
 	}
 }
 
-func fillDefinitions(app string, definition data.AppDefinition) {
+func fillDefinitions(identifier string, app string, definition data.AppDefinition) {
 	//Old config format
 	if strings.Contains(app, version.VERSION_PLACEHOLDER) {
 		app = app[0:strings.LastIndex(app, "-")]
@@ -160,7 +160,7 @@ func fillDefinitions(app string, definition data.AppDefinition) {
 
 	_, exist := Settings.AppDefinitions[app]
 	if !exist {
-		log.Traceln("Adding", app, "definition")
+		log.Traceln("Adding", app, "definition from", identifier)
 
 		//For TOML, appname is in key...
 		if definition.ApplicationName == "" {

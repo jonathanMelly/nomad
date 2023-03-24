@@ -4,8 +4,8 @@
 	"DownloadUrl": "https://github.com/Bioruebe/UniExtract2/releases/download/v{{VERSION}}/UniExtractRC3.zip",
 	"VersionCheck":
 	{
-		"Url":"https://api.github.com/repos/Bioruebe/UniExtract2/releases",
-		"RegEx":"\"tag_name\": \"v{{VERSION}}"
+		"Url":"github:Bioruebe/UniExtract2",
+		"RegEx":"\"tagName\":\"v{{VERSION}}"
 	},
 	"CreateFiles":
 	{

@@ -6,8 +6,8 @@
 	"DownloadUrl": "https://github.com/NoMoreFood/putty-cac/raw/{{VERSION}}/binaries/puttycac-64bit-{{VERSION}}.zip",
 	"VersionCheck":
 	{
-		"Url":"https://api.github.com/repos/NoMoreFood/putty-cac/releases/latest",
-		"RegEx":"\"tag_name\": \"{{VERSION}}"
+		"Url":"github:NoMoreFood/putty-cac",
+		"RegEx":"\"tagName\":\"{{VERSION}}\""
 	},
 	"CreateFiles":
 	{

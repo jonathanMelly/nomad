@@ -5,8 +5,8 @@
 	"DownloadUrl": "https://github.com/aardappel/treesheets/releases/download/{{VERSION}}/linux_treesheets_clang++-12.zip",
 	"VersionCheck":
 	{
-		"Url":"https://api.github.com/repos/aardappel/treesheets/releases/latest",
-		"RegEx":"\"tag_name\": \"{{VERSION}}"
+		"Url":"github:aardappel/treesheets",
+		"RegEx":"\"tagName\":\"{{VERSION}}"
 	},
 	"CreateFiles":
 	{

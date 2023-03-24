@@ -5,8 +5,8 @@
 	"DownloadUrl": "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v{{VERSION}}/npp.{{VERSION}}.portable.x64.zip",
 	"VersionCheck":
 	{
-		"Url":"https://github.com/notepad-plus-plus/notepad-plus-plus/releases/latest",
-		"RegEx":"<title>Release Notepad\\+\\+ release ({{VERSION}})"
+		"Url":"github:notepad-plus-plus/notepad-plus-plus",
+		"RegEx":"\"tagName\":\"v{{VERSION}}"
 	},
 	"CreateFiles":
 	{

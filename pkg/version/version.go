@@ -38,7 +38,6 @@ func (version Version) IsNewerThan(other Version) bool {
 	for _, numericField := range []string{"Major", "Minor", "Patch", "Patch2"} {
 		newer := version.safeGetIntProperty(numericField)
 		older := other.safeGetIntProperty(numericField)
-		log.Debugln(newer, older)
 		if newer < older {
 			return false
 		} else if newer > older {

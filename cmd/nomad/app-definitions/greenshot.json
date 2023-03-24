@@ -4,8 +4,8 @@
 	"DownloadUrl": "https://github.com/greenshot/greenshot/releases/download/v{{VERSION}}/ShareX-{{VERSION}}-portable.zip",
 	"VersionCheck":
 	{
-		"Url":"https://api.github.com/repos/ShareX/ShareX/releases/latest",
-		"RegEx":"\"tag_name\": \"v{{VERSION}}"
+		"Url":"github:ShareX/ShareX",
+		"RegEx":"\"tagName\":\"v{{VERSION}}"
 	},
 	"CreateFiles":
 	{

@@ -5,8 +5,8 @@
 	"DownloadUrl": "https://github.com/CommonLoon102/RegexTestBench/releases/download/v{{VERSION}}/RegexTestBench-win-x86.zip",
 	"VersionCheck":
 	{
-		"Url":"https://api.github.com/repos/CommonLoon102/RegexTestBench/releases/latest",
-		"RegEx":"\"tag_name\": \"v{{VERSION}}"
+		"Url":"githubCommonLoon102/RegexTestBench",
+		"RegEx":"\"tagName\":\"v{{VERSION}}"
 	},
 	"CreateFiles":
 	{

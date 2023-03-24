@@ -6,8 +6,8 @@
 	"DownloadUrl": "https://github.com/obsproject/obs-studio/releases/download/{{VERSION}}/OBS-Studio-{{V_MAJOR}}.{{V_MINOR}}-Full-x64.zip",
 	"VersionCheck":
 	{
-		"Url":"https://api.github.com/repos/obsproject/obs-studio/releases/latest",
-		"RegEx":"\"tag_name\": \"{{VERSION}}"
+		"Url":"github:obsproject/obs-studio",
+		"RegEx":"\"tagName\":\"{{VERSION}}"
 	},
 	"CreateFiles":
 	{

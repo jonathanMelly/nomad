@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gologme/log"
+	"github.com/jonathanMelly/nomad/pkg/bytesize"
 	"github.com/jonathanMelly/nomad/pkg/version"
 	"io"
 	"net/http"
@@ -12,8 +13,9 @@ import (
 )
 
 // ExtractFromRequest will return extracted text from a page at a URL
-func ExtractFromRequest(url string, regex string, apiKey string) (*version.Version, error) {
-	body, err := getRequestBody(url, apiKey)
+func ExtractFromRequest(url string, regex string, apiKey string, requestBody string) (*version.Version, error) {
+
+	body, err := getRequestBody(url, apiKey, requestBody)
 	if err != nil {
 		return nil, err
 	}
@@ -27,8 +29,16 @@ func ExtractFromRequest(url string, regex string, apiKey string) (*version.Versi
 }
 
 // getRequestBody returns the page HTML
-func getRequestBody(url string, apiKey string) (string, error) {
-	r, err := http.NewRequest("GET", url, nil)
+func getRequestBody(url string, apiKey string, requestBody string) (string, error) {
+
+	var method string
+	if requestBody != "" {
+		method = "POST"
+	} else {
+		method = "GET"
+	}
+
+	r, err := http.NewRequest(method, url, strings.NewReader(requestBody))
 	if err != nil {
 		return "", err
 	}
@@ -39,6 +49,7 @@ func getRequestBody(url string, apiKey string) (string, error) {
 	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
 	r.Header.Add("User-Agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`)
 
+	log.Traceln("sending http request to", url, "with payload", requestBody)
 	client, err := http.DefaultClient.Do(r)
 	if err != nil {
 		//avoid too much visibility even if secret is not encrypted in binary...
@@ -60,6 +71,7 @@ func getRequestBody(url string, apiKey string) (string, error) {
 		return "", err
 	}
 
+	log.Traceln("received", bytesize.ByteSize(len(body) /*do not trust client.ContentLength...*/))
 	return string(body), nil
 }
 

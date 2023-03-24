@@ -239,7 +239,7 @@ func getAndExtractAppIfNeeded(
 		// Set the archivePath name based off the folder
 		// Note: The original file download name will be changed
 		var archivePath = path.Join(archivesDir, fmt.Sprint(appNameWithVersion, definition.DownloadExtension))
-		log.Infoln("Downloading ", downloadURL, " >> ", archivePath)
+		log.Infoln("Downloading", downloadURL, "to", archivePath, "...")
 		err = downloadArchive(downloadURL, skipDownload, archivePath)
 		if err != nil {
 			return errors.New(fmt.Sprint("Cannot download archive | ", err))

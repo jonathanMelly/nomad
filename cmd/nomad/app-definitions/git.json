@@ -4,8 +4,8 @@
 	"DownloadUrl": "https://github.com/git-for-windows/git/releases/download/v{{VERSION}}.windows.1/MinGit-{{VERSION}}-busybox-64-bit.zip",
 	"VersionCheck":
 	{
-		"Url":"https://api.github.com/repos/git-for-windows/git/releases/latest",
-		"RegEx":"\"tag_name\": \"v{{VERSION}}"
+		"Url":"github:git-for-windows/git",
+		"RegEx":"\"tagName\":\"v{{VERSION}}"
 	},
 	"CreateFiles":
 	{

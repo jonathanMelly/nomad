@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
+const GITHUB_VERSION_URL_PREFIX = "github:"
+
 type Settings struct {
 	MyApps            []string                  `json:"myapps"`
 	GithubApiKey      string                    `json:"githubApiKey"`
@@ -119,6 +122,21 @@ type VersionCheck struct {
 	Url              string `json:"Url"`
 	RegEx            string `json:"RegEx"`
 	UseLatestVersion bool   `json:"UseLatestVersion"`
+}
+
+func (vc *VersionCheck) Parse() (url string, requestBody string) {
+	githubInfos, isGithub := strings.CutPrefix(vc.Url, GITHUB_VERSION_URL_PREFIX)
+	if !isGithub {
+		url = vc.Url
+	} else {
+		owner, repo, ok := strings.Cut(githubInfos, "/")
+		if ok {
+			url = GITHUB_GRAPHQL_URL
+			requestBody = fmt.Sprint(`{"query": "query{repository(owner:\"`, owner, `\", name:\"`, repo, `\") {latestRelease{tagName}}}"}`)
+		}
+	}
+
+	return
 }
 
 // CombineRegex will take a string array of regular expressions and compile them
