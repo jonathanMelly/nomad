@@ -130,6 +130,7 @@ func TestVersion_IsNewerThan(t *testing.T) {
 		{"", "12.1", "11.28", true},
 		{"", "12.1.99", "12.1.98", true},
 		{"", "12.1.98", "12.1.102", false},
+		{"", "12.1.98u2", "12.1.98", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
