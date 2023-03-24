@@ -26,6 +26,7 @@ Otherwise, go ahead :-)
 | push for 100% portability       | no    | yes   | Example: putty conf not saved with scoop standard bucket          |
 | uses github api (when possible) | no    | yes   | Consequence: Use less bandwidth but needs a PAT                   |
 | single go binary                | no    | yes   | Scoop is a list of ps scripts                                     |
+| multiplatform friendly          | no    | yes   | Use case may not be relevant but there is no technical limitation |
 
 # Status
 It is working (I’m using it at my work). Basic UI is the next big step.
@@ -44,17 +45,30 @@ nomad status filezilla
 nomad list
 ```
 
+ 4. To view app version
+
+```bash 
+nomad version
+```
+
+ 5. To update nomad (UPCOMING, not yet implemented)
+
+```bash 
+nomad self update
+```
+
 *Available apps are listed [here](cmd/nomad/app-definitions), and you can add yours by adding any valid json file 
-in a folder named app-definitions OR in a [config file](config/nomad.toml) that must be placed in the same folder as the executable)*
+in a folder named app-definitions OR in a [config file](config/nomad.toml) that must be placed in the same folder as the executable).
+Please have a look at [Configuration](#configuration) for more info*
 
 # Essential options
 
 | Flag                    | Description                                                         |
 |-------------------------|---------------------------------------------------------------------|
-| -configs &lt;folder&gt; | runs on all .json files in given folder                             |
 | -force                  | force reinstall (removes existing folder)                           |
 | -skip=false             | do not reuse already downloaded archive                             |
 | -latest=false           | do not check for latest version (if url provided in config)         |
+| -version=1.2.0          | install/upgrade/downgrade to custom version                         |
 | -verbose                | verbose output useful for debug                                     |
 
 ## Other options
@@ -63,18 +77,26 @@ Please run
 nomad --help
 ```
 
-# General config
-## Github
-To reduce network traffic, when possible, GitHub API is used to retrieve last release info.
-As GitHub API limit traffic to guest requests, a PAT (GitHub token) is very useful.
-If you have a PAT, please add it in your env (GITHUB_PAT) or put the following [file](config/nomad.toml) in 
-the same directory as the binary.
+# Configuration
 
-### Create a PAT
+## Zero Config by default
+The single binary is self sufficient (no need for any config)
+
+## Opened for config
+You may add a [nomad.toml](config/nomad.toml) in the same directory as the binary to configure any custom app definition and github token.
+
+### Custom app definition
+You can add any custom definition either in the nomad.toml config file or in a app-definitions directory in which you can put a json/toml definition
+following [this structure](internal/pkg/data/data.go) (AppDefinition) or imitating [real examples](cmd/nomad/app-definitions)
+
+### Github
+To reduce network traffic, when possible, GitHub API is used to retrieve lastest app versions info.
+As GitHub API limits traffic to guest requests, a PAT (GitHub token) is very useful, thus a generic token is included
+and if you have a PAT (or it seems fairly easy for you to get one), please add it in your env (GITHUB_PAT) or put the following [file](config/nomad.toml) in 
+the same directory as the binary to reduce pressure on the generic token.
+
+#### Create a PAT
 Please follow [this link](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to create a basic PAT.
-
-# App definition structure
-Please refer to [this file](internal/pkg/data/data.go) or to [real examples](cmd/nomad/app-definitions).
 
 # Next steps
 UI and lots of new apps
