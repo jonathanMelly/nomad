@@ -57,6 +57,7 @@ func LoadAskedAppsInitialStates(askedApps ...string) AppStates {
 	log.Debugln("Selected apps:", askedApps)
 
 	//Merge installed and not installed states for asked apps
+	log.Infoln("Computing status of", len(askedApps), "apps...")
 	askedAppsStates := NewAppStates()
 	for _, app := range askedApps {
 		_state, exist := alreadyInstalledStates[app]

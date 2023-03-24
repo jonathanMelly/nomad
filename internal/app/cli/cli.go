@@ -157,7 +157,6 @@ func doAction(
 		if len(askedStates) == 0 {
 			log.Infoln("No app yet alreadyInstalled")
 		} else {
-			log.Infoln("Computing status of", len(askedStates), "apps...")
 			for app, appState := range askedStates {
 				log.Info(helper.BuildPrefix(app), appState.StatusMessage())
 			}
