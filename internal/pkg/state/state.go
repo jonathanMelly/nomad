@@ -51,13 +51,15 @@ func LoadAskedAppsInitialStates(askedApps ...string) AppStates {
 	log.Debugln("Found", len(alreadyInstalledStates), "installed apps")
 
 	//Handle * asked apps
-	all := askedApps[0] == "all"
-	if len(askedApps) == 0 || all {
+	askedAppsCount := len(askedApps)
+	all := askedAppsCount > 0 && askedApps[0] == "all"
+	if askedAppsCount == 0 || all {
 		log.Debugln("Working on all alreadyInstalledStates apps")
 		for app := range alreadyInstalledStates {
 			askedApps = append(askedApps, app)
 		}
 		if all {
+			//remove "all" entry
 			askedApps = askedApps[1:]
 		}
 	}
