@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 const (
@@ -28,6 +29,8 @@ const (
 type Status int
 
 type AppStates map[string]*AppState
+
+var wg sync.WaitGroup
 
 func NewAppStates() AppStates {
 	return AppStates{}
@@ -48,10 +51,14 @@ func LoadAskedAppsInitialStates(askedApps ...string) AppStates {
 	log.Debugln("Found", len(alreadyInstalledStates), "installed apps")
 
 	//Handle * asked apps
-	if len(askedApps) == 0 || askedApps[0] == "all" {
+	all := askedApps[0] == "all"
+	if len(askedApps) == 0 || all {
 		log.Debugln("Working on all alreadyInstalledStates apps")
 		for app := range alreadyInstalledStates {
 			askedApps = append(askedApps, app)
+		}
+		if all {
+			askedApps = askedApps[1:]
 		}
 	}
 	log.Debugln("Selected apps:", askedApps)
@@ -201,64 +208,69 @@ func DeterminePossibleActions(
 	}
 
 	defer log.SetPrefix("")
-
+	wg.Add(len(apps))
 	for appName, state := range apps {
-		log.SetPrefix(fmt.Sprint("|", appName, "| "))
-
-		configVersion, err := version.FromString(state.Definition.Version)
-		if err != nil {
-			log.Errorln("Bad version format in config : ", state.Definition.Version, "|", err)
-		}
-		log.Debugln("Version from config: ", configVersion)
-
-		//Current version
-		currentInstalledVersion := state.CurrentVersion
-		log.Debugln("Version installed: ", currentInstalledVersion)
-
-		var latestVersionFromRemote *version.Version = nil
-		// If Version Check parameters are specified
-		if useLatestVersion && state.Definition.VersionCheck.Url != "" && state.Definition.VersionCheck.RegEx != "" {
-			url, body := state.Definition.VersionCheck.Parse()
-			// Extract the targetVersion from the webpage
-			latestVersionFromRemote, err =
-				helper.ExtractFromRequest(url, state.Definition.VersionCheck.RegEx, apiKey, body)
-			if err != nil {
-				log.Errorln("Error retrieving last version from remote", err)
-			}
-			log.Debugln("Version from remote: ", latestVersionFromRemote)
-
-		}
-
-		var targetVersion *version.Version
-		if forcedVersion != nil {
-			targetVersion = forcedVersion
-		} else {
-			//not yet installed
-			if currentInstalledVersion == nil {
-				if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) {
-					targetVersion = latestVersionFromRemote
-				} else {
-					targetVersion = configVersion
-				}
-			} else /*Already installed*/ {
-				if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) && latestVersionFromRemote.IsNewerThan(*currentInstalledVersion) {
-					targetVersion = latestVersionFromRemote
-				} else if configVersion.IsNewerThan(*currentInstalledVersion) {
-					log.Debugln("Config ", configVersion, " is newer than currentInstalled", currentInstalledVersion)
-					targetVersion = configVersion
-				} else {
-					targetVersion = currentInstalledVersion
-				}
-			}
-		}
-		log.Debugln("target version", targetVersion)
-		state.TargetVersion = targetVersion
-		state.computeStatus()
-
+		go computeState(appName, state, useLatestVersion, apiKey, forcedVersion)
 	}
+	wg.Wait()
 
 	return nil
 
+}
+
+func computeState(appName string, state *AppState, useLatestVersion bool, apiKey string, forcedVersion *version.Version) {
+	defer wg.Done()
+	log.SetPrefix(fmt.Sprint("|", appName, "| "))
+
+	configVersion, err := version.FromString(state.Definition.Version)
+	if err != nil {
+		log.Errorln("Bad version format in config : ", state.Definition.Version, "|", err)
+	}
+	log.Debugln("Version from config: ", configVersion)
+
+	//Current version
+	currentInstalledVersion := state.CurrentVersion
+	log.Debugln("Version installed: ", currentInstalledVersion)
+
+	var latestVersionFromRemote *version.Version = nil
+	// If Version Check parameters are specified
+	if useLatestVersion && state.Definition.VersionCheck.Url != "" && state.Definition.VersionCheck.RegEx != "" {
+		url, body := state.Definition.VersionCheck.Parse()
+		// Extract the targetVersion from the webpage
+		latestVersionFromRemote, err =
+			helper.ExtractFromRequest(url, state.Definition.VersionCheck.RegEx, apiKey, body)
+		if err != nil {
+			log.Errorln("Error retrieving last version from remote", err)
+		}
+		log.Debugln("Version from remote: ", latestVersionFromRemote)
+
+	}
+
+	var targetVersion *version.Version
+	if forcedVersion != nil {
+		targetVersion = forcedVersion
+	} else {
+		//not yet installed
+		if currentInstalledVersion == nil {
+			if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) {
+				targetVersion = latestVersionFromRemote
+			} else {
+				targetVersion = configVersion
+			}
+		} else /*Already installed*/ {
+			if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) && latestVersionFromRemote.IsNewerThan(*currentInstalledVersion) {
+				targetVersion = latestVersionFromRemote
+			} else if configVersion.IsNewerThan(*currentInstalledVersion) {
+				log.Debugln("Config ", configVersion, " is newer than currentInstalled", currentInstalledVersion)
+				targetVersion = configVersion
+			} else {
+				targetVersion = currentInstalledVersion
+			}
+		}
+	}
+	log.Debugln("target version", targetVersion)
+	state.TargetVersion = targetVersion
+	state.computeStatus()
 }
 
 func (state *AppState) StatusMessage() string {
