@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.11.0](https://github.com/jonathanMelly/nomad/compare/v1.10.0...v1.11.0) (2023-03-25)
+
+
+### Features
+
+* **speed:** make state computing concurrent (speed up task when many apps installed) ([d2e5cae](https://github.com/jonathanMelly/nomad/commit/d2e5caebaa7e41b490c4ccb02860b9155e1a2962))
+
+
+### Bug Fixes
+
+* **all:** do not count special keyword "all" as an app ([d2e5cae](https://github.com/jonathanMelly/nomad/commit/d2e5caebaa7e41b490c4ccb02860b9155e1a2962))
+
 ## [1.10.0](https://github.com/jonathanMelly/nomad/compare/v1.9.0...v1.10.0) (2023-03-24)
 
 
