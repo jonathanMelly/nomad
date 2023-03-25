@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/jonathanMelly/nomad/compare/v1.11.0...v1.11.1) (2023-03-25)
+
+
+### Bug Fixes
+
+* **status:** no error when status without param is given (aka all) ([ee0774e](https://github.com/jonathanMelly/nomad/commit/ee0774e42ec5afd78cf3b15692689e4acbe8568f))
+
 ## [1.11.0](https://github.com/jonathanMelly/nomad/compare/v1.10.0...v1.11.0) (2023-03-25)
 
 
