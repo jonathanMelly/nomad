@@ -18,6 +18,6 @@
 	},
 	"RestoreFiles":
 	[
-		"PUTTY.RND","putty.reg","wsl-ssh-pageant-amd64-gui.exe"
+		"PUTTY.RND","putty.reg","wsl2-ssh-pageant.exe"
 	]
 }
