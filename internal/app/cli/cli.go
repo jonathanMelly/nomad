@@ -9,6 +9,7 @@ import (
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
 	"github.com/jonathanMelly/nomad/internal/pkg/installer"
 	"github.com/jonathanMelly/nomad/internal/pkg/state"
+	"golang.org/x/exp/slices"
 	"math"
 	"os"
 	"path/filepath"
@@ -47,8 +48,8 @@ func printVersion() {
 const (
 	EXIT_OK = 0
 
-	EXIT_BAD_USAGE          = 4
-	EXIT_BAD_FORCED_VERSION = 41
+	EXIT_BAD_USAGE = 4
+	EXIT_ACTION    = 41
 
 	EXIT_UNKNOWN_ACTION = 67
 )
@@ -135,61 +136,62 @@ func doAction(
 	flagConfirm *bool,
 	flagOptimist *bool,
 ) int {
-	//LOAD CONFIG
+	//LOAD CONFIG/app definitions
 	configuration.Load("nomad.toml", *flagDefinitionsDirectory, EmbeddedDefinitions)
 
-	//Load APPS states
-	askedStates := state.LoadAskedAppsInitialStates(flag.Args()[1:]...)
-
-	err := state.DeterminePossibleActions(
-		askedStates,
-		*flagVersion,
-		*flagLatestVersion,
-		configuration.Settings.GithubApiKey)
-
-	if err != nil {
-		log.Errorln("Bad forced version", *flagVersion, "|", err)
-		return EXIT_BAD_FORCED_VERSION
-	}
-
-	switch action {
-	case "status":
-		if len(askedStates) == 0 {
-			log.Infoln("No app yet alreadyInstalled")
-		} else {
-			for app, appState := range askedStates {
-				log.Info(helper.BuildPrefix(app), appState.StatusMessage())
-			}
-		}
-	case "list":
+	//sanitize input
+	action = strings.ToLower(action)
+	if action == "list" {
 		var result []string
 		for app := range configuration.Settings.AppDefinitions {
 			result = append(result, app)
 		}
 		log.Infoln("Available apps:", strings.Join(result, ","))
-	case "install", "update", "upgrade":
-		//Do the job
-		for app, appState := range askedStates {
-			log.Debugln("Processing", app)
+	} else {
+		//Load APPS states and possible actions (upgrade...)
+		askedStates := state.LoadAskedAppsInitialStates(flag.Args()[1:]...)
+		err := state.DeterminePossibleActions(
+			askedStates,
+			*flagVersion,
+			*flagLatestVersion,
+			configuration.Settings.GithubApiKey)
 
-			exitCode := HandleRun(
-				installer.InstallOrUpdate(
-					*appState,
-					*flagForceExtract,
-					*flagSkipDownload,
-					*flagEnvVarForAppsLocation,
-					*flagArchivesSubDir,
-					*flagConfirm,
-				))
-			if exitCode != EXIT_OK && !(*flagOptimist) {
-				return exitCode
-			}
+		if err != nil {
+			log.Errorln("Cannot determine possible actions |", err)
+			return EXIT_ACTION
 		}
-		return 0
 
-	default:
-		log.Errorln("Unknown action", action)
-		return EXIT_UNKNOWN_ACTION
+		if action == "status" {
+			if len(askedStates) == 0 {
+				log.Infoln("No app yet alreadyInstalled")
+			} else {
+				for app, appState := range askedStates {
+					log.Info(helper.BuildPrefix(app), appState.StatusMessage())
+				}
+			}
+		} else if slices.Contains([]string{"install", "update", "upgrade"}, action) {
+			//Do the job
+			for app, appState := range askedStates {
+				log.Debugln("Processing", app)
+
+				exitCode := HandleRun(
+					installer.InstallOrUpdate(
+						*appState,
+						*flagForceExtract,
+						*flagSkipDownload,
+						*flagEnvVarForAppsLocation,
+						*flagArchivesSubDir,
+						*flagConfirm,
+					))
+				if exitCode != EXIT_OK && !(*flagOptimist) {
+					return exitCode
+				}
+			}
+
+		} else {
+			log.Errorln("Unknown action", action)
+			return EXIT_UNKNOWN_ACTION
+		}
 	}
 	return EXIT_OK
 }
