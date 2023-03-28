@@ -1,0 +1,14 @@
+{
+	"Version": "0.1.0",
+	"ApplicationName": "npiperelay",
+	"DownloadUrl": "https://github.com/jstarks/npiperelay/releases/download/v{{VERSION}}/npiperelay_windows_amd64.zip",
+	"VersionCheck":
+	{
+		"Url":"github:jstarks/npiperelay",
+		"RegEx":"\"tagName\":\"v{{VERSION}}"
+	},
+	"CreateFiles":
+	{
+		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
+	}
+}
