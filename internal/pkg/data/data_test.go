@@ -94,8 +94,8 @@ func TestAppDefinition_fillInfosFromRepository(t *testing.T) {
 		want   want
 	}{
 		{"github", fields{RepositoryUrl: "github:owner/repo", DownloadUrl: "test.zip"},
-			want{DownloadUrl: "https://github.com/owner/repo/releases/download/test.zip",
-				VersionCheck: VersionCheck{Url: "github:owner/repo", RegEx: `"tagName":".*{{VERSION}}.*"`}}},
+			want{DownloadUrl: "https://github.com/owner/repo/releases/download/{{TAG_NAME}}/test.zip",
+				VersionCheck: VersionCheck{Url: "github:owner/repo", RegEx: `"tagName":"[^\d]*{{VERSION}}"`}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
