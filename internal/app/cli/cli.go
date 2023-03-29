@@ -52,6 +52,7 @@ const (
 	EXIT_ACTION    = 41
 
 	EXIT_UNKNOWN_ACTION = 67
+	EXIT_NO_VALID_APP   = 68
 )
 
 func Main() int {
@@ -148,8 +149,19 @@ func doAction(
 		}
 		log.Infoln("Available apps:", strings.Join(result, ","))
 	} else {
+
+		//Shortcut
+		askedApps := flag.Args()[1:]
+		if len(askedApps) > 0 {
+			askedApps = state.FilterValidAskedApps(askedApps)
+			if len(askedApps) == 0 {
+				log.Warnln("No valid app name given")
+				return EXIT_NO_VALID_APP
+			}
+		}
+
 		//Load APPS states and possible actions (upgrade...)
-		askedStates := state.LoadAskedAppsInitialStates(flag.Args()[1:]...)
+		askedStates := state.LoadAskedAppsInitialStates(askedApps)
 		err := state.DeterminePossibleActions(
 			askedStates,
 			*flagVersion,
@@ -163,7 +175,7 @@ func doAction(
 
 		if action == "status" {
 			if len(askedStates) == 0 {
-				log.Infoln("No app yet alreadyInstalled")
+				log.Infoln("No app yet installed")
 			} else {
 				for app, appState := range askedStates {
 					log.Info(helper.BuildPrefix(app), appState.StatusMessage())

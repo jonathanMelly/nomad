@@ -33,7 +33,10 @@ const VERSION_REGEX = `(?P<full>` +
 const VERSION_PLACEHOLDER = "{{VERSION}}"
 
 // IsNewerThan could probably be optimized...
-func (version Version) IsNewerThan(other Version) bool {
+func (version Version) IsNewerThan(other *Version) bool {
+	if other == nil {
+		return true
+	}
 	//int part
 	for _, numericField := range []string{"Major", "Minor", "Patch", "Patch2"} {
 		newer := version.safeGetIntProperty(numericField)

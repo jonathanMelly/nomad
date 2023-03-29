@@ -39,19 +39,34 @@ nomad install filezilla
 nomad update filezilla
 nomad status filezilla
 ```
- 3. To list available apps
+ 1. To list available apps
 
 ```bash 
 nomad list
 ```
 
- 4. To view app version
+1. To check status of all installed apps
+
+```bash 
+nomad status
+```
+
+- To check status of one app (installed or not)
+    ```bash 
+    nomad status filezilla
+    ```
+- To check status of multiple apps (installed or not)
+  ```bash 
+  nomad status filezilla rclone putty
+  ```
+
+ 1. To view app version
 
 ```bash 
 nomad version
 ```
 
- 5. To update nomad (UPCOMING, not yet implemented)
+ 1. To update nomad (UPCOMING, not yet implemented)
 
 ```bash 
 nomad self update

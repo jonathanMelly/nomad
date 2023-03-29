@@ -1,7 +1,3 @@
-[apps.winmerge]
-Version="2.16.24"
-Shortcut="WinMergeU.exe"
-DownloadUrl="https://github.com/WinMerge/winmerge/releases/download/v{{VERSION}}/winmerge-{{VERSION}}-exe.zip"
-VersionCheck={Url="github:WinMerge/winmerge",RegEx="\"tagName\":\"v{{VERSION}}"}
-CreateFiles={"VERSION-{{VERSION}}.txt"="{{VERSION}}"}
-#Could export/import registry HKEY_CURRENT_USER\SOFTWARE\Thingamahoochie to save settings...
+RepositoryUrl="github:WinMerge/winmerge"
+DownloadUrl="winmerge-{{VERSION}}-exe.zip"
+

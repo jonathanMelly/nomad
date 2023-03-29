@@ -82,6 +82,10 @@ func TestVersionDetailsPatterns(t *testing.T) {
 		assertOne(t, `"tag_name": "v9.2.0.0p1-Beta"`, `"tag_name": "(?:[vV])`, "9.2.0.0p1-Beta")
 	})
 
+	t.Run("github graphql", func(t *testing.T) {
+		assertOne(t, `{"data":{"repository":{"latestRelease":{"tagName":"version bob 1.4.0"}}}}`, `"tagName":"[^\d]*`, "1.4.0")
+	})
+
 }
 
 func TestVersionPatterns(t *testing.T) {
@@ -137,10 +141,10 @@ func TestVersion_IsNewerThan(t *testing.T) {
 
 			v1, _ := FromString(tt.newer)
 			v2, _ := FromString(tt.older)
-			if got := v1.IsNewerThan(*v2); got != tt.want {
+			if got := v1.IsNewerThan(v2); got != tt.want {
 				t.Errorf("%vIsNewerThan(%v) = %v, want %v", v1, v2, got, tt.want)
 			}
-			if got := !v2.IsNewerThan(*v1); got != tt.want {
+			if got := !v2.IsNewerThan(v1); got != tt.want {
 				t.Errorf("NOT IsNewerThan() = %v, want %v", got, tt.want)
 			}
 		})

@@ -13,6 +13,7 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -89,6 +90,8 @@ func loadAppDefinitions(sourceIdentifier string, directoryPath string, fs2 fs.FS
 	for _, f := range files {
 		if !f.IsDir() {
 			appDefinitionPath := path.Join(directoryPath, f.Name())
+			appNameFromFilename := strings.TrimSuffix(f.Name(), filepath.Ext(f.Name()))
+			const APP_NAME_ATTRIBUTE = "ApplicationName"
 			if strings.HasSuffix(f.Name(), ".json") {
 				jsonContent, err := fs.ReadFile(fs2, appDefinitionPath)
 				if err != nil {
@@ -100,6 +103,13 @@ func loadAppDefinitions(sourceIdentifier string, directoryPath string, fs2 fs.FS
 				} else {
 					jsonMerge.WriteString(`,`)
 				}
+
+				jsonString := string(jsonContent)
+				if !strings.Contains(jsonString, APP_NAME_ATTRIBUTE) {
+					log.Traceln("Adding", APP_NAME_ATTRIBUTE, "from filename", appNameFromFilename)
+					jsonContent = []byte(strings.Replace(jsonString, "{",
+						fmt.Sprintf(`{\n\t"%s"":"%s,\n"`, APP_NAME_ATTRIBUTE, appNameFromFilename), 1))
+				}
 				jsonMerge.Write(jsonContent)
 
 			} else if strings.HasSuffix(f.Name(), ".toml") {
@@ -107,6 +117,11 @@ func loadAppDefinitions(sourceIdentifier string, directoryPath string, fs2 fs.FS
 				if err != nil {
 					log.Errorln("Cannot load toml", sourceIdentifier, "config", appDefinitionPath, "|", err)
 					continue
+				}
+
+				if !strings.HasPrefix(string(tomlContent), "[apps.") {
+					log.Traceln("Adding", APP_NAME_ATTRIBUTE, "from filename", appNameFromFilename)
+					tomlMerge.WriteString(fmt.Sprintf("[apps.%s]\n", appNameFromFilename))
 				}
 				tomlMerge.Write(tomlContent)
 				tomlMerge.WriteString(fmt.Sprintln())
@@ -151,7 +166,7 @@ func addJsonAppDefinitionsFromConfig(identifier string, jsonConfig *config.Confi
 }
 
 func fillDefinitions(identifier string, app string, definition data.AppDefinition) {
-	//Old config format
+	//Old config format, should be removed end of year 2023
 	if strings.Contains(app, version.VERSION_PLACEHOLDER) {
 		app = app[0:strings.LastIndex(app, "-")]
 		definition.ApplicationName = app
@@ -167,8 +182,7 @@ func fillDefinitions(identifier string, app string, definition data.AppDefinitio
 			definition.ApplicationName = app
 		}
 
-		err := definition.ValidateAndSetDefaults()
-		if err != nil {
+		if valid, err := definition.IsValid(); !valid {
 			log.Warnln("Invalid app definition", app, "|", err, "->discarding")
 		} else {
 			Settings.AppDefinitions[app] = &definition

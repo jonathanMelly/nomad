@@ -2,28 +2,12 @@ package data
 
 import (
 	"github.com/gookit/goutil/testutil/assert"
-	"regexp"
+	"reflect"
 	"testing"
 )
 
 func TestAppDefinition_ComputeDownloadExtension(t *testing.T) {
-	type fields struct {
-		ApplicationName   string
-		DownloadExtension string
-		Version           string
-		VersionCheck      VersionCheck
-		Symlink           string
-		Shortcut          string
-		ShortcutIcon      string
-		DownloadUrl       string
-		ExtractRegExList  []string
-		CreateFolders     []string
-		CreateFiles       map[string]string
-		MoveObjects       map[string]string
-		RestoreFiles      []string
-		Validated         bool
-		ExtractRegex      *regexp.Regexp
-	}
+	type fields AppDefinition
 	tests := []struct {
 		name   string
 		fields fields
@@ -31,6 +15,7 @@ func TestAppDefinition_ComputeDownloadExtension(t *testing.T) {
 	}{
 		{name: "custom", fields: fields{DownloadUrl: "test.zip?bob"}, result: ".zip"},
 		{name: "standard", fields: fields{DownloadUrl: "http://www.test.com/test.zip"}, result: ".zip"},
+		{name: "githubrepo", fields: fields{DownloadUrl: "test-{{VERSION}}.exe"}, result: ".exe"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -48,8 +33,6 @@ func TestAppDefinition_ComputeDownloadExtension(t *testing.T) {
 				CreateFiles:       tt.fields.CreateFiles,
 				MoveObjects:       tt.fields.MoveObjects,
 				RestoreFiles:      tt.fields.RestoreFiles,
-				Validated:         tt.fields.Validated,
-				ExtractRegex:      tt.fields.ExtractRegex,
 			}
 			definition.ComputeDownloadExtension()
 			assert.Equal(t, tt.result, definition.DownloadExtension)
@@ -87,13 +70,84 @@ func TestVersionCheck_Parse(t *testing.T) {
 				RegEx:            tt.fields.RegEx,
 				UseLatestVersion: tt.fields.UseLatestVersion,
 			}
-			gotUrl, gotRequestBody := vc.Parse()
+			gotUrl, gotRequestBody := vc.BuildRequest()
 			if gotUrl != tt.wantUrl {
-				t.Errorf("Parse() gotUrl = %v, want %v", gotUrl, tt.wantUrl)
+				t.Errorf("BuildRequest() gotUrl = %v, want %v", gotUrl, tt.wantUrl)
 			}
 			if gotRequestBody != tt.wantRequestBody {
-				t.Errorf("Parse() gotRequestBody = %v, want %v", gotRequestBody, tt.wantRequestBody)
+				t.Errorf("BuildRequest() gotRequestBody = %v, want %v", gotRequestBody, tt.wantRequestBody)
 			}
+		})
+	}
+}
+
+func TestAppDefinition_fillInfosFromRepository(t *testing.T) {
+	type want struct {
+		DownloadUrl  string
+		VersionCheck VersionCheck
+	}
+	type fields AppDefinition
+
+	tests := []struct {
+		name   string
+		fields fields
+		want   want
+	}{
+		{"github", fields{RepositoryUrl: "github:owner/repo", DownloadUrl: "test.zip"},
+			want{DownloadUrl: "https://github.com/owner/repo/releases/download/test.zip",
+				VersionCheck: VersionCheck{Url: "github:owner/repo", RegEx: `"tagName":".*{{VERSION}}.*"`}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			definition := &AppDefinition{
+				Version:           tt.fields.Version,
+				DownloadUrl:       tt.fields.DownloadUrl,
+				RepositoryUrl:     tt.fields.RepositoryUrl,
+				ApplicationName:   tt.fields.ApplicationName,
+				DownloadExtension: tt.fields.DownloadExtension,
+				VersionCheck:      tt.fields.VersionCheck,
+				Symlink:           tt.fields.Symlink,
+				Shortcut:          tt.fields.Shortcut,
+				ShortcutIcon:      tt.fields.ShortcutIcon,
+				ExtractRegExList:  tt.fields.ExtractRegExList,
+				CreateFolders:     tt.fields.CreateFolders,
+				CreateFiles:       tt.fields.CreateFiles,
+				MoveObjects:       tt.fields.MoveObjects,
+				RestoreFiles:      tt.fields.RestoreFiles,
+				validated:         tt.fields.validated,
+				extractRegex:      tt.fields.extractRegex,
+			}
+			definition.fillInfosFromRepository([]string{})
+			assert.Equal(t, tt.want.DownloadUrl, definition.DownloadUrl)
+			assert.True(t, reflect.DeepEqual(tt.want.VersionCheck, definition.VersionCheck))
+		})
+	}
+}
+
+func TestAppDefinition_FillTagPlaceholder(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		fields   *AppDefinition
+		input    string
+		expected string
+	}{
+		{"with auto tagname", &AppDefinition{ApplicationName: "bob", RepositoryUrl: GITHUB_PREFIX + ":owner/repo", DownloadUrl: "bob.zip"},
+			`{"data":{"repository":{"latestRelease":{"tagName":"v1.4.0"}}}}`, "https://github.com/owner/repo/releases/download/v1.4.0/bob.zip"},
+		{"without auto tagname", &AppDefinition{ApplicationName: "bob", RepositoryUrl: GITHUB_PREFIX + ":owner/repo", DownloadUrl: "custom/bob.zip"},
+			`{"data":{"repository":{"latestRelease":{"tagName":"v1.4.0"}}}}`, "https://github.com/owner/repo/releases/download/custom/bob.zip"},
+		{"manual", &AppDefinition{ApplicationName: "bob", RepositoryUrl: GITHUB_PREFIX + ":owner/repo", DownloadUrl: "manual x"},
+			`{"data":{"repository":{"latestRelease":{"tagName":"v1.4.0"}}}}`, "manual x"},
+		{"custom", &AppDefinition{ApplicationName: "bob", RepositoryUrl: GITHUB_PREFIX + ":owner/repo", DownloadUrl: "http://custom.com"},
+			`{"data":{"repository":{"latestRelease":{"tagName":"v1.4.0"}}}}`, "http://custom.com"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			definition := tt.fields
+			err := definition.validateAndSetDefaults()
+			assert.NoError(t, err)
+			definition.FillTagPlaceholder(tt.input)
+			assert.Equal(t, tt.expected, tt.fields.DownloadUrl)
 		})
 	}
 }

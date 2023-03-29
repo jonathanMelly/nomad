@@ -15,10 +15,19 @@ import (
 	"strings"
 )
 
-func extractArchive(archivePath string, definition data.AppDefinition, appTargetPath string) error {
+func extractArchive(archivePath string, definition data.AppDefinition, appTargetDirectory string) error {
 
 	var archiveFileSystem fs.FS
 	switch definition.DownloadExtension {
+	case ".exe":
+		//Simple copyFile/paste for exe files
+		originalAssetName := filepath.Base(definition.DownloadUrl)
+		if err := copyFile(archivePath, filepath.Join(appTargetDirectory, originalAssetName)); err != nil {
+			return err
+		} else {
+			//Not an archive, bypass archive handling
+			return nil
+		}
 	case ".zip":
 		log.Debugln("ZIP archive")
 		zipReader, err := zip.OpenReader(archivePath)
@@ -42,12 +51,50 @@ func extractArchive(archivePath string, definition data.AppDefinition, appTarget
 	}
 
 	log.Debugln("Deepest root in archive:", archiveDeepestRootFolder)
-	return copyFromFS(archiveFileSystem, archiveDeepestRootFolder, appTargetPath, definition.ExtractRegex)
+	return copyFromFS(archiveFileSystem, archiveDeepestRootFolder, appTargetDirectory, definition.GetExtractRegex())
 
+}
+
+func copyFile(sourcePath string, destinationPath string) error {
+	source, err := os.Open(sourcePath)
+	if err != nil {
+		return err
+	}
+	defer func(source *os.File) {
+		err := source.Close()
+		if err != nil {
+			log.Errorln("Cannot close", sourcePath, "reader")
+		}
+	}(source)
+	//Creates file directory
+	if !helper.FileOrDirExists(destinationPath) {
+		err = os.MkdirAll(filepath.Dir(destinationPath), os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	target, err := os.Create(destinationPath)
+	if err != nil {
+		return err
+	}
+	defer func(target *os.File) {
+		err := target.Close()
+		if err != nil {
+			log.Errorln("Cannot close", target.Name())
+		}
+	}(target)
+
+	_, err = io.Copy(target, source)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // copyFromFS will copyFromFS certain files from a fs to a target based on a regular expression
 func copyFromFS(sourceFileSystem fs.FS, root string, targetDirectory string, allowRegExp *regexp.Regexp) error {
+
+	log.Infoln("Extracting files from archive")
 
 	// Create folder to copyFromFS files
 	if !helper.FileOrDirExists(targetDirectory) {

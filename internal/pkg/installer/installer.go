@@ -45,11 +45,8 @@ func InstallOrUpdate(appState state.AppState, forceExtract bool, skipDownload bo
 	log.SetPrefix(helper.BuildPrefix(appName))
 
 	//Enforce validation
-	if !definition.Validated {
-		err := definition.ValidateAndSetDefaults()
-		if err != nil {
-			return err, "invalid definition", EXIT_INVALID_DEFINITION
-		}
+	if valid, err := definition.IsValid(); !valid {
+		return err, "invalid definition", EXIT_INVALID_DEFINITION
 	}
 
 	//Show status
@@ -75,8 +72,7 @@ func InstallOrUpdate(appState state.AppState, forceExtract bool, skipDownload bo
 	var archivesDir = path.Join(configuration.AppPath, archivesSubDir)
 
 	//Extract
-	err := getAndExtractAppIfNeeded(appState, forceExtract, skipDownload, targetAppPath, archivesDir, appNameWithVersion, &definition)
-	if err != nil {
+	if err := getAndExtractAppIfNeeded(appState, forceExtract, skipDownload, targetAppPath, archivesDir, appNameWithVersion, definition); err != nil {
 		return err, "Cannot install/update app", EXIT_INSTALL_UPDATE_ERROR
 	}
 
@@ -90,8 +86,7 @@ func InstallOrUpdate(appState state.AppState, forceExtract bool, skipDownload bo
 	}
 
 	//Shortcut
-	err = handleShortcut(definition, symlink, customAppLocationForShortcut, configuration.DefaultShortcutsDir)
-	if err != nil {
+	if err = handleShortcut(*definition, symlink, customAppLocationForShortcut, configuration.DefaultShortcutsDir); err != nil {
 		return err, fmt.Sprint("Cannot create shortcut dir ", configuration.DefaultShortcutsDir), EXIT_SHORTCUT_ERROR
 	}
 

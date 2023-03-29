@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gologme/log"
+	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/pkg/bytesize"
 	"github.com/jonathanMelly/nomad/pkg/version"
 	"io"
@@ -12,15 +13,18 @@ import (
 	"strings"
 )
 
-// ExtractFromRequest will return extracted text from a page at a URL
-func ExtractFromRequest(url string, regex string, apiKey string, requestBody string) (*version.Version, error) {
+// GetVersion will return extracted text from a page at a URL
+func GetVersion(url string, definition *data.AppDefinition, apiKey string, requestBody string) (*version.Version, error) {
 
-	body, err := getRequestBody(url, apiKey, requestBody)
+	responseBody, err := sendRequest(url, apiKey, requestBody)
 	if err != nil {
 		return nil, err
 	}
 
-	foundVersion, err := version.FromStringCustom(body, regex)
+	//extract tag
+	definition.FillTagPlaceholder(responseBody)
+
+	foundVersion, err := version.FromStringCustom(responseBody, definition.VersionCheck.RegEx)
 	if err != nil {
 		return nil, fmt.Errorf("Could not find version on page:"+url+" | %w", err)
 	}
@@ -28,8 +32,8 @@ func ExtractFromRequest(url string, regex string, apiKey string, requestBody str
 	return foundVersion, nil
 }
 
-// getRequestBody returns the page HTML
-func getRequestBody(url string, apiKey string, requestBody string) (string, error) {
+// sendRequest returns the request response body
+func sendRequest(url string, apiKey string, requestBody string) (string, error) {
 
 	var method string
 	if requestBody != "" {

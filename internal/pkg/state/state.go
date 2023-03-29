@@ -3,6 +3,7 @@ package state
 import (
 	"fmt"
 	"github.com/gologme/log"
+	"github.com/gookit/goutil/maputil"
 	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
@@ -37,7 +38,7 @@ func NewAppStates() AppStates {
 }
 
 type AppState struct {
-	Definition           data.AppDefinition
+	Definition           *data.AppDefinition
 	SymlinkFound         bool
 	CurrentVersion       *version.Version
 	TargetVersion        *version.Version
@@ -45,22 +46,30 @@ type AppState struct {
 	Status               Status
 }
 
-func LoadAskedAppsInitialStates(askedApps ...string) AppStates {
+func FilterValidAskedApps(askedApps []string) (filtered []string) {
+	//Check app validity
+	for _, askedApp := range askedApps {
+		if maputil.HasKey(configuration.Settings.AppDefinitions, askedApp) {
+			filtered = append(filtered, askedApp)
+		} else {
+			log.Warnln("unknown app", askedApp)
+		}
+	}
+	return
+}
+
+func LoadAskedAppsInitialStates(askedApps []string) AppStates {
+
 	//Scan installed APPS
 	alreadyInstalledStates := ScanCurrentApps(configuration.AppPath)
 	log.Debugln("Found", len(alreadyInstalledStates), "installed apps")
 
 	//Handle * asked apps
 	askedAppsCount := len(askedApps)
-	all := askedAppsCount > 0 && askedApps[0] == "all"
-	if askedAppsCount == 0 || all {
-		log.Debugln("Working on all alreadyInstalledStates apps")
+	if askedAppsCount == 0 {
+		log.Debugln("Working on all installed apps")
 		for app := range alreadyInstalledStates {
 			askedApps = append(askedApps, app)
-		}
-		if all {
-			//remove "all" entry
-			askedApps = askedApps[1:]
 		}
 	}
 	log.Debugln("Selected apps:", askedApps)
@@ -147,8 +156,14 @@ func ScanCurrentApps(baseDirectory string) AppStates {
 func analyzeEntry(rootPath string, appDirectory string, states AppStates, isSymlink bool) {
 	fullPath := filepath.Join(rootPath, appDirectory)
 	log.Traceln("Analyzing", fullPath, "(from symlink:", isSymlink, ")")
-	guessedApp, guessedVersionString, dashFound := strings.Cut(appDirectory, "-")
-	if dashFound {
+
+	const VersionSeparator = "-"
+	lastSeparatorPosition := strings.LastIndex(appDirectory, VersionSeparator)
+	if lastSeparatorPosition >= 0 {
+		guessedApp := appDirectory[:lastSeparatorPosition]
+		guessedVersionString := appDirectory[lastSeparatorPosition+1:]
+		log.Traceln("Guessed app", guessedApp, "with version", guessedVersionString)
+
 		guessedVersion, err := version.FromString(guessedVersionString)
 		if err != nil {
 			log.Errorln("Cannot get version of", guessedApp, "->skipping")
@@ -162,7 +177,7 @@ func analyzeEntry(rootPath string, appDirectory string, states AppStates, isSyml
 
 				//Is it a better candidate for current active version ? (remember, symlink is MASTER)
 				if alreadyFound {
-					if !identifiedApp.SymlinkFound && !identifiedApp.CurrentVersion.IsNewerThan(*guessedVersion) {
+					if !identifiedApp.SymlinkFound && !identifiedApp.CurrentVersion.IsNewerThan(guessedVersion) {
 						addOrUpdateState(fullPath, guessedApp, states, guessedVersion, isSymlink)
 					} else {
 						log.Traceln("Discarding existing app", guessedApp, "with version", guessedVersion, "as current version candidate (symlinked or newer with version", identifiedApp.CurrentVersion, "already found)")
@@ -173,7 +188,7 @@ func analyzeEntry(rootPath string, appDirectory string, states AppStates, isSyml
 			}
 		}
 	} else {
-		log.Traceln("No dash found in", fullPath, ", discarding entry")
+		log.Traceln("No", VersionSeparator, "found in", fullPath, ", discarding entry")
 	}
 }
 
@@ -189,7 +204,7 @@ func addOrUpdateState(appPath string, guessedApp string, states AppStates, curre
 
 func buildState(appPath string, knownAppDef data.AppDefinition, isSymlink bool, currentVersion *version.Version) AppState {
 	return AppState{
-		Definition:           knownAppDef,
+		Definition:           &knownAppDef,
 		SymlinkFound:         isSymlink,
 		CurrentVersion:       currentVersion,
 		CurrentVersionFolder: appPath,
@@ -224,10 +239,15 @@ func computeState(appName string, state *AppState, useLatestVersion bool, apiKey
 	defer wg.Done()
 	log.SetPrefix(fmt.Sprint("|", appName, "| "))
 
-	configVersion, err := version.FromString(state.Definition.Version)
-	if err != nil {
-		log.Errorln("Bad version format in config : ", state.Definition.Version, "|", err)
+	var configVersion *version.Version = nil
+	if state.Definition.Version != "" {
+		var err error
+		configVersion, err = version.FromString(state.Definition.Version)
+		if err != nil {
+			log.Errorln("Bad version format in config : ", state.Definition.Version, "|", err)
+		}
 	}
+
 	log.Debugln("Version from config: ", configVersion)
 
 	//Current version
@@ -237,16 +257,17 @@ func computeState(appName string, state *AppState, useLatestVersion bool, apiKey
 	var latestVersionFromRemote *version.Version = nil
 	// If Version Check parameters are specified
 	if useLatestVersion && state.Definition.VersionCheck.Url != "" && state.Definition.VersionCheck.RegEx != "" {
-		url, body := state.Definition.VersionCheck.Parse()
+		url, requestBody := state.Definition.VersionCheck.BuildRequest()
+
 		// Extract the targetVersion from the webpage
+		var err error
 		latestVersionFromRemote, err =
-			helper.ExtractFromRequest(url, state.Definition.VersionCheck.RegEx, apiKey, body)
+			helper.GetVersion(url, state.Definition, apiKey, requestBody)
 		if err != nil {
 			log.Errorln("Error retrieving last version from remote", err)
 		}
-		log.Debugln("Version from remote: ", latestVersionFromRemote)
-
 	}
+	log.Debugln("Version from remote: ", latestVersionFromRemote)
 
 	var targetVersion *version.Version
 	if forcedVersion != nil {
@@ -254,15 +275,15 @@ func computeState(appName string, state *AppState, useLatestVersion bool, apiKey
 	} else {
 		//not yet installed
 		if currentInstalledVersion == nil {
-			if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) {
+			if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(configVersion) {
 				targetVersion = latestVersionFromRemote
 			} else {
 				targetVersion = configVersion
 			}
 		} else /*Already installed*/ {
-			if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(*configVersion) && latestVersionFromRemote.IsNewerThan(*currentInstalledVersion) {
+			if latestVersionFromRemote != nil && latestVersionFromRemote.IsNewerThan(configVersion) && latestVersionFromRemote.IsNewerThan(currentInstalledVersion) {
 				targetVersion = latestVersionFromRemote
-			} else if configVersion.IsNewerThan(*currentInstalledVersion) {
+			} else if configVersion != nil && configVersion.IsNewerThan(currentInstalledVersion) {
 				log.Debugln("Config ", configVersion, " is newer than currentInstalled", currentInstalledVersion)
 				targetVersion = configVersion
 			} else {
@@ -315,9 +336,9 @@ func (state *AppState) computeStatus() {
 	if state.CurrentVersion == nil {
 		state.Status = INSTALL
 	} else {
-		if state.TargetVersion.IsNewerThan(*state.CurrentVersion) {
+		if state.TargetVersion.IsNewerThan(state.CurrentVersion) {
 			state.Status = UPGRADE
-		} else if state.CurrentVersion.IsNewerThan(*state.TargetVersion) {
+		} else if state.CurrentVersion.IsNewerThan(state.TargetVersion) {
 			state.Status = DOWNGRADE
 		} else {
 			state.Status = KEEP
