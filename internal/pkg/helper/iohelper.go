@@ -26,6 +26,28 @@ func IsDirectory(path string) bool {
 	return fileInfo.IsDir()
 }
 
+func GetSymlinkTarget(path string) string {
+	if IsSymlink(path) {
+		target, err := os.Readlink(path)
+		if err != nil {
+			log.Errorln("cannot readlink", path)
+		}
+		return target
+	}
+	return ""
+}
+
+func SymlinkPointsToUnknownTarget(path string) bool {
+	if IsSymlink(path) {
+		target := GetSymlinkTarget(path)
+		if target == "" {
+			return false
+		}
+		return !FileOrDirExists(target)
+	}
+	return false
+}
+
 func IsSymlink(path string) bool {
 	fileInfo, err := os.Lstat(path)
 	if err != nil {

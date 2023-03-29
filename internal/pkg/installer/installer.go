@@ -168,23 +168,28 @@ func handleSymlink(appState state.AppState, newTarget string) (string, error) {
 	symlink := filepath.Join(configuration.AppPath, appState.Definition.Symlink)
 	log.Debugln("Handling symlink", symlink, "(already discovered:", appState.SymlinkFound, ")")
 
-	if appState.SymlinkFound /*&& helper.FileOrDirExists(symlink) should not be possible...*/ {
-		//Remove old
-		err := os.Remove(symlink)
-		if err != nil {
-			log.Errorln("Cannot remove symlink ", symlink, "|", err)
-		} else {
-			log.Debugln("Removed symlink", symlink)
+	absoluteTarget, _ := filepath.Abs(newTarget)
+	if absoluteTarget != helper.GetSymlinkTarget(symlink) {
+		if appState.SymlinkFound || helper.SymlinkPointsToUnknownTarget(symlink) {
+			//Remove old
+			err := os.Remove(symlink)
+			if err != nil {
+				log.Errorln("Cannot remove symlink ", symlink, "|", err)
+			} else {
+				log.Debugln("Removed symlink", symlink)
+			}
+		} else if reflect.DeepEqual(appState.CurrentVersion, appState.TargetVersion) { /*no symlink and same version,... */
+			log.Infoln("missing symlink", symlink, "will be regenerated")
 		}
-	} else if reflect.DeepEqual(appState.CurrentVersion, appState.TargetVersion) { /*no symlink and same version,... */
-		log.Infoln("missing symlink", symlink, "will be regenerated")
-	}
 
-	//SYMLINK
-	log.Debugln("Linking " + symlink + " -> " + newTarget)
-	err := junction.Create(newTarget, symlink)
-	if err != nil {
-		return symlink, errors.New(fmt.Sprint("Error symlink/junction to ", newTarget, " | ", err))
+		//SYMLINK
+		log.Debugln("Linking " + symlink + " -> " + newTarget)
+		err := junction.Create(newTarget, symlink)
+		if err != nil {
+			return symlink, errors.New(fmt.Sprint("Error symlink/junction to ", newTarget, " | ", err))
+		}
+	} else {
+		log.Debugln("symlink", symlink, "already pointing to", newTarget)
 	}
 
 	return symlink, nil
