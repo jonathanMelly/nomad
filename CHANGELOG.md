@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.12.0](https://github.com/jonathanMelly/nomad/compare/v1.11.1...v1.12.0) (2023-03-31)
+
+
+### Features
+
+* **app:** add nodejs ([a2d635f](https://github.com/jonathanMelly/nomad/commit/a2d635f50948478edaa18d046ccd5365d1056caa))
+* **app:** added wsl2-ssh-pageant ([d747a63](https://github.com/jonathanMelly/nomad/commit/d747a63995e55256d1ceb0f3ccc997e3b1fff8cf))
+* **apps:** add npiperelay ([405c20e](https://github.com/jonathanMelly/nomad/commit/405c20e708415da2fc0693ac131c65e03a02e025))
+* **exe:** handles direct exe files (no archive) ([d747a63](https://github.com/jonathanMelly/nomad/commit/d747a63995e55256d1ceb0f3ccc997e3b1fff8cf))
+* **github apps:** simplify config (only 2 lines for an app!!!) ([d747a63](https://github.com/jonathanMelly/nomad/commit/d747a63995e55256d1ceb0f3ccc997e3b1fff8cf))
+* **log:** better messages when archive already exists/app directory already exists ([187f8c8](https://github.com/jonathanMelly/nomad/commit/187f8c8bb49e834db3f7dd75e1a7786733fe8713))
+* **messages:** tell if download in progress/extraction in progress ([d747a63](https://github.com/jonathanMelly/nomad/commit/d747a63995e55256d1ceb0f3ccc997e3b1fff8cf))
+* **putty:** add working ssl2 pageant bridge utility to restore ([3cb172f](https://github.com/jonathanMelly/nomad/commit/3cb172fe20bf0ca9e4e30842e07d4b088eca1283))
+
+
+### Bug Fixes
+
+* **list:** do not compute possible actions for app listing ([fd1ca5b](https://github.com/jonathanMelly/nomad/commit/fd1ca5b35463b8ae463845bc768587af91033e19))
+* **status:** do not compute status when no valid apps ([d747a63](https://github.com/jonathanMelly/nomad/commit/d747a63995e55256d1ceb0f3ccc997e3b1fff8cf))
+* **symlink:** do not report notexisting error when checking if link is valid ([9eaa4e4](https://github.com/jonathanMelly/nomad/commit/9eaa4e46224703f3e2c5e39514eba66e414ad1d5))
+* **symlink:** handle bad pointing symlink ([0469295](https://github.com/jonathanMelly/nomad/commit/0469295729648ea0ec93f98d7e546a8ce54dbecc))
+
 ## [1.11.1](https://github.com/jonathanMelly/nomad/compare/v1.11.0...v1.11.1) (2023-03-25)
 
 
