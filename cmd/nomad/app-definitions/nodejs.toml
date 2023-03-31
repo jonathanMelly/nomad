@@ -1,0 +1,2 @@
+RepositoryUrl="github:nodejs/node"
+DownloadUrl="https://nodejs.org/dist/{{TAG_NAME}}/node-{{TAG_NAME}}-win-x64.zip"
