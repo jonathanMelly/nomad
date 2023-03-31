@@ -49,10 +49,15 @@ func SymlinkPointsToUnknownTarget(path string) bool {
 }
 
 func IsSymlink(path string) bool {
+
 	fileInfo, err := os.Lstat(path)
 	if err != nil {
-		log.Errorln("Cannot lstat", path, "|", err)
-		return false
+		if errors.Is(err, fs.ErrNotExist) {
+			return false
+		} else {
+			log.Errorln("Cannot lstat", path, "|", err)
+			return false
+		}
 	}
 	isSymlink := fs.ModeSymlink&fileInfo.Mode() == fs.ModeSymlink
 
