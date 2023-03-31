@@ -239,7 +239,7 @@ func getAndExtractAppIfNeeded(
 		// Set the archivePath name based off the folder
 		// Note: The original file download name will be changed
 		var archivePath = path.Join(archivesDir, fmt.Sprint(appNameWithVersion, definition.DownloadExtension))
-		log.Infoln("Downloading", downloadURL, "to", archivePath, "...")
+
 		err = downloadArchive(downloadURL, skipDownload, archivePath)
 		if err != nil {
 			return errors.New(fmt.Sprint("Cannot download archive | ", err))
@@ -252,7 +252,7 @@ func getAndExtractAppIfNeeded(
 			return errors.New(fmt.Sprint("Error extracting from archive | ", err))
 		}
 	} else {
-		log.Infoln("directory already exists, use -force to regenerate from archive")
+		log.Infoln("directory", targetAppPath, "already exists (use -force to regenerate from archive)")
 	}
 	return nil
 }
@@ -283,8 +283,9 @@ func checkAndEraseCurrentVersionIfNeeded(appPath string, forceExtract bool) (boo
 
 func downloadArchive(downloadURL string, skipDownload bool, archivePath string) error {
 	if skipDownload && helper.FileOrDirExists(archivePath) {
-		log.Debugln("Skipping download as ", archivePath, " archive already exists (use -force to override)")
+		log.Infoln("Using already downloaded", archivePath, "(use -force to override)")
 	} else {
+		log.Infoln("Downloading", downloadURL, "to", archivePath, "...")
 		size, err := helper.DownloadFile(downloadURL, archivePath)
 		if err != nil {
 			return errors.New(fmt.Sprint("Error download file ", err))
