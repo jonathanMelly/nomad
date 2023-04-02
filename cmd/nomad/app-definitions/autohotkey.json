@@ -1,9 +1,5 @@
 {
 	"Version": "1.1",
 	"ApplicationName": "autohotkey",
-	"DownloadUrl": "https://www.autohotkey.com/download/ahk.zip",
-	"CreateFiles":
-	{
-		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
-	}
+	"DownloadUrl": "https://www.autohotkey.com/download/ahk.zip"
 }

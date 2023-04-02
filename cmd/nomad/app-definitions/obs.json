@@ -1,5 +1,5 @@
 {
-	"Version": "29.0",
+	"Version": "29.0.0",
 	"ApplicationName": "obs",
 	"Shortcut": "obs.bat",
 	"ShortcutIcon": "bin/64bit/obs64.exe,0",

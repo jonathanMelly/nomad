@@ -86,6 +86,13 @@ func LoadAskedAppsInitialStates(askedApps []string) AppStates {
 		}
 	}
 
+	//Special nomad (always get version from binary)
+	nomadState, found := askedAppsStates["nomad"]
+	if found {
+		log.Traceln("Getting nomad version from binary")
+		nomadState.CurrentVersion = configuration.Version
+	}
+
 	return askedAppsStates
 
 }

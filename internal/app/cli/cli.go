@@ -9,6 +9,7 @@ import (
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
 	"github.com/jonathanMelly/nomad/internal/pkg/installer"
 	"github.com/jonathanMelly/nomad/internal/pkg/state"
+	versionLib "github.com/jonathanMelly/nomad/pkg/version"
 	"golang.org/x/exp/slices"
 	"math"
 	"os"
@@ -16,9 +17,16 @@ import (
 	"strings"
 )
 
-var Version = "unreleased"
+var versionString string
+var versionAdditionalInfos string
 
-var EmbeddedDefinitions embed.FS
+func setupBaseConfigAndSettings(githubPat string, versionString string, archivesSubdir string) {
+	version, _ := versionLib.FromString(versionString)
+
+	configuration.Version = version
+	configuration.Settings.GithubApiKey = githubPat
+	configuration.Settings.ArchivesDirectory = archivesSubdir
+}
 
 var exeName = filepath.Base(os.Args[0])
 
@@ -28,17 +36,18 @@ func customUsage() {
 	fmt.Printf("Main usage: %s install|update|status [OPTIONS] [...appName]\n\nOPTIONS:\n", exeName)
 	flag.PrintDefaults()
 	fmt.Println("\nExamples:")
-	fmt.Println("\t", exeName, "install rclone")
-	fmt.Println("\t", exeName, "status")
+	fmt.Println("\t", exeName, "i[nstall] rclone")
+	fmt.Println("\t", exeName, "u[pgrade] rclone")
+	fmt.Println("\t", exeName, "st[atus]")
 	fmt.Println("\t", exeName, "-confirm=false install filezilla")
-	fmt.Println("\t", exeName, "-verbose update git obs")
-	fmt.Println("\t", exeName, "version")
+	fmt.Println("\t", exeName, "-verbose u[pdate] git obs")
+	fmt.Println("\t", exeName, "v[ersion]")
 	fmt.Println("\nList available apps for install:")
-	fmt.Println("\t", exeName, "list")
+	fmt.Println("\t", exeName, "l[ist]")
 }
 
 func printVersion() {
-	_, err := fmt.Println(exeName, Version)
+	_, err := fmt.Println(exeName, versionString, versionAdditionalInfos)
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -55,9 +64,11 @@ const (
 	EXIT_NO_VALID_APP   = 68
 )
 
-func Main() int {
-
+func Main(_embeddedDefs embed.FS, _githubPat string, _version string, _versionExtras string) int {
+	versionString = _version //must be done for customUsage
+	versionAdditionalInfos = _versionExtras
 	flag.Usage = customUsage
+
 	// Overwrite version
 	flagVersion := flag.String("version", "", "Overwrites the version in the app-definitions helper")
 	flagDefinitionsDirectory := flag.String("definitions", "app-definitions", "Specify directory for custom app definitions files (relative to current dir and not outside...)")
@@ -70,6 +81,7 @@ func Main() int {
 	flagArchivesSubDir := flag.String("archives", "archives", "Set archives sub dir")
 	flagVerbose := flag.Bool("verbose", false, "Verbose mode (mainly for debug)")
 	flagVeryVerbose := flag.Bool("vverbose", false, "Very verbose mode (debug)")
+	flagRefresh := flag.Bool("refresh", false, "Try to redo files operations, symlinks and shortcuts even with no version bump")
 
 	flag.Parse()
 
@@ -88,7 +100,6 @@ func Main() int {
 	} else {
 		log.EnableLevelsByNumber(4)
 	}
-	configuration.Settings.ArchivesDirectory = *flagArchivesSubDir
 
 	//Prefix is used to show app name...
 	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
@@ -98,12 +109,17 @@ func Main() int {
 		flag.Usage()
 		os.Exit(EXIT_BAD_USAGE)
 	} else {
-		action := flag.Arg(0)
+		setupBaseConfigAndSettings(_githubPat, _version, *flagArchivesSubDir)
+		action := strings.ToLower(flag.Arg(0))
 
-		if action == "version" {
+		//VERSION
+		if strings.HasPrefix(action, "v") {
 			printVersion()
 			key := configuration.Settings.GithubApiKey
 			log.Debug("Using token ", key[0:int(math.Min(float64(len(key)), 15))], "...\n")
+			return EXIT_OK
+		} else if strings.HasPrefix(action, "h") /*help*/ {
+			customUsage()
 			return EXIT_OK
 		} else {
 			return doAction(
@@ -116,7 +132,9 @@ func Main() int {
 				flagEnvVarForAppsLocation,
 				flagArchivesSubDir,
 				flagConfirm,
-				flagOptimist)
+				flagOptimist,
+				flagRefresh,
+				_embeddedDefs)
 
 		}
 	}
@@ -125,8 +143,7 @@ func Main() int {
 
 }
 
-func doAction(
-	flagDefinitionsDirectory *string,
+func doAction(flagDefinitionsDirectory *string,
 	flagVersion *string,
 	flagLatestVersion *bool,
 	action string,
@@ -136,13 +153,16 @@ func doAction(
 	flagArchivesSubDir *string,
 	flagConfirm *bool,
 	flagOptimist *bool,
-) int {
+	flagRefresh *bool,
+	embeddedDefinitions embed.FS) int {
 	//LOAD CONFIG/app definitions
-	configuration.Load("nomad.toml", *flagDefinitionsDirectory, EmbeddedDefinitions)
+	configuration.Load("nomad.toml", *flagDefinitionsDirectory, embeddedDefinitions)
 
 	//sanitize input
 	action = strings.ToLower(action)
-	if action == "list" {
+
+	//LIST available APPS
+	if strings.HasPrefix(action, "l") {
 		var result []string
 		for app := range configuration.Settings.AppDefinitions {
 			result = append(result, app)
@@ -151,7 +171,17 @@ func doAction(
 	} else {
 
 		//Shortcut
-		askedApps := flag.Args()[1:]
+		var askedApps []string
+
+		//SELF UPGRADE
+		//Alias to update nomad
+		if strings.HasPrefix(action, "se") {
+			askedApps = []string{"nomad"}
+			action = "upgrade"
+		} else {
+			askedApps = flag.Args()[1:]
+		}
+
 		if len(askedApps) > 0 {
 			askedApps = state.FilterValidAskedApps(askedApps)
 			if len(askedApps) == 0 {
@@ -173,7 +203,8 @@ func doAction(
 			return EXIT_ACTION
 		}
 
-		if action == "status" {
+		//STATUS
+		if strings.HasPrefix(action, "s") {
 			if len(askedStates) == 0 {
 				log.Infoln("No app yet installed")
 			} else {
@@ -181,7 +212,9 @@ func doAction(
 					log.Info(helper.BuildPrefix(app), appState.StatusMessage())
 				}
 			}
-		} else if slices.Contains([]string{"install", "update", "upgrade"}, action) {
+		} else if slices.IndexFunc([]string{"i", "u"}, func(e string) bool {
+			return strings.HasPrefix(action, e)
+		}) != -1 {
 			//Do the job
 			for app, appState := range askedStates {
 				log.Debugln("Processing", app)
@@ -194,6 +227,7 @@ func doAction(
 						*flagEnvVarForAppsLocation,
 						*flagArchivesSubDir,
 						*flagConfirm,
+						*flagRefresh,
 					))
 				if exitCode != EXIT_OK && !(*flagOptimist) {
 					return exitCode

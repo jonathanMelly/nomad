@@ -35,20 +35,20 @@ It is working (I’m using it at my work). Basic UI is the next big step.
  1. Download [latest release](https://github.com/jonathanMelly/portable-app-installer/releases/latest)
  2. To install / update / get status an app (*Filezilla* for instance), start a terminal and run
 ```bash 
-nomad install filezilla
-nomad update filezilla
-nomad status filezilla
+nomad i[nstall] filezilla
+nomad up[grade] filezilla
+nomad st[atus] filezilla
 ```
  1. To list available apps
 
 ```bash 
-nomad list
+nomad l[ist]
 ```
 
 1. To check status of all installed apps
 
 ```bash 
-nomad status
+nomad st[atus]
 ```
 
 - To check status of one app (installed or not)
@@ -63,13 +63,13 @@ nomad status
  1. To view app version
 
 ```bash 
-nomad version
+nomad v[ersion]
 ```
 
- 1. To update nomad (UPCOMING, not yet implemented)
+ 1. To update nomad (and get new apps)
 
 ```bash 
-nomad self update
+nomad self
 ```
 
 *Available apps are listed [here](cmd/nomad/app-definitions), and you can add yours by adding any valid json file 
@@ -95,7 +95,7 @@ nomad --help
 # Configuration
 
 ## Zero Config by default
-The single binary is self sufficient (no need for any config)
+The single binary is self-sufficient (no need for any config)
 
 ## Opened for config
 You may add a [nomad.toml](config/nomad.toml) in the same directory as the binary to configure any custom app definition and github token.

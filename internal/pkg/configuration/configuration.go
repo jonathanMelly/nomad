@@ -17,6 +17,7 @@ import (
 	"strings"
 )
 
+var Version *version.Version
 var Settings = data.NewSettings()
 var AppDefinitionDirectoryName = "app-definitions"
 

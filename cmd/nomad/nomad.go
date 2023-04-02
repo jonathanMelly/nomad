@@ -14,7 +14,6 @@ import (
 	"runtime/debug"
 
 	"github.com/jonathanMelly/nomad/internal/app/cli"
-	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
 	"os"
 )
 
@@ -35,11 +34,12 @@ var embeddedDefs embed.FS
 var githubApiKey string
 
 func main() {
-	cli.Version = fmt.Sprint(version, " [", buildDate, "]", " (", commit, ")")
-	cli.EmbeddedDefinitions = embeddedDefs
-	//Sets default key (can be later overridden)
-	configuration.Settings.GithubApiKey = githubApiKey
-	os.Exit(cli.Main())
+	os.Exit(cli.Main(
+		embeddedDefs,
+		githubApiKey,
+		version,
+		fmt.Sprint(" [", buildDate, "]", " (", commit, ")"),
+	))
 }
 
 var commit = func() string {

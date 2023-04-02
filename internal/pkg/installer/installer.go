@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"archive/zip"
 	"bufio"
 	"errors"
 	"fmt"
@@ -11,11 +12,15 @@ import (
 	"github.com/jonathanMelly/nomad/internal/pkg/state"
 	"github.com/jonathanMelly/nomad/pkg/bytesize"
 	junction "github.com/nyaosorg/go-windows-junction"
+	"github.com/udhos/equalfile"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
+	"time"
 )
 
 //goland:noinspection GoSnakeCaseUsage
@@ -34,7 +39,7 @@ const (
 
 // InstallOrUpdate will execute commands from an app-definitions file
 func InstallOrUpdate(appState state.AppState, forceExtract bool, skipDownload bool,
-	customAppLocationForShortcut string, archivesSubDir string, askForConfirmation bool) (error error, errorMessage string, exitCode int) {
+	customAppLocationForShortcut string, archivesSubDir string, askForConfirmation bool, refresh bool) (error error, errorMessage string, exitCode int) {
 
 	//Aliases
 	definition := appState.Definition
@@ -52,45 +57,50 @@ func InstallOrUpdate(appState state.AppState, forceExtract bool, skipDownload bo
 	//Show status
 	log.Infoln(appState.StatusMessage())
 
-	//User confirm
-	abort := !userWantsToContinue(askForConfirmation)
-	if abort {
-		return nil, "Action aborted by user", EXIT_ABORTED_BY_USER
-	}
-
-	//Create app path if needed
-	if !helper.FileOrDirExists(configuration.AppPath) {
-		log.Debugln("Creating", configuration.AppPath, "directory")
-		err := os.Mkdir(configuration.AppPath, os.ModePerm)
-		if err != nil {
-			return err, fmt.Sprint("Cannot create ", configuration.AppPath), EXIT_OK
+	if appState.Status != state.KEEP || refresh {
+		//User confirm
+		abort := !userWantsToContinue(askForConfirmation)
+		if abort {
+			return nil, "Action aborted by user", EXIT_ABORTED_BY_USER
 		}
+
+		//Create app path if needed
+		if !helper.FileOrDirExists(configuration.AppPath) {
+			log.Debugln("Creating", configuration.AppPath, "directory")
+			err := os.Mkdir(configuration.AppPath, os.ModePerm)
+			if err != nil {
+				return err, fmt.Sprint("Cannot create ", configuration.AppPath), EXIT_OK
+			}
+		}
+
+		var appNameWithVersion = fmt.Sprint(appName, "-", targetVersion)
+		var targetAppPath = path.Join(configuration.AppPath, appNameWithVersion)
+		var archivesDir = path.Join(configuration.AppPath, archivesSubDir)
+
+		//Extract
+		if err := getAndExtractAppIfNeeded(appState, forceExtract, skipDownload, targetAppPath, archivesDir, appNameWithVersion, definition); err != nil {
+			return err, "Cannot install/update app", EXIT_INSTALL_UPDATE_ERROR
+		}
+
+		//Custom file actions
+		handleRestoreAndCustomFiles(appState, targetAppPath)
+
+		//Symlink
+		symlink, err := handleSymlink(appState, targetAppPath)
+		if err != nil {
+			return err, "Symlink issue", EXIT_SYMLINK_ERROR
+		}
+
+		//Shortcut
+		if err = handleShortcut(*definition, symlink, customAppLocationForShortcut, configuration.DefaultShortcutsDir); err != nil {
+			return err, fmt.Sprint("Cannot create shortcut dir ", configuration.DefaultShortcutsDir), EXIT_SHORTCUT_ERROR
+		}
+
+		log.Infoln(appState.SuccessMessage())
+	} else {
+		log.Warnln("nothing to do (use -refresh or -force to regenerate stuff for current version)")
 	}
 
-	var appNameWithVersion = fmt.Sprint(appName, "-", targetVersion)
-	var targetAppPath = path.Join(configuration.AppPath, appNameWithVersion)
-	var archivesDir = path.Join(configuration.AppPath, archivesSubDir)
-
-	//Extract
-	if err := getAndExtractAppIfNeeded(appState, forceExtract, skipDownload, targetAppPath, archivesDir, appNameWithVersion, definition); err != nil {
-		return err, "Cannot install/update app", EXIT_INSTALL_UPDATE_ERROR
-	}
-
-	//Custom file actions
-	handleRestoreAndCustomFiles(appState, targetAppPath)
-
-	//Symlink
-	symlink, err := handleSymlink(appState, targetAppPath)
-	if err != nil {
-		return err, "Symlink issue", EXIT_SYMLINK_ERROR
-	}
-
-	//Shortcut
-	if err = handleShortcut(*definition, symlink, customAppLocationForShortcut, configuration.DefaultShortcutsDir); err != nil {
-		return err, fmt.Sprint("Cannot create shortcut dir ", configuration.DefaultShortcutsDir), EXIT_SHORTCUT_ERROR
-	}
-
-	log.Infoln(appState.SuccessMessage())
 	return nil, "", EXIT_OK
 
 }
@@ -192,7 +202,63 @@ func handleSymlink(appState state.AppState, newTarget string) (string, error) {
 		log.Debugln("symlink", symlink, "already pointing to", newTarget)
 	}
 
+	//handle special nomad symlink
+	//Special for nomad, update current binary
+	if appState.Definition.ApplicationName == "nomad" {
+		currentBinaryPath := os.Args[0]
+		if runtime.GOOS == "windows" && !strings.HasSuffix(currentBinaryPath, ".exe") {
+			currentBinaryPath = fmt.Sprint(currentBinaryPath, ".exe")
+		}
+		nomadBinaryName := filepath.Base(currentBinaryPath)
+		targetBinaryPath := filepath.Join(newTarget, nomadBinaryName)
+
+		//diff currentBinary with target => if different,
+		//rename current binary and
+		//copy and paste (symlink in windows needs admin rights (avoid that)...)
+		//(when windows authorizes symlink for any user, create a symlink instead)
+		cmp := equalfile.New(nil, equalfile.Options{})
+		sameVersion, err := cmp.CompareFile(currentBinaryPath, targetBinaryPath)
+		if err != nil {
+			return "Cannot compare nomad binary versions", err
+		} else if !sameVersion {
+
+			log.Trace("try replacing nomad binary with latest installed")
+
+			oldVersion := fmt.Sprint(currentBinaryPath, ".", appState.CurrentVersion)
+			err := os.Rename(currentBinaryPath, oldVersion)
+			if err != nil {
+				return fmt.Sprint("Cannot rename old nomad binary to", oldVersion), err
+			}
+
+			newBinary, err := os.Create(currentBinaryPath)
+			if err != nil {
+				rollbackRename(oldVersion, currentBinaryPath)
+				return "Cannot create new binary", err
+			}
+			targetBinary, err := os.Open(targetBinaryPath)
+			if err != nil {
+				rollbackRename(oldVersion, currentBinaryPath)
+				return fmt.Sprint("Cannot open target binary", targetBinary), err
+			}
+			_, err = io.Copy(newBinary, targetBinary)
+			if err != nil {
+				rollbackRename(oldVersion, currentBinaryPath)
+				return fmt.Sprint("Cannot copy ", targetBinary, " content to ", newBinary), err
+			}
+			log.Traceln("ok")
+
+		}
+	}
+
 	return symlink, nil
+}
+
+func rollbackRename(oldVersion string, currentBinaryPath string) {
+	//try to rollback
+	err := os.Rename(oldVersion, currentBinaryPath)
+	if err != nil {
+		log.Errorln("Cannot rollback nomad to previous version", err)
+	}
 }
 
 func getAndExtractAppIfNeeded(
@@ -240,7 +306,7 @@ func getAndExtractAppIfNeeded(
 		// Note: The original file download name will be changed
 		var archivePath = path.Join(archivesDir, fmt.Sprint(appNameWithVersion, definition.DownloadExtension))
 
-		err = downloadArchive(downloadURL, skipDownload, archivePath)
+		err := downloadArchive(downloadURL, skipDownload, archivePath)
 		if err != nil {
 			return errors.New(fmt.Sprint("Cannot download archive | ", err))
 		}
@@ -249,7 +315,19 @@ func getAndExtractAppIfNeeded(
 		log.Debugln("Extracting files from ", archivePath)
 		err = extractArchive(archivePath, *definition, targetAppPath)
 		if err != nil {
-			return errors.New(fmt.Sprint("Error extracting from archive | ", err))
+			var extra string
+			if errors.Is(err, zip.ErrFormat) {
+				datetimeStr := time.Now().Format("2006-01-02X15_04_05")
+				newPath := fmt.Sprint(archivePath, "-", datetimeStr, ".bad")
+				err2 := os.Rename(archivePath, newPath)
+
+				if err2 == nil {
+					extra = fmt.Sprint(" (archive moved to ", newPath, " )")
+				} else {
+					log.Warnln("cannot move bad archive to", newPath, "|", err2)
+				}
+			}
+			return errors.New(fmt.Sprint("Error extracting from archive ", extra, " | ", err))
 		}
 	} else {
 		log.Infoln("directory", targetAppPath, "already exists (use -force to regenerate from archive)")

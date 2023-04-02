@@ -1,0 +1,4 @@
+Version="15.0.0"
+RepositoryUrl="github:ShareX/ShareX"
+DownloadUrl="v{{VERSION}}/ShareX-{{VERSION}}-portable.zip"
+RestoreFiles=["backups/"]

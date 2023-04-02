@@ -13,8 +13,6 @@ const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 const GITHUB_PREFIX = "github"
 const GITHUB_BASE_URL = "https://github.com/"
 
-const TAGNAME_PLACEHOLDER = "{{TAG_NAME}}"
-
 type Settings struct {
 	MyApps            []string                  `json:"myapps"`
 	GithubApiKey      string                    `json:"githubApiKey"`
@@ -69,20 +67,15 @@ type AppDefinition struct {
 	extractRegex *regexp.Regexp
 }
 
-func (definition *AppDefinition) FillTagPlaceholder(input string) {
-	const token = `"tagName":"`
-	if tagNameIndex := strings.LastIndex(input, token); tagNameIndex >= 0 {
-		subPart := input[tagNameIndex+len(token):]
-		tagName := subPart[:strings.Index(subPart, `"`)]
-		definition.DownloadUrl = strings.ReplaceAll(definition.DownloadUrl, TAGNAME_PLACEHOLDER, tagName)
-	}
-}
-
 func (definition *AppDefinition) validateAndSetDefaults() error {
 	var errs []string
 	//NAME
 	if definition.ApplicationName == "" {
 		errs = append(errs, "missing application name")
+	}
+
+	if definition.Version == "" {
+		errs = append(errs, "missing base version")
 	}
 
 	//SYMLINK
@@ -149,12 +142,7 @@ func (definition *AppDefinition) fillInfosFromRepository(errs []string) {
 					}
 
 					if !strings.HasPrefix(definition.DownloadUrl, "http") && !strings.HasPrefix(definition.DownloadUrl, "manual") {
-						autoTag := fmt.Sprint(TAGNAME_PLACEHOLDER, "/")
-						if strings.Contains(definition.DownloadUrl, "/") {
-							autoTag = ""
-						}
-
-						definition.DownloadUrl = fmt.Sprint(GITHUB_BASE_URL, repoInfos, "/releases/download/", autoTag, definition.DownloadUrl)
+						definition.DownloadUrl = fmt.Sprint(GITHUB_BASE_URL, repoInfos, "/releases/download/", definition.DownloadUrl)
 					}
 
 				} else {

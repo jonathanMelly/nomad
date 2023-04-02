@@ -1,2 +1,3 @@
+Version="1.4.0"
 RepositoryUrl="github:BlackReloaded/wsl2-ssh-pageant"
-DownloadUrl="wsl2-ssh-pageant.exe"
+DownloadUrl="v{{VERSION}}/wsl2-ssh-pageant.exe"

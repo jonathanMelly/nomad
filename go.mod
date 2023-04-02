@@ -7,6 +7,7 @@ require (
 	github.com/gookit/config/v2 v2.2.1
 	github.com/gookit/goutil v0.6.6
 	github.com/nyaosorg/go-windows-junction v0.1.0
+	github.com/udhos/equalfile v0.3.0
 	golang.org/x/exp v0.0.0-20220909182711-5c715a9e8561
 )
 

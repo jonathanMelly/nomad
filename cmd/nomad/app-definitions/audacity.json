@@ -7,9 +7,5 @@
 	{
 		"Url":"github:audacity/audacity",
 		"RegEx":"\"tagName\":\"Audacity-{{VERSION}}"
-	},
-	"CreateFiles":
-	{
-		"VERSION-{{VERSION}}.txt":"{{VERSION}}"
 	}
 }

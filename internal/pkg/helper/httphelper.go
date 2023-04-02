@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+const USER_AGENT = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`
+
 // GetVersion will return extracted text from a page at a URL
 func GetVersion(url string, definition *data.AppDefinition, apiKey string, requestBody string) (*version.Version, error) {
 
@@ -20,9 +22,6 @@ func GetVersion(url string, definition *data.AppDefinition, apiKey string, reque
 	if err != nil {
 		return nil, err
 	}
-
-	//extract tag
-	definition.FillTagPlaceholder(responseBody)
 
 	foundVersion, err := version.FromStringCustom(responseBody, definition.VersionCheck.RegEx)
 	if err != nil {
@@ -32,6 +31,7 @@ func GetVersion(url string, definition *data.AppDefinition, apiKey string, reque
 	return foundVersion, nil
 }
 
+// TODO refactor with BuildAndDoHttp !!!
 // sendRequest returns the request response body
 func sendRequest(url string, apiKey string, requestBody string) (string, error) {
 
@@ -51,7 +51,7 @@ func sendRequest(url string, apiKey string, requestBody string) (string, error) 
 		r.Header.Add("Authorization", fmt.Sprint("Bearer ", apiKey))
 	}
 	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
-	r.Header.Add("User-Agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`)
+	r.Header.Add("User-Agent", USER_AGENT)
 
 	log.Traceln("sending http request to", url, "with payload", requestBody)
 	client, err := http.DefaultClient.Do(r)
@@ -92,26 +92,40 @@ func DownloadFile(url string, fileName string) (int64, error) {
 		return 0, err
 	}
 
-	r, err := http.NewRequest("GET", url, nil)
+	client, err := BuildAndDoHttp(url, "GET")
 	if err != nil {
 		return -1, err
+	}
+
+	switch client.StatusCode {
+	case 200:
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				log.Errorln("Cannot close http body", err)
+			}
+		}(client.Body)
+		n, err := io.Copy(out, client.Body)
+		return n, err
+	case 404:
+		return -1, errors.New("URL not found")
+	default:
+		return -1, errors.New(fmt.Sprint("Bad http status: ", client.StatusCode))
+	}
+}
+
+func BuildAndDoHttp(url string, method string) (*http.Response, error) {
+	r, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return nil, err
 	}
 
 	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
-	r.Header.Add("User-Agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`)
+	r.Header.Add("User-Agent", USER_AGENT)
 
 	client, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Errorln("Cannot close http body", err)
-		}
-	}(client.Body)
-
-	n, err := io.Copy(out, client.Body)
-
-	return n, err
+	return client, nil
 }

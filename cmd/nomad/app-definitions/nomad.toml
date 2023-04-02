@@ -1,0 +1,3 @@
+Version="1.12.0"
+RepositoryUrl="github:jonathanMelly/nomad"
+DownloadUrl="v{{VERSION}}/nomad-{{VERSION}}-win64.zip"

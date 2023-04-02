@@ -1,0 +1,4 @@
+Version="1.62.2"
+RepositoryUrl="github:rclone/rclone"
+DownloadUrl="v{{VERSION}}/rclone-v{{VERSION}}-windows-amd64.zip"
+RestoreFiles=["rclone.conf"]

@@ -1,0 +1,3 @@
+Version="22.3.1"
+RepositoryUrl="github:graalvm/graalvm-ce-builds"
+DownloadUrl="vm-{{VERSION}}/graalvm-ce-java19-windows-amd64-{{VERSION}}.zip"

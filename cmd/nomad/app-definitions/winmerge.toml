@@ -1,3 +1,4 @@
+Version="2.16.28"
 RepositoryUrl="github:WinMerge/winmerge"
-DownloadUrl="winmerge-{{VERSION}}-exe.zip"
+DownloadUrl="v{{VERSION}}/winmerge-{{VERSION}}-x64-exe.zip"
 

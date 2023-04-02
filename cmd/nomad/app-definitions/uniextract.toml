@@ -1,3 +1,4 @@
+Version="2.0.0-rc.3"
 RepositoryUrl="github:Bioruebe/UniExtract2"
 DownloadUrl="v{{VERSION}}/UniExtractRC3.zip"
 RestoreFiles=["UniExtract.ini","passwords.txt","log/"]

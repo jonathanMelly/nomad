@@ -17,7 +17,7 @@ func stat(path string) os.FileInfo {
 
 // FileOrDirExists returns true if a file/directory is valid AND exists
 func FileOrDirExists(filename string) bool {
-	_, err := os.Stat(filename)
+	_, err := os.Lstat(filename)
 	return err == nil || errors.Is(err, fs.ErrExist)
 }
 

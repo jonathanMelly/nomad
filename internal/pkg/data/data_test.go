@@ -94,7 +94,7 @@ func TestAppDefinition_fillInfosFromRepository(t *testing.T) {
 		want   want
 	}{
 		{"github", fields{RepositoryUrl: "github:owner/repo", DownloadUrl: "test.zip"},
-			want{DownloadUrl: "https://github.com/owner/repo/releases/download/{{TAG_NAME}}/test.zip",
+			want{DownloadUrl: "https://github.com/owner/repo/releases/download/test.zip",
 				VersionCheck: VersionCheck{Url: "github:owner/repo", RegEx: `"tagName":"[^\d]*{{VERSION}}"`}}},
 	}
 	for _, tt := range tests {
@@ -120,34 +120,6 @@ func TestAppDefinition_fillInfosFromRepository(t *testing.T) {
 			definition.fillInfosFromRepository([]string{})
 			assert.Equal(t, tt.want.DownloadUrl, definition.DownloadUrl)
 			assert.True(t, reflect.DeepEqual(tt.want.VersionCheck, definition.VersionCheck))
-		})
-	}
-}
-
-func TestAppDefinition_FillTagPlaceholder(t *testing.T) {
-
-	tests := []struct {
-		name     string
-		fields   *AppDefinition
-		input    string
-		expected string
-	}{
-		{"with auto tagname", &AppDefinition{ApplicationName: "bob", RepositoryUrl: GITHUB_PREFIX + ":owner/repo", DownloadUrl: "bob.zip"},
-			`{"data":{"repository":{"latestRelease":{"tagName":"v1.4.0"}}}}`, "https://github.com/owner/repo/releases/download/v1.4.0/bob.zip"},
-		{"without auto tagname", &AppDefinition{ApplicationName: "bob", RepositoryUrl: GITHUB_PREFIX + ":owner/repo", DownloadUrl: "custom/bob.zip"},
-			`{"data":{"repository":{"latestRelease":{"tagName":"v1.4.0"}}}}`, "https://github.com/owner/repo/releases/download/custom/bob.zip"},
-		{"manual", &AppDefinition{ApplicationName: "bob", RepositoryUrl: GITHUB_PREFIX + ":owner/repo", DownloadUrl: "manual x"},
-			`{"data":{"repository":{"latestRelease":{"tagName":"v1.4.0"}}}}`, "manual x"},
-		{"custom", &AppDefinition{ApplicationName: "bob", RepositoryUrl: GITHUB_PREFIX + ":owner/repo", DownloadUrl: "http://custom.com"},
-			`{"data":{"repository":{"latestRelease":{"tagName":"v1.4.0"}}}}`, "http://custom.com"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			definition := tt.fields
-			err := definition.validateAndSetDefaults()
-			assert.NoError(t, err)
-			definition.FillTagPlaceholder(tt.input)
-			assert.Equal(t, tt.expected, tt.fields.DownloadUrl)
 		})
 	}
 }
