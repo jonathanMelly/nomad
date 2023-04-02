@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.13.0](https://github.com/jonathanMelly/nomad/compare/v1.12.0...v1.13.0) (2023-04-02)
+
+
+### Features
+
+* **checks:** validate all embedded download URLs ([73f91df](https://github.com/jonathanMelly/nomad/commit/73f91df529699a0b68c005852042138da223957f))
+* **cli:** handle minimal action names (i for install, st for status, u for upgrade,...) ([73f91df](https://github.com/jonathanMelly/nomad/commit/73f91df529699a0b68c005852042138da223957f))
+* **self update:** nomad can update itself ;-) (using same logic as other apps + special exe handling) ([73f91df](https://github.com/jonathanMelly/nomad/commit/73f91df529699a0b68c005852042138da223957f))
+
+
+### Bug Fixes
+
+* **tag:** no more depend on remote tag info... configs are a bit longer but it supports offline install/reinstall which is important ([73f91df](https://github.com/jonathanMelly/nomad/commit/73f91df529699a0b68c005852042138da223957f))
+
 ## [1.12.0](https://github.com/jonathanMelly/nomad/compare/v1.11.1...v1.12.0) (2023-03-31)
 
 
