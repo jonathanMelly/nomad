@@ -134,7 +134,7 @@ func handleShortcut(definition data.AppDefinition, symlink string, customAppLoca
 
 		log.Debugln("Creating shortcut ", definition.Shortcut, " -> ", targetForShortcut)
 		createShortcut(
-			definition.Shortcut,
+			filepath.Base(definition.Shortcut),
 			targetForShortcut,
 			"",
 			filepath.Dir(targetForShortcut),
@@ -206,7 +206,8 @@ func handleSymlink(appState state.AppState, newTarget string) (string, error) {
 	//Special for nomad, update current binary
 	if appState.Definition.ApplicationName == "nomad" {
 		currentBinaryPath := os.Args[0]
-		if runtime.GOOS == "windows" && !strings.HasSuffix(currentBinaryPath, ".exe") {
+		if //goland:noinspection GoBoolExpressions
+		runtime.GOOS == "windows" && !strings.HasSuffix(currentBinaryPath, ".exe") {
 			currentBinaryPath = fmt.Sprint(currentBinaryPath, ".exe")
 		}
 		nomadBinaryName := filepath.Base(currentBinaryPath)

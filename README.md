@@ -26,7 +26,7 @@ Otherwise, go ahead :-)
 | push for 100% portability       | no    | yes   | Example: putty conf not saved with scoop standard bucket          |
 | uses github api (when possible) | no    | yes   | Consequence: Use less bandwidth but needs a PAT                   |
 | single go binary                | no    | yes   | Scoop is a list of ps scripts                                     |
-| multiplatform friendly          | no    | yes   | Use case may not be relevant but there is no technical limitation |
+
 
 # Status
 It is working (I’m using it at my work). Basic UI is the next big step.
