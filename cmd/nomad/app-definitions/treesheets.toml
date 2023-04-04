@@ -1,3 +1,5 @@
 Version="4456947105"
 RepositoryUrl="github:aardappel/treesheets"
 DownloadUrl="{{VERSION}}/windows_treesheets_no_installer.zip"
+Shortcut="TreeSheets.exe"
+RestoreFiles=["treesheets.xml"]
