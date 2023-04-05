@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.14.0](https://github.com/jonathanMelly/nomad/compare/v1.13.0...v1.14.0) (2023-04-05)
+
+
+### Features
+
+* **app:** add jmeter ([4000c1f](https://github.com/jonathanMelly/nomad/commit/4000c1f225eab4c1166e50c7495591c5004da1da))
+* **app:** added postman ([73394f2](https://github.com/jonathanMelly/nomad/commit/73394f277759b8d7c383a7c967e4ac2afe397a3b))
+* **app:** added python3 ([b39b1c6](https://github.com/jonathanMelly/nomad/commit/b39b1c6958a23d0aeaaceb639adb8679dfee90ac))
+* **definition:** ability to use app_path and app_path_generic in create files content ([448a4af](https://github.com/jonathanMelly/nomad/commit/448a4af78c8c5c5993c00b5db6314c3ce215c744))
+* **treesheets:** added shortcut and config file to keep ([51fd19a](https://github.com/jonathanMelly/nomad/commit/51fd19acf420b4d0a01cc2b7c21f4cc095b3bcb1))
+
+
+### Bug Fixes
+
+* **shortcut:** handles shortcuts for files in subfolders ([4000c1f](https://github.com/jonathanMelly/nomad/commit/4000c1f225eab4c1166e50c7495591c5004da1da))
+
 ## [1.13.0](https://github.com/jonathanMelly/nomad/compare/v1.12.0...v1.13.0) (2023-04-02)
 
 
