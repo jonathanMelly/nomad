@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
+	"github.com/jonathanMelly/nomad/pkg/version"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,19 +12,22 @@ import (
 )
 
 // writeScripts creates files from the app-definitions file
-func writeScripts(scripts map[string]string, workingFolder string, version string) error {
+func writeScripts(scripts map[string]string, appSpecificVersionFolder string, absoluteSymlinkToAppFolder string, version *version.Version) error {
 	var _errors []error
 	// Loop through each script
 	for name, body := range scripts {
 
 		// Path of file
-		relativePath := strings.Replace(filepath.Join(workingFolder, name), "{{VERSION}}", version, -1)
+		relativePath := strings.Replace(filepath.Join(appSpecificVersionFolder, name), "{{VERSION}}", version.String(), -1)
 
 		// Write to file
 		if helper.FileOrDirExists(relativePath) {
 			log.Debugln(relativePath, "already in destination, skipping")
 		} else {
-			err := os.WriteFile(relativePath, []byte(strings.Replace(body, "{{VERSION}}", version, -1)), os.ModePerm)
+			content := strings.Replace(body, "{{VERSION}}", version.String(), -1)
+			content = strings.Replace(content, "{{APP_PATH_GENERIC}}", absoluteSymlinkToAppFolder, -1)
+			content = strings.Replace(content, "{{APP_PATH}}", appSpecificVersionFolder, -1)
+			err := os.WriteFile(relativePath, []byte(content), os.ModePerm)
 			if err != nil {
 				_errors = append(_errors, err)
 			}

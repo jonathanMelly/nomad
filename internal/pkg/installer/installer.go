@@ -163,7 +163,8 @@ func handleRestoreAndCustomFiles(appState state.AppState, workingFolder string) 
 	}
 
 	log.Traceln("Creating files:", definition.CreateFiles)
-	if err := writeScripts(definition.CreateFiles, workingFolder, appState.TargetVersion.String()); err != nil {
+	absoluteSymlinkToApp, _ := filepath.Abs(filepath.Join(configuration.AppPath, appState.Definition.Symlink))
+	if err := writeScripts(definition.CreateFiles, workingFolder, absoluteSymlinkToApp, appState.TargetVersion); err != nil {
 		log.Errorln("Error creating files:", definition.CreateFiles, "|", err)
 	}
 
