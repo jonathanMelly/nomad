@@ -1,0 +1,4 @@
+Version="10.12.0"
+VersionCheck={Url="https://dl.pstmn.io/changelog?channel=stable&platform=win64",RegEx="{\"name\":\"{{VERSION}}\""}
+DownloadUrl="https://dl.pstmn.io/download/{{VERSION}}/Postman-win64-{{VERSION}}-full.nupkg"
+Shortcut="lib/net45/Postman.exe"

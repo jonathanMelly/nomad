@@ -28,8 +28,8 @@ func extractArchive(archivePath string, definition data.AppDefinition, appTarget
 			//Not an archive, bypass archive handling
 			return nil
 		}
-	case ".zip":
-		log.Debugln("ZIP archive")
+	case ".zip", ".nupkg":
+		log.Debugln(definition.DownloadExtension, "archive")
 		zipReader, err := zip.OpenReader(archivePath)
 		if err != nil {
 			return err
