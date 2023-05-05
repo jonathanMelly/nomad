@@ -1,4 +1,7 @@
 Version="2.16.28"
 RepositoryUrl="github:WinMerge/winmerge"
 DownloadUrl="v{{VERSION}}/winmerge-{{VERSION}}-x64-exe.zip"
+#options.ini must be manually exported
+#tika customized bat script to get it from here
+RestoreFiles=["options.ini","Commands/Apache-Tika/tika.bat","Commands/Apache-Tika/tika-app-2.2.1.jar"]
 
