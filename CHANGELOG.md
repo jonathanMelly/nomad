@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.15.0](https://github.com/jonathanMelly/nomad/compare/v1.14.0...v1.15.0) (2023-05-05)
+
+
+### Features
+
+* **apps:** added blender ([4121fba](https://github.com/jonathanMelly/nomad/commit/4121fba61141aa2158f15c3b3b88e38fa4453000))
+* **console:** added spinner for download/extract phases ([354aadb](https://github.com/jonathanMelly/nomad/commit/354aadb008ea304b8011268b576c87ef7f5fed30))
+* **winmerge:** restore options.ini and tika stuff ([11965c2](https://github.com/jonathanMelly/nomad/commit/11965c236a7d926c7f6a7a1e862606ada610f159))
+
 ## [1.14.0](https://github.com/jonathanMelly/nomad/compare/v1.13.0...v1.14.0) (2023-04-05)
 
 
