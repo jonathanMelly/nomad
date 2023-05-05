@@ -1,0 +1,4 @@
+Version="3.5.1"
+DownloadUrl="https://mirrors.dotsrc.org/blender/release/Blender{{V_MAJOR}}.{{V_MINOR}}/blender-{{VERSION}}-windows-x64.zip"
+VersionCheck={Url="https://www.blender.org/download/",RegEx="Download Blender {{VERSION}}"}
+Shortcut="blender.exe"
