@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"errors"
 	"fmt"
+	"github.com/briandowns/spinner"
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func extractArchive(archivePath string, definition data.AppDefinition, appTargetDirectory string) error {
@@ -95,6 +97,10 @@ func copyFile(sourcePath string, destinationPath string) error {
 func copyFromFS(sourceFileSystem fs.FS, root string, targetDirectory string, allowRegExp *regexp.Regexp) error {
 
 	log.Infoln("Extracting files from archive")
+	s := spinner.New(spinner.CharSets[59], 300*time.Millisecond)
+	s.Prefix = "Please wait while extracting "
+	s.Start()
+	defer s.Stop()
 
 	// Create folder to copyFromFS files
 	if !helper.FileOrDirExists(targetDirectory) {

@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/briandowns/spinner"
 	"github.com/gologme/log"
 	"github.com/jonathanMelly/nomad/internal/pkg/configuration"
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
@@ -366,11 +367,15 @@ func downloadArchive(downloadURL string, skipDownload bool, archivePath string) 
 		log.Infoln("Using already downloaded", archivePath, "(use -force to override)")
 	} else {
 		log.Infoln("Downloading", downloadURL, "to", archivePath, "...")
+		_spinner := spinner.New(spinner.CharSets[59], 300*time.Millisecond) // Build our new _spinner
+		_spinner.Prefix = "Please wait while downloading file "
+		_spinner.Start()
 		size, err := helper.DownloadFile(downloadURL, archivePath)
+		_spinner.Stop()
 		if err != nil {
 			return errors.New(fmt.Sprint("Error download file ", err))
 		}
-		log.Traceln("Download size:", bytesize.ByteSize(size))
+		log.Traceln("Downloaded size:", bytesize.ByteSize(size))
 	}
 	return nil
 }
