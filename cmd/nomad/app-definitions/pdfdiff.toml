@@ -1,0 +1,4 @@
+Version="0.5.1"
+RepositoryUrl="github:vslavik/diff-pdf"
+DownloadUrl="v{{VERSION}}/diff-pdf-win-{{VERSION}}.zip"
+
