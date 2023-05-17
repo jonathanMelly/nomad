@@ -174,14 +174,18 @@ func (definition *AppDefinition) IsValid() (bool, error) {
 }
 
 func (definition *AppDefinition) ComputeDownloadExtension() {
+	extensionRegex, err := regexp.Compile(`\.[a-zA-Z0-9]+`)
+	if err != nil {
+		log.Errorln(err)
+	}
 	if definition.DownloadExtension == "" {
 		const defaultExt = ".zip"
 		if definition.DownloadUrl != "" {
 			if !strings.HasPrefix(definition.DownloadUrl, "manual") { //Let manual extension be determined later
 				lastPoint := strings.LastIndex(definition.DownloadUrl, ".")
 				if lastPoint >= 0 {
-					cutExtension, _, _ := strings.Cut(definition.DownloadUrl[lastPoint:], "?") //removes URL get params after filename
-					definition.DownloadExtension = cutExtension
+					clean := extensionRegex.FindString(definition.DownloadUrl[lastPoint:])
+					definition.DownloadExtension = clean
 				} else {
 					definition.DownloadExtension = defaultExt
 				}

@@ -16,6 +16,7 @@ func TestAppDefinition_ComputeDownloadExtension(t *testing.T) {
 		{name: "custom", fields: fields{DownloadUrl: "test.zip?bob"}, result: ".zip"},
 		{name: "standard", fields: fields{DownloadUrl: "http://www.test.com/test.zip"}, result: ".zip"},
 		{name: "githubrepo", fields: fields{DownloadUrl: "test-{{VERSION}}.exe"}, result: ".exe"},
+		{name: "sourceforge", fields: fields{DownloadUrl: "bob.zip/download"}, result: ".zip"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
