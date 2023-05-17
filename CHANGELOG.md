@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.16.0](https://github.com/jonathanMelly/nomad/compare/v1.15.0...v1.16.0) (2023-05-17)
+
+
+### Features
+
+* **apps:** added dbeaver ([1d8d09f](https://github.com/jonathanMelly/nomad/commit/1d8d09fb0fb66071737e00f2e327d98174f897ba))
+* **sourceforge:** ready to handle sourceforge download url syntax ([3c27a3e](https://github.com/jonathanMelly/nomad/commit/3c27a3efc8c40770c126774cab42ee7d5d6df90e))
+
 ## [1.15.0](https://github.com/jonathanMelly/nomad/compare/v1.14.0...v1.15.0) (2023-05-05)
 
 
