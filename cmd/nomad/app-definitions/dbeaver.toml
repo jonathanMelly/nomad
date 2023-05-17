@@ -1,0 +1,6 @@
+Version="23.0.4"
+RepositoryUrl="github:dbeaver/dbeaver"
+DownloadUrl="{{VERSION}}/dbeaver-ce-{{VERSION}}-win32.win32.x86_64.zip"
+Shortcut="dbeaver.exe"
+RestoreFiles=["dbeaver.ini"]
+
