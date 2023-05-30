@@ -1,4 +1,6 @@
 Version="15.0.0"
 RepositoryUrl="github:ShareX/ShareX"
 DownloadUrl="v{{VERSION}}/ShareX-{{VERSION}}-portable.zip"
-RestoreFiles=["backups/"]
+#Store your manually exported config somewhere in this folder if needed
+RestoreFiles=["ShareX"]
+Shortcut="ShareX.exe"
