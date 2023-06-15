@@ -2,4 +2,4 @@ Version="23.1"
 DownloadUrl="https://download.mobatek.net/2312023031823706/MobaXterm_Portable_v{{VERSION}}.zip"
 VersionCheck={Url="https://mobaxterm.mobatek.net/download-home-edition.html",RegEx="Version {{VERSION}}"}
 Shortcut="MobaXterm_Personal_{{VERSION}}.exe"
-RestoreFiles=["MobaXterm.ini","MobaXterm backup.zip"]
+RestoreFiles=["MobaXterm.ini","MobaXterm backup.zip","session-logs"]
