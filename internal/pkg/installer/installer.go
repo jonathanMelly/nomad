@@ -93,6 +93,8 @@ func InstallOrUpdate(appState state.AppState, forceExtract bool, skipDownload bo
 		}
 
 		//Shortcut
+		//Update placeholder for shortcut
+		appState.Definition.Shortcut = appState.TargetVersion.FillVersionsPlaceholders(appState.Definition.Shortcut)
 		if err = handleShortcut(*definition, symlink, customAppLocationForShortcut, configuration.DefaultShortcutsDir); err != nil {
 			return err, fmt.Sprint("Cannot create shortcut dir ", configuration.DefaultShortcutsDir), EXIT_SHORTCUT_ERROR
 		}
