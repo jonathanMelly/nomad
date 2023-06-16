@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.17.0](https://github.com/jonathanMelly/nomad/compare/v1.16.0...v1.17.0) (2023-06-16)
+
+
+### Features
+
+* **apps:** add mobaxtermpro ([e6f4c94](https://github.com/jonathanMelly/nomad/commit/e6f4c94d02372ee6459c1c4d95810693f1710bcc))
+* **apps:** added mobaxterm ([0c6b6ee](https://github.com/jonathanMelly/nomad/commit/0c6b6ee96668fbc073639c2f9759a244a2c8383b))
+* **apps:** added pdfdiff ([b07b30d](https://github.com/jonathanMelly/nomad/commit/b07b30d5bec08ddc07a2a3b176721f2824b41136))
+* **mobaxterm:** restore term logs ([5479e34](https://github.com/jonathanMelly/nomad/commit/5479e341bb40a74e43b0f5237bd94070d1297bc2))
+* **sharex:** restore config ([efb18c0](https://github.com/jonathanMelly/nomad/commit/efb18c01b010044b78e487f9f9924ca3a8448bee))
+* **shortcut:** replace version placeholder in shortcut too ([0c6b6ee](https://github.com/jonathanMelly/nomad/commit/0c6b6ee96668fbc073639c2f9759a244a2c8383b))
+
 ## [1.16.0](https://github.com/jonathanMelly/nomad/compare/v1.15.0...v1.16.0) (2023-05-17)
 
 
