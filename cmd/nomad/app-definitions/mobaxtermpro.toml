@@ -1,0 +1,6 @@
+Version="23.1"
+DownloadUrl="manual,go to https://ccc.mobatek.net/ccc.php, generate portable zip and put it into archives..."
+DownloadExtension=".zip"
+VersionCheck={Url="https://mobaxterm.mobatek.net/download-home-edition.html",RegEx="Version {{VERSION}}"}
+Shortcut="MobaXterm.exe"
+RestoreFiles=["MobaXterm.ini","MobaXterm backup.zip","session-logs"]
