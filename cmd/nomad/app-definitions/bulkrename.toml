@@ -1,0 +1,6 @@
+Version="3.4.4.0"
+Shortcut="64-bit/Bulk Rename Utility.exe"
+DownloadUrl="https://www.bulkrenameutility.co.uk/Downloads/BRU_NoInstall.zip"
+RestoreFiles=["64-bit/Bulk Rename Utility.ini"]
+VersionCheck={Url="https://www.bulkrenameutility.co.uk/Download.php",RegEx="version {{VERSION}}"}
+
