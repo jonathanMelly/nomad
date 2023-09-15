@@ -1,3 +1,5 @@
 Version="3.11.2"
 VersionCheck={Url="https://www.python.org/downloads/",RegEx="https://www.python.org/ftp/python/{{VERSION}}/python-"}
 DownloadUrl="https://www.python.org/ftp/python/{{VERSION}}/python-{{VERSION}}-embed-amd64.zip"
+#stores venv in this custom folder...
+RestoreFiles=["venv/"]
