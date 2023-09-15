@@ -1,0 +1,7 @@
+Version="1.82.2"
+DownloadUrl="https://update.code.visualstudio.com/{{VERSION}}/win32-x64-archive/stable#/dl.7z"
+DownloadExtension=".zip"
+VersionCheck={Url="https://code.visualstudio.com/sha?build=stable",RegEx="\"productVersion\":\"{{VERSION}}\""}
+Shortcut="code.exe"
+RestoreFiles=["data"]
+
