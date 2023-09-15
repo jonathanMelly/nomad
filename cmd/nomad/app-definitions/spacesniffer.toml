@@ -1,0 +1,6 @@
+Version="1.3.0.2"
+RepositoryUrl="github:redtrillix/SpaceSniffer"
+DownloadUrl="v{{VERSION}}/spacesniffer_{{V_MAJOR}}_{{V_MINOR}}_{{V_PATCH}}_{{V_PATCH2}}.zip"
+Shortcut="SpaceSniffer.exe"
+#RestoreFiles=["TODO.xml"]
+
