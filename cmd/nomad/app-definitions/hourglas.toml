@@ -1,0 +1,4 @@
+Version="1.15.0"
+RepositoryUrl="github:dziemborowicz/hourglass"
+DownloadUrl="v{{VERSION}}/HourglassPortable.exe"
+Shortcut="HourglassPortable.exe"
