@@ -3,5 +3,6 @@ DownloadUrl="https://update.code.visualstudio.com/{{VERSION}}/win32-x64-archive/
 DownloadExtension=".zip"
 VersionCheck={Url="https://code.visualstudio.com/sha?build=stable",RegEx="\"productVersion\":\"{{VERSION}}\""}
 Shortcut="code.exe"
+CreateFolders=["data"]
 RestoreFiles=["data"]
 
