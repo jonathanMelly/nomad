@@ -1,0 +1,5 @@
+Version="1.21.3"
+DownloadUrl="https://go.dev/dl/go{{VERSION}}.windows-amd64.zip"
+VersionCheck={Url="https://go.googlesource.com/go",RegEx="/go/\\+/refs/tags/go{{VERSION}}"}
+CreateFolders=["workspace"]
+RestoreFiles=["workspace"]
