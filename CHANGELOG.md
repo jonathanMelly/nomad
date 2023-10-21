@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.18.0](https://github.com/jonathanMelly/nomad/compare/v1.17.0...v1.18.0) (2023-10-21)
+
+
+### Features
+
+* **apps:** add vscode ([8ace6cb](https://github.com/jonathanMelly/nomad/commit/8ace6cbddea26fec94bd265745e6290bb1edbadc))
+* **apps:** added arsclip ([246fdf6](https://github.com/jonathanMelly/nomad/commit/246fdf61258c18a24b9c776167faecdc34600d27))
+* **apps:** added bulk rename utility ([11dd768](https://github.com/jonathanMelly/nomad/commit/11dd768a5fe034f6a2e9e9094a7fe919a1b68fc1))
+* **apps:** added golang ([187844e](https://github.com/jonathanMelly/nomad/commit/187844e8b81768f2bdf085c6dc72bc445715f47d))
+* **apps:** added hourglas a simple timer with some UI showing time left ([6d88996](https://github.com/jonathanMelly/nomad/commit/6d889964fa2d140c162172e9882245e4ea196773))
+* **apps:** added spacesniffer awesome app to clean space ([169e631](https://github.com/jonathanMelly/nomad/commit/169e631b1e5d600752f8117a06f5a4824bd57b98))
+* **python3:** added custom venv restore ([a1d072c](https://github.com/jonathanMelly/nomad/commit/a1d072cbcb306f87b65c201ca767a7ebc40413a7))
+* **sfx:** handles 7z sfx archives ([0dc5e93](https://github.com/jonathanMelly/nomad/commit/0dc5e9395d83757559f39373a1e29df02e8db237))
+
+
+### Bug Fixes
+
+* **git:** working full git portable ([0dc5e93](https://github.com/jonathanMelly/nomad/commit/0dc5e9395d83757559f39373a1e29df02e8db237))
+* **postman:** temporarily set postman download link to manual (waiting for 7z full support...) ([857996b](https://github.com/jonathanMelly/nomad/commit/857996ba30c98e9e787d12b9539c734653d2fed9))
+* **vscode:** create data folder to force standalone mode ([1ded30e](https://github.com/jonathanMelly/nomad/commit/1ded30efbc15931cebae04938899adb080ce7a68))
+
 ## [1.17.0](https://github.com/jonathanMelly/nomad/compare/v1.16.0...v1.17.0) (2023-06-16)
 
 
