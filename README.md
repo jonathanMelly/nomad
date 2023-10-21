@@ -120,3 +120,5 @@ UI and lots of new apps
 Please open an issue if you see a bug or think of a nice improvement.
 PR are also welcome.
 
+# Build
+view [action](.github/workflows/go.yml)
