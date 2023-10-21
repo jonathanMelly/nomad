@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -24,6 +25,7 @@ func extractArchive(archivePath string, definition data.AppDefinition, appTarget
 	case ".exe":
 		//Simple copyFile/paste for exe files
 		originalAssetName := filepath.Base(definition.DownloadUrl)
+
 		if err := copyFile(archivePath, filepath.Join(appTargetDirectory, originalAssetName)); err != nil {
 			return err
 		} else {
@@ -43,6 +45,17 @@ func extractArchive(archivePath string, definition data.AppDefinition, appTarget
 			}
 		}(zipReader)
 		archiveFileSystem = zipReader
+	case ".7sfx":
+		//Simple autoextract sfx
+		cmd := exec.Command(archivePath, "-o"+appTargetDirectory, "-y")
+		//TODO filter regex
+		if err := cmd.Run(); err != nil {
+			return err
+		} else {
+			//Not an archive, bypass archive handling
+			return nil
+		}
+
 	default:
 		return errors.New(fmt.Sprint("Unsupported extension ", definition.DownloadExtension))
 	}

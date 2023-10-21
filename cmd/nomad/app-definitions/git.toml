@@ -1,3 +1,4 @@
-Version="2.40.0.windows.1"
+Version="2.42.0.2"
 RepositoryUrl="github:git-for-windows/git"
-DownloadUrl="v{{VERSION}}/MinGit-{{V_MAJOR}}.{{V_MINOR}}.{{V_PATCH}}-busybox-64-bit.zip"
+DownloadExtension=".7sfx"
+DownloadUrl="v{{V_MAJOR}}.{{V_MINOR}}.{{V_PATCH}}.windows.{{V_PATCH2}}/PortableGit-{{VERSION}}-64-bit.7z.exe"
