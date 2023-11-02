@@ -1,0 +1,5 @@
+Version="0.15.0"
+RepositoryUrl="github:kopia/kopia"
+DownloadUrl="v{{VERSION}}/kopia-{{VERSION}}-windows-x64.zip"
+RestoreFiles=["scripts","cli-logs","content-logs"]
+
