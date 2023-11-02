@@ -2,11 +2,11 @@
 	"Version": "3.0.18",
 	"ApplicationName": "vlc",
 	"Shortcut": "vlc.exe",
-	"DownloadUrl": "https://download.videolan.org/pub/videolan/vlc/last/win64/vlc-{{VERSION}}-win64.zip",
+	"DownloadUrl": "https://download.videolan.org/pub/videolan/vlc/{{VERSION}}/win64/vlc-{{VERSION}}-win64.zip",
 	"VersionCheck":
 	{
-		"Url":"https://www.videolan.org/news.html",
-		"RegEx":">VLC {{VERSION}}</a"
+		"Url":"https://www.videolan.org/vlc/",
+		"RegEx":"Version <span id='downloadVersion'>\\s*{{VERSION}}"
 	},
 	"CreateFiles":
 	{
