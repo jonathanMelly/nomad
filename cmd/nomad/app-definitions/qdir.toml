@@ -1,0 +1,7 @@
+Version="11.43"
+DownloadUrl="http://www.softwareok.com/Download/Q-Dir_Portable_x64.zip"
+DownloadExtension=".zip"
+VersionCheck={Url="http://www.softwareok.com/?Download=Q-Dir",RegEx="<title>Q-Dir {{VERSION}} Download"}
+Shortcut="Q-Dir_x64.exe"
+RestoreFiles=["Q-Dir.ini","Favoriten"]
+
