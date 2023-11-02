@@ -1,0 +1,4 @@
+Version="3.0.0-alpha.11"
+RepositoryUrl="github:winsw/winsw"
+DownloadUrl="v{{VERSION}}/WinSW-x64.exe"
+RestoreFiles=["configs"]
