@@ -1,11 +1,11 @@
 repo_name: jonathanMelly/nomad
-report_id: 8667e4772645544ec0f9999e7c88c299
+report_id: 7a712284d7441cefb5a60e8531666b7b
 repo_type: Public
-timestamp: '2023-11-13T13:09:17+00:00'
-requested_by: jonathanMelly
+timestamp: '2023-12-14T10:35:19+00:00'
+requested_by: stacksharebot
 provider: github
 branch: main
-detected_tools_count: 3
+detected_tools_count: 16
 tools:
 - name: Golang
   description: An open source programming language that makes it easy to build simple,
@@ -18,6 +18,17 @@ tools:
   sub_category: Languages
   image_url: https://img.stackshare.io/service/1005/O6AczwfV_400x400.png
   detection_source: Repo Metadata
+- name: pgvector
+  description: Open-source vector similarity search for Postgres
+  website_url: https://github.com/pgvector/pgvector/
+  open_source: false
+  hosted_saas: false
+  category: Data Stores
+  sub_category: Database Tools
+  image_url: https://img.stackshare.io/service/109221/default_b888cdf5617d936aa6aacf130911906955508639.png
+  detection_source: cmd/nomad/app-definitions/archive/example.json.txt
+  last_updated_by: Joseph Spurrier
+  last_updated_on: 2016-01-31 22:42:40.000000000 Z
 - name: Git
   description: Fast, scalable, distributed revision control system
   website_url: http://git-scm.com/
@@ -38,3 +49,168 @@ tools:
   detection_source: ".github/workflows/go.yml"
   last_updated_by: Jonathan Melly
   last_updated_on: 2023-03-18 23:46:34.000000000 Z
+- name: LangChain
+  description: Build AI apps with LLMs through composability
+  website_url: https://github.com/hwchase17/langchain
+  open_source: true
+  hosted_saas: false
+  category: Communications
+  sub_category: Large Language Model Tools
+  image_url: https://img.stackshare.io/service/48790/default_5b6c6b73f1ff3775c85d2a1ba954cb87e30cbf13.jpg
+  detection_source: cmd/nomad/app-definitions/archive/example.json.txt
+  last_updated_by: Joseph Spurrier
+  last_updated_on: 2015-02-22 09:21:28.000000000 Z
+- name: color
+  description: Color package for Go
+  package_url: https://pkg.go.dev/github.com/fatih/color
+  version: 1.14.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-05-05 10:14:15.000000000 Z
+- name: exp
+  description: Experimental and deprecated packages
+  package_url: https://pkg.go.dev/golang.org/x/exp
+  version: 0.0.0
+  license: BSD-3-Clause
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2022-11-29 13:11:36.000000000 Z
+- name: go-colorable
+  description: Go-colorable Colorable writer for windows
+  package_url: https://pkg.go.dev/github.com/mattn/go-colorable
+  version: 0.1.13
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-05-05 10:14:15.000000000 Z
+- name: go-isatty
+  description: Package isatty implements interface to isatty
+  package_url: https://pkg.go.dev/github.com/mattn/go-isatty
+  version: 0.0.16
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-05-05 10:14:15.000000000 Z
+- name: go-winio
+  description: Win32 IO-related utilities for Go
+  package_url: https://pkg.go.dev/github.com/Microsoft/go-winio
+  version: 0.5.2
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-03-09 15:54:58.000000000 Z
+- name: mapstructure
+  description: Go library for decoding generic map values into native Go structures
+  package_url: https://pkg.go.dev/github.com/mitchellh/mapstructure
+  version: 1.5.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-03-09 00:23:28.000000000 Z
+- name: mergo
+  description: 'Mergo: merging Go structs and maps since 2013'
+  package_url: https://pkg.go.dev/github.com/imdario/mergo
+  version: 0.3.13
+  license: BSD-3-Clause
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-03-09 00:23:28.000000000 Z
+- name: spinner
+  description: Go
+  package_url: https://pkg.go.dev/github.com/briandowns/spinner
+  version: 1.23.0
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-05-05 10:14:15.000000000 Z
+- name: sys
+  description: Go packages for low-level interaction with the operating system
+  package_url: https://pkg.go.dev/golang.org/x/sys
+  version: 0.0.0
+  license: BSD-3-Clause
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2022-11-29 13:11:36.000000000 Z
+- name: text
+  description: Go text processing support
+  package_url: https://pkg.go.dev/golang.org/x/text
+  version: 0.7.0
+  license: BSD-3-Clause
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-03-09 00:23:28.000000000 Z
+- name: toml
+  description: TOML parser for Golang with reflection
+  package_url: https://pkg.go.dev/github.com/BurntSushi/toml
+  version: 1.2.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Go Modules Packages
+  image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/jonathanMelly/nomad/blob/main/go.sum
+  detection_source: go.mod
+  last_updated_by: Jonathan Melly
+  last_updated_on: 2023-03-03 09:19:37.000000000 Z
