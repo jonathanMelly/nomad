@@ -2,7 +2,7 @@
 	"Version": "3.2.3",
 	"ApplicationName": "audacity",
 	"Shortcut": "Audacity.exe",
-	"DownloadUrl": "https://github.com/audacity/audacity/releases/download/Audacity-{{VERSION}}/audacity-win-{{VERSION}}-x64.zip",
+	"DownloadUrl": "https://github.com/audacity/audacity/releases/download/Audacity-{{VERSION}}/audacity-win-{{VERSION}}-64bit.zip",
 	"VersionCheck":
 	{
 		"Url":"github:audacity/audacity",
