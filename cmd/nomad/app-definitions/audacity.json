@@ -1,5 +1,5 @@
 {
-	"Version": "3.2.3",
+	"Version": "3.4.2",
 	"ApplicationName": "audacity",
 	"Shortcut": "Audacity.exe",
 	"DownloadUrl": "https://github.com/audacity/audacity/releases/download/Audacity-{{VERSION}}/audacity-win-{{VERSION}}-64bit.zip",
