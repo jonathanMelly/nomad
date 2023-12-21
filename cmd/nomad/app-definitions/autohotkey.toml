@@ -1,0 +1,4 @@
+Version="1.1.36.02"
+RepositoryUrl="github:AutoHotkey/AutoHotkey"
+DownloadExtension=".ahksetup"
+DownloadUrl="v{{VERSION}}/AutoHotkey_{{VERSION}}_setup.exe"

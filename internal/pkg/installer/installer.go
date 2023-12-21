@@ -198,6 +198,8 @@ func handleSymlink(appState state.AppState, newTarget string) (string, error) {
 
 		//SYMLINK
 		log.Debugln("Linking " + symlink + " -> " + newTarget)
+
+		//TODO detect filesystem without symlink support (exfat...) https://github.com/jonathanMelly/nomad/issues/44
 		err := junction.Create(newTarget, symlink)
 		if err != nil {
 			return symlink, errors.New(fmt.Sprint("Error symlink/junction to ", newTarget, " | ", err))

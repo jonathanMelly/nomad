@@ -56,6 +56,38 @@ func extractArchive(archivePath string, definition data.AppDefinition, appTarget
 			return nil
 		}
 
+	case ".ahksetup":
+
+		//cannot run .ahksetup directly... (seems to)
+		extension := filepath.Ext(archivePath)
+		original := strings.TrimSuffix(archivePath, extension) + ".exe"
+		err := os.Rename(archivePath, original)
+		if err != nil {
+			return err
+		}
+
+		//needs cmd /c to avoid access rights issues
+		absOriginal, _ := filepath.Abs(original)
+		absAppTargetDirectory, _ := filepath.Abs(appTargetDirectory)
+
+		cmd := exec.Command(absOriginal, "/S", "/D="+absAppTargetDirectory)
+		//TODO filter regex
+		if err := cmd.Run(); err != nil {
+			err2 := os.Rename(original, archivePath)
+			if err2 != nil {
+				return errors.Join(err, err2)
+			}
+			return err
+		} else {
+			err := os.Rename(original, archivePath)
+			if err != nil {
+				return err
+			}
+
+			//Not an archive, bypass further archive handling
+			return nil
+		}
+
 	default:
 		return errors.New(fmt.Sprint("Unsupported extension ", definition.DownloadExtension))
 	}
