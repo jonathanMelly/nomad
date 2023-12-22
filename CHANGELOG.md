@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.0](https://github.com/jonathanMelly/nomad/compare/v1.19.0...v1.20.0) (2023-12-22)
+
+
+### Features
+
+* **dbeaver:** keep settings along app instead of default %userprofile%\appdata... (as it is one main goal of nomad) ([9903253](https://github.com/jonathanMelly/nomad/commit/99032530b700ecd43fda8e282224902390578f8d))
+
 ## [1.19.0](https://github.com/jonathanMelly/nomad/compare/v1.18.0...v1.19.0) (2023-12-22)
 
 
