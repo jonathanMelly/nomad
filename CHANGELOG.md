@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.19.0](https://github.com/jonathanMelly/nomad/compare/v1.18.0...v1.19.0) (2023-12-22)
+
+
+### Features
+
+* **apps:** added greenshot ([a9548df](https://github.com/jonathanMelly/nomad/commit/a9548dfc2d0c636b345501848fd4d0e01cb1ca8a))
+* **apps:** added kopià super backup tool ([aec4f9f](https://github.com/jonathanMelly/nomad/commit/aec4f9f2bc521fcfdc761465b6849052e6ee6ca6))
+* **apps:** added looping db modeling tool ([98eeba3](https://github.com/jonathanMelly/nomad/commit/98eeba3043a8f447c459d50651be78403332a2ce))
+* **apps:** added qdir ([7848721](https://github.com/jonathanMelly/nomad/commit/7848721d0af5b8cb55c1f594fed84749431c67e0))
+* **apps:** added winsw ([1d0b533](https://github.com/jonathanMelly/nomad/commit/1d0b533806249e03cdceef6d1528c3ec802ccf41))
+* **audacity:** use new url ([5a8e9d9](https://github.com/jonathanMelly/nomad/commit/5a8e9d93ccaa070e0316e5a7afd57279d7a2fdf6))
+* **php:** add php ([8d68f92](https://github.com/jonathanMelly/nomad/commit/8d68f9213b15a3ab51cd81a70a0f976d18f5bfe9))
+* **vlc:** update vlc to handle new versions ([854028e](https://github.com/jonathanMelly/nomad/commit/854028e755fad3be941f3c4b9fa5bb2bf5e512ff))
+
+
+### Bug Fixes
+
+* **audacity:** update version for new url ([9544c3e](https://github.com/jonathanMelly/nomad/commit/9544c3ef264d05aa5cde40a48fea3dbb069a602d))
+* **autohotkey:** use gh assets (cloudflare issues with global ones) ([83e772f](https://github.com/jonathanMelly/nomad/commit/83e772f8cb1fac39447c4168e1a1b67324b06dc4))
+* **php:** download uri linked to real version + keep php.ini+ext upon upgrade... ([5fe37dc](https://github.com/jonathanMelly/nomad/commit/5fe37dcf6365ea7a84c5f071bdf50847988d1832))
+
 ## [1.18.0](https://github.com/jonathanMelly/nomad/compare/v1.17.0...v1.18.0) (2023-10-21)
 
 
