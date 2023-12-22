@@ -1,0 +1,4 @@
+Version="4.0"
+VersionCheck={Url="https://www.looping-mcd.fr/#",RegEx="Version {{VERSION}}"}
+DownloadUrl="https://www.looping-mcd.fr/Looping.zip"
+Shortcut="Looping.exe"
