@@ -1,4 +1,4 @@
-Version="8.3.1"
+Version="8.3.2"
 VersionCheck={Url="https://windows.php.net/download",RegEx="PHP [^\\(]+ \\({{VERSION}}\\)"}
-DownloadUrl="https://windows.php.net/downloads/releases/php-{{VERSION}}-Win32-vs16-x64.zip"
+DownloadUrl="https://windows.php.net/downloads/releases/latest/php-{{V_MAJOR}}.{{V_MINOR}}-Win32-vs16-x64-latest.zip"
 RestoreFiles=["php.ini","ext/"]
