@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.21.0](https://github.com/jonathanMelly/nomad/compare/v1.20.0...v1.21.0) (2024-02-07)
+
+
+### Features
+
+* **apps:** added resourcehacker ([9f27674](https://github.com/jonathanMelly/nomad/commit/9f27674f713239787465f6a80ffceb74b9387de8))
+
+
+### Bug Fixes
+
+* **mobaxterm:** allow bad ssl cert... ([7a475ae](https://github.com/jonathanMelly/nomad/commit/7a475ae78c921443335d4848ca0a007fb7f62e67))
+* **php:** use latest minor ([b9da36a](https://github.com/jonathanMelly/nomad/commit/b9da36a2af212e9a59b63bccc950b7a689aaa8d5))
+
 ## [1.20.0](https://github.com/jonathanMelly/nomad/compare/v1.19.0...v1.20.0) (2023-12-22)
 
 
