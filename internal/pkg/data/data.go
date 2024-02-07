@@ -41,8 +41,9 @@ type Apps struct {
 // AppDefinition contains the settings for the portable application
 type AppDefinition struct {
 	//MANDATORY FIELDS
-	Version     string `json:"Version"`
-	DownloadUrl string `json:"DownloadUrl"` //without /, auto add tag_name for repo based app (see wsl2-ssh-pageant.toml)
+	Version          string `json:"Version"`
+	DownloadUrl      string `json:"DownloadUrl"` //without /, auto add tag_name for repo based app (see wsl2-ssh-pageant.toml)
+	SslIgnoreBadCert bool   //ability to disable ssl checks if needed
 
 	//Optional fields
 	RepositoryUrl string `json:"RepositoryUrl"` //for easy config with github repos

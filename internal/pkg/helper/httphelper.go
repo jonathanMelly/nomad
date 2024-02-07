@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"github.com/gologme/log"
@@ -11,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 const USER_AGENT = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`
@@ -80,7 +82,7 @@ func sendRequest(url string, apiKey string, requestBody string) (string, error) 
 }
 
 // DownloadFile downloads a file from a URL
-func DownloadFile(url string, fileName string) (int64, error) {
+func DownloadFile(url string, fileName string, ignoreBadCert bool) (int64, error) {
 	out, err := os.Create(fileName)
 	defer func(out *os.File) {
 		err := out.Close()
@@ -92,40 +94,50 @@ func DownloadFile(url string, fileName string) (int64, error) {
 		return 0, err
 	}
 
-	client, err := BuildAndDoHttp(url, "GET")
+	response, err := BuildAndDoHttp(url, "GET", ignoreBadCert)
 	if err != nil {
 		return -1, err
 	}
 
-	switch client.StatusCode {
+	switch response.StatusCode {
 	case 200:
 		defer func(Body io.ReadCloser) {
 			err := Body.Close()
 			if err != nil {
 				log.Errorln("Cannot close http body", err)
 			}
-		}(client.Body)
-		n, err := io.Copy(out, client.Body)
+		}(response.Body)
+		n, err := io.Copy(out, response.Body)
 		return n, err
 	case 404:
 		return -1, errors.New("URL not found")
 	default:
-		return -1, errors.New(fmt.Sprint("Bad http status: ", client.StatusCode))
+		return -1, errors.New(fmt.Sprint("Bad http status: ", response.StatusCode))
 	}
 }
 
-func BuildAndDoHttp(url string, method string) (*http.Response, error) {
+func BuildAndDoHttp(url string, method string, ignoreBadCert bool) (*http.Response, error) {
 	r, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
+	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml,application/zip;q=0.9,*/*;q=0.8`)
 	r.Header.Add("User-Agent", USER_AGENT)
 
-	client, err := http.DefaultClient.Do(r)
+	if ignoreBadCert {
+		log.Debugln("ignoring bad cert for this url:", url)
+	}
+	transport := http.DefaultTransport.(*http.Transport)
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: ignoreBadCert}
+	httpClient := http.Client{
+		Timeout:   3 * time.Second,
+		Transport: transport,
+	}
+
+	response, err := httpClient.Do(r)
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return response, nil
 }

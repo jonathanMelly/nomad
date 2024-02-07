@@ -313,7 +313,7 @@ func getAndExtractAppIfNeeded(
 		// Note: The original file download name will be changed
 		var archivePath = path.Join(archivesDir, fmt.Sprint(appNameWithVersion, definition.DownloadExtension))
 
-		err := downloadArchive(downloadURL, skipDownload, archivePath)
+		err := downloadArchive(downloadURL, skipDownload, archivePath, definition.SslIgnoreBadCert)
 		if err != nil {
 			return errors.New(fmt.Sprint("Cannot download archive | ", err))
 		}
@@ -366,7 +366,7 @@ func checkAndEraseCurrentVersionIfNeeded(appPath string, forceExtract bool) (boo
 	return extract, nil
 }
 
-func downloadArchive(downloadURL string, skipDownload bool, archivePath string) error {
+func downloadArchive(downloadURL string, skipDownload bool, archivePath string, ignoreBadCert bool) error {
 	if skipDownload && helper.FileOrDirExists(archivePath) {
 		log.Infoln("Using already downloaded", archivePath, "(use -force to override)")
 	} else {
@@ -374,7 +374,7 @@ func downloadArchive(downloadURL string, skipDownload bool, archivePath string) 
 		_spinner := spinner.New(spinner.CharSets[59], 300*time.Millisecond) // Build our new _spinner
 		_spinner.Prefix = "Please wait while downloading file "
 		_spinner.Start()
-		size, err := helper.DownloadFile(downloadURL, archivePath)
+		size, err := helper.DownloadFile(downloadURL, archivePath, ignoreBadCert)
 		_spinner.Stop()
 		if err != nil {
 			return errors.New(fmt.Sprint("Error download file ", err))
