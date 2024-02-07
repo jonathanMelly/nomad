@@ -1,0 +1,4 @@
+Version="5.2.7"
+VersionCheck={Url="https://www.angusj.com/resourcehacker/",RegEx="Version {{VERSION}}"}
+DownloadUrl="https://www.angusj.com/resourcehacker/resource_hacker.zip"
+Shortcut="ResourceHacker.exe"
