@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.0](https://github.com/jonathanMelly/nomad/compare/v1.21.0...v1.22.0) (2024-02-22)
+
+
+### Features
+
+* **release:** add versionless asset file ([f378ff2](https://github.com/jonathanMelly/nomad/commit/f378ff25b7564f40383fe693fd642039ad9c65d0))
+
 ## [1.21.0](https://github.com/jonathanMelly/nomad/compare/v1.20.0...v1.21.0) (2024-02-07)
 
 
