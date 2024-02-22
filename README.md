@@ -1,5 +1,10 @@
 # NOMAD, a portable app installer 
 
+# Install
+Run this command in a cmd
+```shell
+powershell -Command Invoke-WebRequest -Uri https://github.com/jonathanMelly/nomad/raw/main/install.bat -OutFile %TEMP%\downloaded.bat && %TEMP%\downloaded.bat
+```
 # Credits
 This initial structure of this app was based on [goappmation](https://github.com/josephspurrier/goappmation).
 It has then a lot evolved...
