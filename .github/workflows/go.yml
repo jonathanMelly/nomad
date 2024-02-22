@@ -40,7 +40,7 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
         run: cd build-win64 && zip ../win64.zip *
 
-      - name: Upload release binary
+      - name: Upload release binary with version info
         uses: Bertrand256/upload-release-asset@v1.0.4
         if: ${{ steps.release.outputs.release_created }}
         env:
@@ -49,3 +49,13 @@ jobs:
           tag: ${{ steps.release.outputs.tag_name }}
           asset_path: win64.zip
           asset_name: nomad-${{ steps.release.outputs.major }}.${{steps.release.outputs.minor}}.${{steps.release.outputs.patch}}-win64.zip
+
+      - name: Upload release binary without version info
+        uses: Bertrand256/upload-release-asset@v1.0.4
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tag: ${{ steps.release.outputs.tag_name }}
+          asset_path: win64.zip
+          asset_name: nomad-latest-win64.zip
