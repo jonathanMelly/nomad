@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.23.0](https://github.com/jonathanMelly/nomad/compare/v1.22.0...v1.23.0) (2024-02-22)
+
+
+### Features
+
+* **install:** add install instructions ([dde9e30](https://github.com/jonathanMelly/nomad/commit/dde9e3051930f1b1ac6ff56136946d05af93a0b5))
+* **install:** direct install ([cbb44cb](https://github.com/jonathanMelly/nomad/commit/cbb44cbbb394a3005af7939173c52cc0f28fb551))
+
+
+### Bug Fixes
+
+* **del:** use win del instead of rm ([b0ec19b](https://github.com/jonathanMelly/nomad/commit/b0ec19bf5a46d0bd9f145830154f8a49bcb5201e))
+
 ## [1.22.0](https://github.com/jonathanMelly/nomad/compare/v1.21.0...v1.22.0) (2024-02-22)
 
 
