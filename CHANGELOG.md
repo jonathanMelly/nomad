@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.24.0](https://github.com/jonathanMelly/nomad/compare/v1.23.0...v1.24.0) (2024-03-07)
+
+
+### Features
+
+* **php:** keep www folder upon updates ([34d84e2](https://github.com/jonathanMelly/nomad/commit/34d84e2e51ba4e55b5c7ac2489fe5ba6489cdfe7))
+
 ## [1.23.0](https://github.com/jonathanMelly/nomad/compare/v1.22.0...v1.23.0) (2024-02-22)
 
 
