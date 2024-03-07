@@ -43,10 +43,11 @@ func TestValidateDefaultAppDefinitions(t *testing.T) {
 }
 
 func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
+
 	defVersion, _ := version2.FromString(def.Version)
 	downloadURL := defVersion.FillVersionsPlaceholders(def.DownloadUrl)
 	client, err := helper.BuildAndDoHttp(downloadURL, "HEAD", def.SslIgnoreBadCert)
 	assert.NoError(t, err)
-	assert.Equal(t, 200, client.StatusCode, downloadURL)
+	assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
 	wg.Done()
 }
