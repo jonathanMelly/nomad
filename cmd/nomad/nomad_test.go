@@ -48,6 +48,7 @@ func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
 	downloadURL := defVersion.FillVersionsPlaceholders(def.DownloadUrl)
 	client, err := helper.BuildAndDoHttp(downloadURL, "HEAD", def.SslIgnoreBadCert)
 	assert.NoError(t, err)
+	assert.NotNil(t, client, "http client result for url"+downloadURL+" should not be nil")
 	assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
 	wg.Done()
 }
