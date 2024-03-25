@@ -33,7 +33,7 @@ jobs:
           TOKEN: ${{ secrets.GH_API_TOKEN }}
         run: |
             echo -n "$TOKEN" > "$MAIN_PATH"/ghkey.txt
-          go generate "$MAIN_PATH"
+            go generate "$MAIN_PATH"
 
       - name: Test (discard result upon release)
         continue-on-error: ${{ steps.release.outputs.release_created }}
