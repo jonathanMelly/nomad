@@ -11,6 +11,7 @@ jobs:
   release-please:
     env:
       MAIN_PATH: "./cmd/nomad"
+
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@v3
