@@ -9,6 +9,8 @@ on:
 
 jobs:
   release-please:
+    env:
+      MAIN_PATH: "./cmd/nomad"
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@v3
@@ -35,8 +37,6 @@ jobs:
         run: go test ./...
 
       - name: Build
-        env:
-          MAIN_PATH: "./cmd/nomad"
         run: |
             go generate "$MAIN_PATH"
             GOOS=windows GOARCH=amd64 go build -o build-win64/ "$MAIN_PATH"
