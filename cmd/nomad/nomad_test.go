@@ -43,9 +43,13 @@ func TestValidateDefaultAppDefinitions(t *testing.T) {
 }
 
 func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
+	log.Infoln("checking for initial url", def.DownloadUrl)
 
 	defVersion, _ := version2.FromString(def.Version)
 	downloadURL := defVersion.FillVersionsPlaceholders(def.DownloadUrl)
+
+	log.Infoln("processed url", downloadURL)
+
 	client, err := helper.BuildAndDoHttp(downloadURL, "HEAD", def.SslIgnoreBadCert)
 	assert.NoError(t, err)
 	assert.NotNil(t, client, "http client result for url"+downloadURL+" should not be nil")
