@@ -34,9 +34,11 @@ func TestValidateDefaultAppDefinitions(t *testing.T) {
 
 		//check that url exists
 		if strings.HasPrefix(def.DownloadUrl, "http") {
-			checkDownloadableAsset(t, def)
+			wg.Add(1)
+			go checkDownloadableAsset(t, def)
 		}
 	}
+	wg.Wait()
 
 }
 
@@ -48,8 +50,10 @@ func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
 
 	client, err := helper.BuildAndDoHttp(downloadURL, "HEAD", def.SslIgnoreBadCert)
 	assert.NoError(t, err)
-	assert.NotNil(t, client, "http client result for url"+downloadURL+" should not be nil")
-	assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
+	if assert.NotNil(t, client, "http client result for url "+downloadURL+" should not be nil") {
+		assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
+	}
 
 	log.Debugln(" --- OK")
+	wg.Done()
 }
