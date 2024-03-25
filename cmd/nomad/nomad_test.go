@@ -7,6 +7,7 @@ import (
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
 	version2 "github.com/jonathanMelly/nomad/pkg/version"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"testing"
@@ -43,16 +44,20 @@ func TestValidateDefaultAppDefinitions(t *testing.T) {
 }
 
 func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
-	log.Infoln("checking for initial url", def.DownloadUrl)
+
+	defer func() { wg.Done() }()
+	debug.SetPanicOnFault(true)
+
+	log.Debugln("checking for initial url", def.DownloadUrl)
 
 	defVersion, _ := version2.FromString(def.Version)
 	downloadURL := defVersion.FillVersionsPlaceholders(def.DownloadUrl)
 
-	log.Infoln("processed url", downloadURL)
+	log.Debugln("processed url", downloadURL)
 
 	client, err := helper.BuildAndDoHttp(downloadURL, "HEAD", def.SslIgnoreBadCert)
 	assert.NoError(t, err)
 	assert.NotNil(t, client, "http client result for url"+downloadURL+" should not be nil")
 	assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
-	wg.Done()
+
 }
