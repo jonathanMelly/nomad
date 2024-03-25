@@ -11,7 +11,6 @@ jobs:
   release-please:
     env:
       MAIN_PATH: "./cmd/nomad"
-
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@v3
@@ -21,7 +20,7 @@ jobs:
           extra-files: |
             cmd/nomad/nomad.go
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -35,7 +34,7 @@ jobs:
             echo -n "$TOKEN" > "$MAIN_PATH"/ghkey.txt
             go generate "$MAIN_PATH"
 
-      - name: Test (discard result upon release)
+      - name: Test
         continue-on-error: ${{ steps.release.outputs.release_created }}
         run: go test ./...
 
