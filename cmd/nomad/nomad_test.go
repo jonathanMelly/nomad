@@ -7,7 +7,6 @@ import (
 	"github.com/jonathanMelly/nomad/internal/pkg/data"
 	"github.com/jonathanMelly/nomad/internal/pkg/helper"
 	version2 "github.com/jonathanMelly/nomad/pkg/version"
-	"runtime/debug"
 	"strings"
 	"sync"
 	"testing"
@@ -35,29 +34,22 @@ func TestValidateDefaultAppDefinitions(t *testing.T) {
 
 		//check that url exists
 		if strings.HasPrefix(def.DownloadUrl, "http") {
-			wg.Add(1)
-			go checkDownloadableAsset(t, def)
+			checkDownloadableAsset(t, def)
 		}
 	}
-	wg.Wait()
 
 }
 
 func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
-
-	defer func() { wg.Done() }()
-	debug.SetPanicOnFault(true)
-
-	log.Debugln("checking for initial url", def.DownloadUrl)
+	log.Debug("checking  url for ", def.ApplicationName)
 
 	defVersion, _ := version2.FromString(def.Version)
 	downloadURL := defVersion.FillVersionsPlaceholders(def.DownloadUrl)
-
-	log.Debugln("processed url", downloadURL)
 
 	client, err := helper.BuildAndDoHttp(downloadURL, "HEAD", def.SslIgnoreBadCert)
 	assert.NoError(t, err)
 	assert.NotNil(t, client, "http client result for url"+downloadURL+" should not be nil")
 	assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
 
+	log.Debugln(" --- OK")
 }

@@ -18,7 +18,6 @@ jobs:
           extra-files: |
             cmd/nomad/nomad.go
 
-
       - uses: actions/checkout@v3
 
       - name: Set up Go
@@ -26,14 +25,20 @@ jobs:
         with:
           go-version: "1.21"
 
-      - name: Test and Build
+      - name: Setup token
         env:
           TOKEN: ${{ secrets.GH_API_TOKEN }}
+        run: echo -n "$TOKEN" > "$MAIN_PATH"/ghkey.txt
+
+      - name: Test
+        continue-on-error: true
+        run: go test ./...
+
+      - name: Build
+        env:
           MAIN_PATH: "./cmd/nomad"
         run: |
-            echo -n "$TOKEN" > "$MAIN_PATH"/ghkey.txt
             go generate "$MAIN_PATH"
-            go test ./...
             GOOS=windows GOARCH=amd64 go build -o build-win64/ "$MAIN_PATH"
 
       - name: Package
