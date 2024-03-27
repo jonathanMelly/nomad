@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.26.0](https://github.com/jonathanMelly/nomad/compare/v1.25.0...v1.26.0) (2024-03-27)
+
+
+### Features
+
+* **http:** set timeout to 10 seconds (3 before) ([93f5efc](https://github.com/jonathanMelly/nomad/commit/93f5efcdfe474ca7fe90a5be15199b532c6c6faf))
+
 ## [1.25.0](https://github.com/jonathanMelly/nomad/compare/v1.24.0...v1.25.0) (2024-03-27)
 
 
