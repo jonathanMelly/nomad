@@ -35,8 +35,13 @@ jobs:
             go generate "$MAIN_PATH"
 
       - name: Test
-        continue-on-error: ${{ steps.release.outputs.release_created }}
+        id: tests
+        continue-on-error: true
         run: go test ./...
+
+      - name: Stop pipeline on failed tests
+        if: steps.tests.outcome != 'success' && ! ${{ steps.release.outputs.release_created }}
+        run: exit 1
 
       - name: Build
         run: GOOS=windows GOARCH=amd64 go build -o build-win64/ "$MAIN_PATH"

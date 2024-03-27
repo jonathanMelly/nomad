@@ -43,17 +43,16 @@ func TestValidateDefaultAppDefinitions(t *testing.T) {
 }
 
 func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
-	log.Debug("checking  url for ", def.ApplicationName)
 
 	defVersion, _ := version2.FromString(def.Version)
 	downloadURL := defVersion.FillVersionsPlaceholders(def.DownloadUrl)
 
 	client, err := helper.BuildAndDoHttp(downloadURL, "HEAD", def.SslIgnoreBadCert)
-	assert.NoError(t, err)
-	if assert.NotNil(t, client, "http client result for url "+downloadURL+" should not be nil") {
+
+	if assert.NoError(t, err, "http client error url "+downloadURL) &&
+		assert.NotNil(t, client, "http client for url "+downloadURL+" should not be nil") {
 		assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
 	}
 
-	log.Debugln(" --- OK")
 	wg.Done()
 }
