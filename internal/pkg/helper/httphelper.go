@@ -131,7 +131,7 @@ func BuildAndDoHttp(url string, method string, ignoreBadCert bool) (*http.Respon
 	transport := http.DefaultTransport.(*http.Transport)
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: ignoreBadCert}
 	httpClient := http.Client{
-		Timeout:   3 * time.Second,
+		Timeout:   10 * time.Second,
 		Transport: transport,
 	}
 
