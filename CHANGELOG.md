@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.25.0](https://github.com/jonathanMelly/nomad/compare/v1.24.0...v1.25.0) (2024-03-27)
+
+
+### Features
+
+* **build:** upgrade to go 1.21 ([ebf09cb](https://github.com/jonathanMelly/nomad/commit/ebf09cb9694938d6665f9925cf770bcb2935338d))
+
+
+### Bug Fixes
+
+* **test:** seq. tests + no fail upon test issue for release... ([7aab812](https://github.com/jonathanMelly/nomad/commit/7aab812c3ffbb641cdb101b76de1a5e4a9e48c54))
+
 ## [1.24.0](https://github.com/jonathanMelly/nomad/compare/v1.23.0...v1.24.0) (2024-03-07)
 
 
