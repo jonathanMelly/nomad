@@ -40,7 +40,7 @@ jobs:
         run: go test ./...
 
       - name: Stop pipeline on failed tests
-        if: steps.tests.outcome != 'success' && ! ${{ steps.release.outputs.release_created }}
+        if: steps.tests.outcome != 'success' && !steps.release.outputs.release_created
         run: exit 1
 
       - name: Build
