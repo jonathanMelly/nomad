@@ -1,4 +1,4 @@
 Version="2.42.0.2"
 RepositoryUrl="github:git-for-windows/git"
 DownloadExtension=".7sfx"
-DownloadUrl="v{{V_MAJOR}}.{{V_MINOR}}.{{V_PATCH}}.windows.{{V_PATCH2}}/PortableGit-{{VERSION}}-64-bit.7z.exe"
+DownloadUrl="v{{VERSION}}/PortableGit-{{V_MAJOR}}.{{V_MINOR}}.{{V_PATCH}}-64-bit.7z.exe"
