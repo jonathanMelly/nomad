@@ -315,6 +315,17 @@ func getAndExtractAppIfNeeded(
 
 		err := downloadArchive(downloadURL, skipDownload, archivePath, definition.SslIgnoreBadCert)
 		if err != nil {
+			downloadedFile, err := os.Stat(archivePath)
+			if err != nil {
+				if downloadedFile.Size() == 0 {
+					err := os.Remove(downloadedFile.Name())
+					if err != nil {
+						log.Warnln("Cannot remove empty file", downloadedFile.Name(), "|", err)
+					} else {
+						log.Debugln("Removed empty file", downloadedFile.Name())
+					}
+				}
+			}
 			return errors.New(fmt.Sprint("Cannot download archive | ", err))
 		}
 
