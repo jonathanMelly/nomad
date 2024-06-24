@@ -1,0 +1,4 @@
+Version="2.51.0"
+RepositoryUrl="github:cli/cli"
+DownloadUrl="v{{VERSION}}/gh_{{VERSION}}_windows_amd64.zip"
+
