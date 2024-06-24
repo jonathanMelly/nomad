@@ -1,5 +1,5 @@
 Version="23.1"
-DownloadUrl="manual,go to https://ccc.mobatek.net/ccc.php, generate portable zip and put it into archives..."
+DownloadUrl="manual, 1. go to https://ccc.mobatek.net/ccc.php, 2. GENERATE portable zip and put it into archives..."
 DownloadExtension=".zip"
 VersionCheck={Url="https://mobaxterm.mobatek.net/download-home-edition.html",RegEx="Version {{VERSION}}"}
 Shortcut="MobaXterm.exe"
