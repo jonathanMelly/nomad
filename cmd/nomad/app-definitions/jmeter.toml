@@ -1,4 +1,4 @@
 Version="5.6.3"
 DownloadUrl="https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-{{VERSION}}.zip"
-VersionCheck={Url="https://jmeter.apache.org/changes.html",RegEx="<h1>Version {{VERSION}}</h1>"}
+VersionCheck={Url="https://jmeter.apache.org/changes.html",RegEx="<h1>Version {{VERSION}}"}
 Shortcut="bin/jmeter.bat"
