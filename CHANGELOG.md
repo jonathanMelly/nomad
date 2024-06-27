@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.27.0](https://github.com/jonathanMelly/nomad/compare/v1.26.0...v1.27.0) (2024-06-27)
+
+
+### Features
+
+* **apps:** added inkscape ([449a772](https://github.com/jonathanMelly/nomad/commit/449a7724256bcef778369065761ef7e627a8727d))
+* **ghcli:** added githubcli ([21bc735](https://github.com/jonathanMelly/nomad/commit/21bc735f57a1e18817138d4f6d8e8dd8c06a4e06))
+* **git:** update to 2.45.1.windows.1 ([756208a](https://github.com/jonathanMelly/nomad/commit/756208aed8d5c1e7748eea67550db66255fd586c))
+* **heidi:** added Snippets for restore ([d010d21](https://github.com/jonathanMelly/nomad/commit/d010d212c24f89e6935df750940922751671eac0))
+* **jmeter:** update to 5.6.3 ([205a793](https://github.com/jonathanMelly/nomad/commit/205a793c025dc13261e07502aa8c6690a7eebaa7))
+* **mobaxtermpro:** better info message for manual download ([1a4d94c](https://github.com/jonathanMelly/nomad/commit/1a4d94ce3b50cb7d0431cb09febaaa4103c2a540))
+
+
+### Bug Fixes
+
+* **git:** updated download url ([a105dcc](https://github.com/jonathanMelly/nomad/commit/a105dccd63d37578dee8167d9d7139624048b515))
+* **installer:** remove empty archive upon download error ([9e3a7e8](https://github.com/jonathanMelly/nomad/commit/9e3a7e8c027f7a6fc4dfd86753d14d74c3a25ee9))
+* **jmeter:** version check pattern updated ([99bc3ad](https://github.com/jonathanMelly/nomad/commit/99bc3ad30229818c745a9f048195d341491a52ae))
+
 ## [1.26.0](https://github.com/jonathanMelly/nomad/compare/v1.25.0...v1.26.0) (2024-03-27)
 
 
