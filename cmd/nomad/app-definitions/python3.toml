@@ -1,5 +1,6 @@
-Version="3.11.2"
-VersionCheck={Url="https://www.python.org/downloads/",RegEx="https://www.python.org/ftp/python/{{VERSION}}/python-"}
-DownloadUrl="https://www.python.org/ftp/python/{{VERSION}}/python-{{VERSION}}-embed-amd64.zip"
+Version="3.12.4.1"
+VersionCheck={Url="https://winpython.github.io/",RegEx="WinPythondot-64bit-{{VERSION}}"}
+DownloadUrl="https://sourceforge.net/projects/winpython/files/WinPython_{{V_MAJOR}}.{{V_MINOR}}/{{VERSION}}/Winpython64-{{VERSION}}dot.exe/download"
+DownloadExtension=".7sfx"
 #stores venv in this custom folder...
-RestoreFiles=["venv/"]
+#RestoreFiles=["venv/"]

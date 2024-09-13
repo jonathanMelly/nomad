@@ -15,7 +15,8 @@ import (
 	"time"
 )
 
-const USER_AGENT = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`
+const USER_AGENT_BROWSER = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`
+const USER_AGENT_WGET = `curl/7.54`
 
 // GetVersion will return extracted text from a page at a URL
 func GetVersion(url string, definition *data.AppDefinition, apiKey string, requestBody string) (*version.Version, error) {
@@ -53,7 +54,7 @@ func sendRequest(url string, apiKey string, requestBody string) (string, error) 
 		r.Header.Add("Authorization", fmt.Sprint("Bearer ", apiKey))
 	}
 	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
-	r.Header.Add("User-Agent", USER_AGENT)
+	r.Header.Add("User-Agent", USER_AGENT_BROWSER)
 
 	log.Traceln("sending http request to", url, "with payload", requestBody)
 	client, err := http.DefaultClient.Do(r)
@@ -123,7 +124,12 @@ func BuildAndDoHttp(url string, method string, ignoreBadCert bool) (*http.Respon
 	}
 
 	r.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml,application/zip;q=0.9,*/*;q=0.8`)
-	r.Header.Add("User-Agent", USER_AGENT)
+
+	userAgent := USER_AGENT_BROWSER
+	if strings.Contains(url, "sourceforge") {
+		userAgent = USER_AGENT_WGET
+	}
+	r.Header.Add("User-Agent", userAgent)
 
 	if ignoreBadCert {
 		log.Debugln("ignoring bad cert for this url:", url)

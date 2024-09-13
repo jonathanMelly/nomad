@@ -126,4 +126,8 @@ Please open an issue if you see a bug or think of a nice improvement.
 PR are also welcome.
 
 # Build
+## Windows
+go generate .\cmd\nomad
+go build -o build .\cmd\nomad\
+## Linux
 view [action](.github/workflows/go.yml)
