@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NomadGuiProgramme", "NomadGuiProgramme\NomadGuiProgramme.csproj", "{47C6AB80-D765-4FDA-9F30-F95E6A9E2540}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EA18C5B9-8E7F-4294-9728-E43D75485961}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NomadGuiProgramme.UITests", "NomadGuiProgramme.UITests\NomadGuiProgramme.UITests.csproj", "{AD6F2745-93F7-4D8B-95DA-87BAF5F56E3B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NomadGuiProgramme.Tests", "NomadGuiProgramme.Tests\NomadGuiProgramme.Tests.csproj", "{C7FC3752-491C-46C4-8848-F29C6B08CC99}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AC8A4B17-2F48-4962-94DA-332EC0C24847}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		Directory.Packages.props = Directory.Packages.props
+		global.json = global.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47C6AB80-D765-4FDA-9F30-F95E6A9E2540}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47C6AB80-D765-4FDA-9F30-F95E6A9E2540}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47C6AB80-D765-4FDA-9F30-F95E6A9E2540}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{47C6AB80-D765-4FDA-9F30-F95E6A9E2540}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47C6AB80-D765-4FDA-9F30-F95E6A9E2540}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47C6AB80-D765-4FDA-9F30-F95E6A9E2540}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{AD6F2745-93F7-4D8B-95DA-87BAF5F56E3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD6F2745-93F7-4D8B-95DA-87BAF5F56E3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD6F2745-93F7-4D8B-95DA-87BAF5F56E3B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{AD6F2745-93F7-4D8B-95DA-87BAF5F56E3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD6F2745-93F7-4D8B-95DA-87BAF5F56E3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD6F2745-93F7-4D8B-95DA-87BAF5F56E3B}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{C7FC3752-491C-46C4-8848-F29C6B08CC99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7FC3752-491C-46C4-8848-F29C6B08CC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7FC3752-491C-46C4-8848-F29C6B08CC99}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{C7FC3752-491C-46C4-8848-F29C6B08CC99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7FC3752-491C-46C4-8848-F29C6B08CC99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7FC3752-491C-46C4-8848-F29C6B08CC99}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AD6F2745-93F7-4D8B-95DA-87BAF5F56E3B} = {EA18C5B9-8E7F-4294-9728-E43D75485961}
+		{C7FC3752-491C-46C4-8848-F29C6B08CC99} = {EA18C5B9-8E7F-4294-9728-E43D75485961}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {58C5E07B-9248-40D5-9B38-8FE336F37C56}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,58 @@
+﻿<Page x:Class="NomadGuiProgramme.Presentation.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:NomadGuiProgramme.Presentation"
+      xmlns:uen="using:Uno.Extensions.Navigation.UI"
+      xmlns:utu="using:Uno.Toolkit.UI"
+      xmlns:um="using:Uno.Material"
+      NavigationCacheMode="Required"
+      Background="{ThemeResource BackgroundBrush}">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="70*" />
+      <ColumnDefinition Width="30*" />
+    </Grid.ColumnDefinitions>
+
+    <Grid Grid.Column="0" VerticalAlignment="Stretch">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="15*" />
+        <RowDefinition Height="85*" />
+      </Grid.RowDefinitions>
+      <Rectangle Grid.Row="0" Fill="White" VerticalAlignment="Stretch" />
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="60*" />
+          <ColumnDefinition Width="20*" />
+          <ColumnDefinition Width="20*" />
+        </Grid.ColumnDefinitions>
+        <Rectangle Grid.Column="0" Fill="White" VerticalAlignment="Stretch" />
+        <Rectangle Grid.Column="1" Fill="PaleVioletRed" VerticalAlignment="Stretch" />
+        <Rectangle Grid.Column="2" Fill="White" VerticalAlignment="Stretch" />
+
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80*"/>
+            <ColumnDefinition Width="20*"/>
+          </Grid.ColumnDefinitions>
+          <TextBox Grid.Column="0" PlaceholderText="Chercher-moi" Width="400" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          <!-- <Image Source="ms-appx:///../../image/IOP.jpg" Height="10" Width="40" Grid.Column="1" x:Name="Loupe"/> -->
+          <TextBlock Text="Image à venir" Grid.Column="1" VerticalAlignment="Center"/>
+        </Grid>
+         
+
+      </Grid>
+
+
+      <Rectangle Grid.Row="1" Fill="White" VerticalAlignment="Stretch" />
+      <Border Grid.Row="0" Height="8" Background="Black" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+    <Grid x:Name="MainGrid">
+      <!-- Ce conteneur recevra les contrôles créés dynamiquement -->
+    </Grid>
+    </Grid>
+    <Button Content="Lancer Nomad List" Command="{Binding RunNomadListCommand}" Width="200" Height="50" VerticalAlignment="Top"/>
+    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+    <Rectangle Grid.Column="1" Fill="Gray" VerticalAlignment="Stretch" />
+
+
+  </Grid>
+</Page>
