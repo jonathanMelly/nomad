@@ -1,7 +1,7 @@
 # NOMAD, a portable app installer 
 
 # Install
-Run this command in a cmd
+Run this command in a cmd and in a `nomad` folder (or whatever else folder)
 ```shell
 powershell -Command Invoke-WebRequest -Uri https://github.com/jonathanMelly/nomad/raw/main/install.bat -OutFile %TEMP%\downloaded.bat && %TEMP%\downloaded.bat
 ```
