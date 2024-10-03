@@ -1,45 +1,30 @@
-public sealed partial class MainPage : Page
+using System.Collections.ObjectModel;
+
+namespace NomadGuiProgramme.Presentation
 {
-    public MainPage()
+    public sealed partial class MainPage : Page
     {
-        this.InitializeComponent();
+        public ObservableCollection<ApplicationItem> Applications { get; } = new ObservableCollection<ApplicationItem>();
 
-        // Événement chargé pour s'assurer que le DataContext est bien prêt
-        this.Loaded += MainPage_Loaded;
-    }
+        public MainViewModel ViewModel { get; } = new MainViewModel();
 
-    private void MainPage_Loaded(object sender, RoutedEventArgs e)
-    {
-        // Vérifier si le DataContext est bien initialisé
-        if (this.DataContext is MainViewModel viewModel)
+
+        public MainPage()
         {
-            // S'assurer que la collection "Applications" est non nulle
-            if (viewModel.Applications != null)
-            {
-                // Écouter les changements dans la collection "Applications"
-                viewModel.Applications.CollectionChanged += Applications_CollectionChanged;
-            }
+            this.InitializeComponent();
+            this.DataContext = new MainViewModel();
         }
-    }
 
-    private void Applications_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    }
+    public class ApplicationItem
+{
+    public string Name { get; set; }
+    public ICommand InstallCommand { get; }
+
+    public ApplicationItem(string name, ICommand installAppCommand)
     {
-        // Ajouter chaque élément nouvellement ajouté à la Grid
-        foreach (string appName in e.NewItems)
-        {
-            AddControlsDynamically(appName);
-        }
+        Name = name;
+        InstallCommand = new RelayCommand(() => installAppCommand.Execute(name));
     }
-
-    public void AddControlsDynamically(string appName)
-    {
-        TextBlock textBlock = new TextBlock
-        {
-            Text = appName,
-            FontSize = 18,
-            Margin = new Thickness(10)
-        };
-
-        MainGrid.Children.Add(textBlock);
-    }
+}
 }
