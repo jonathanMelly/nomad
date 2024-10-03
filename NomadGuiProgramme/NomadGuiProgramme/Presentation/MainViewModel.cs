@@ -1,44 +1,143 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
-using System.Xml.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
-public partial class MainViewModel : ObservableObject
+namespace NomadGuiProgramme.Presentation
 {
-    public ICommand RunNomadListCommand { get; }
-
-    // Collection pour stocker les applications récupérées
-    public ObservableCollection<string> Applications { get; } = new ObservableCollection<string>();
-
-    public MainViewModel()
+    public enum AppStatus
     {
-        RunNomadListCommand = new RelayCommand(RunNomadList);
+        NeedsUpdate,
+        Installed,
+        NotInstalled
     }
 
-    private async void RunNomadList()
+    public partial class ApplicationItem : ObservableObject
     {
-        string exePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "nomad.exe");
-        Debug.WriteLine($"Executable Path: {exePath}");
+        public string Name { get; set; }
 
-        Process process = new Process();
-        process.StartInfo.FileName = exePath;
-        process.StartInfo.Arguments = "list";
-        process.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(exePath);
-        process.StartInfo.RedirectStandardOutput = true;
-        process.StartInfo.RedirectStandardError = true;
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.CreateNoWindow = true;
-
-        process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-        process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
-
-        try
+        private AppStatus status;
+        public AppStatus Status
         {
+            get => status;
+            set => SetProperty(ref status, value);
+        }
+
+        public ICommand InstallCommand { get; }
+
+        public ApplicationItem(string name, ICommand installCommand)
+        {
+            Name = name;
+            InstallCommand = new RelayCommand(() => installCommand.Execute(Name));
+        }
+
+        public string ButtonContent
+        {
+            get
+            {
+                return Status switch
+                {
+                    AppStatus.NeedsUpdate => "Mettre à jour",
+                    AppStatus.NotInstalled => "Installer",
+                    _ => "Réinstaller",
+                };
+            }
+        }
+
+        public bool IsButtonEnabled => Status != AppStatus.Installed;
+    }
+
+    public partial class MainViewModel : ObservableObject
+    {
+        public ICommand RunNomadListCommand { get; }
+        public ICommand InstallAppCommand { get; }
+        public ICommand SearchCommand { get; }
+
+        public ObservableCollection<ApplicationItem> Applications { get; } = new ObservableCollection<ApplicationItem>();
+        public ObservableCollection<ApplicationItem> FilteredApplications { get; } = new ObservableCollection<ApplicationItem>();
+
+        [ObservableProperty]
+        private string searchText;
+
+        public MainViewModel()
+        {
+            RunNomadListCommand = new RelayCommand(RunNomadList);
+            InstallAppCommand = new RelayCommand<string>(InstallApp);
+            SearchCommand = new RelayCommand(ExecuteSearch);
+        }
+
+        private async void RunNomadList()
+        {
+            try
+            {
+                var allApps = await GetAllApps();
+                var appStatuses = await GetAppStatuses(allApps);
+
+                Applications.Clear();
+
+                foreach (var appName in allApps)
+                {
+                    var status = appStatuses.ContainsKey(appName) ? appStatuses[appName] : AppStatus.NotInstalled;
+                    var appItem = new ApplicationItem(appName, InstallAppCommand) { Status = status };
+                    Applications.Add(appItem);
+                }
+
+                SortApplications();
+
+                FilteredApplications.Clear();
+                foreach (var app in Applications)
+                {
+                    FilteredApplications.Add(app);
+                }
+            }
+            catch (Exception ex)
+            {
+                Name = $"Exception: {ex.Message}";
+            }
+        }
+
+        private void SortApplications()
+        {
+            var sortedApps = Applications
+                .OrderBy(app => app.Status == AppStatus.NeedsUpdate ? 0 :
+                                app.Status == AppStatus.Installed ? 1 : 2)
+                .ThenBy(app => app.Name)
+                .ToList();
+
+            Applications.Clear();
+            foreach (var app in sortedApps)
+            {
+                Applications.Add(app);
+            }
+        }
+
+        private async Task<List<string>> GetAllApps()
+        {
+            var allApps = new List<string>();
+
+            string exePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "nomad.exe");
+
+            Process process = new Process();
+            process.StartInfo.FileName = exePath;
+            process.StartInfo.Arguments = "list";
+            process.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(exePath);
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+
             bool isStarted = process.Start();
             if (!isStarted)
             {
-                name = "Failed to start the process.";
-                return;
+                Name = "Failed to start the process.";
+                return allApps;
             }
 
             var outputTask = process.StandardOutput.ReadToEndAsync();
@@ -54,88 +153,181 @@ public partial class MainViewModel : ObservableObject
             string allAppsStr = ((standardError + standardOutput).Split(":")).Last();
             string[] apps = allAppsStr.Split(",");
 
-            Applications.Clear();  // Vider la collection avant d'ajouter les nouvelles apps
-        foreach (var app in apps)
-        {
-            string trimmedApp = app.Trim();
-            if (!string.IsNullOrEmpty(trimmedApp))
+            foreach (var app in apps)
             {
-                Applications.Add(trimmedApp);
+                string trimmedApp = app.Trim();
+                if (!string.IsNullOrEmpty(trimmedApp))
+                {
+                    allApps.Add(trimmedApp);
+                }
             }
+
+            return allApps;
         }
-        }
-        catch (Exception ex)
+
+        private async Task<Dictionary<string, AppStatus>> GetAppStatuses(List<string> allApps)
         {
-            Name = $"Exception: {ex.Message}";
-        }
-    }
-    private async void InstallApp(string appName)
-    {
-        string exePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "nomad.exe");
-        Debug.WriteLine($"Executable Path: {exePath}");
+            var appStatuses = new Dictionary<string, AppStatus>();
 
-        Process process = new Process();
-        process.StartInfo.FileName = exePath;
-        process.StartInfo.Arguments = $"i {appName}";
-        process.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(exePath);
-        process.StartInfo.RedirectStandardOutput = true;
-        process.StartInfo.RedirectStandardError = true;
-        process.StartInfo.RedirectStandardInput = true; // Rediriger l'entrée standard
-        process.StartInfo.UseShellExecute = true;
-        process.StartInfo.CreateNoWindow = false;
+            string exePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "nomad.exe");
 
-        process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-        process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+            Process process = new Process();
+            process.StartInfo.FileName = exePath;
+            process.StartInfo.Arguments = "status";
+            process.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(exePath);
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
 
-        try
-        {
             bool isStarted = process.Start();
             if (!isStarted)
             {
                 Name = "Failed to start the process.";
-                return;
+                return appStatuses;
             }
 
-            // Créer des tâches pour lire les sorties standard et les erreurs
-            var outputTask = ReadOutputAsync(process.StandardOutput, process);
-            var errorTask = ReadOutputAsync(process.StandardError, process);
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var errorTask = process.StandardError.ReadToEndAsync();
 
-            // Écrire les 'y' nécessaires dans l'entrée standard
-            await Task.Delay(500); // Attendre un peu pour que le processus démarre et demande une confirmation
-            await process.StandardInput.WriteLineAsync("y");
-
-            // Attendre que le processus se termine
             await Task.WhenAll(outputTask, errorTask);
+
             process.WaitForExit();
 
             string standardOutput = outputTask.Result;
-            string standardError = errorTask.Result;
+            string standardError = outputTask.Result;
 
-            // Traiter les sorties
-            Name = $"Installation de {appName} terminée.\nSortie : {standardOutput}\nErreurs : {standardError}";
-        }
-        catch (Exception ex)
-        {
-            Name = $"Exception lors de l'installation de {appName}: {ex.Message}";
-        }
-    }
+            string output = standardError + standardOutput;
 
-    private async Task<string> ReadOutputAsync(StreamReader reader, Process process)
-    {
-        StringBuilder output = new StringBuilder();
-        string line;
-        while ((line = await reader.ReadLineAsync()) != null)
-        {
-            output.AppendLine(line);
-            // Détecter les invites de confirmation si nécessaire et répondre
-            if (line.Contains("Proceed [Y,n]") || line.Contains("Proceed [Y,n] (Enter=Yes) ?"))
+            var lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var line in lines)
             {
-                await process.StandardInput.WriteLineAsync("y");
+                if (line.Contains("|"))
+                {
+                    int startIndex = line.IndexOf("|") + 1;
+                    int endIndex = line.IndexOf("|", startIndex);
+                    if (endIndex > startIndex)
+                    {
+                        string appName = line.Substring(startIndex, endIndex - startIndex);
+                        string statusText = line.Substring(endIndex + 1).Trim();
+
+                        AppStatus status;
+                        if (statusText.Contains("already up to date"))
+                        {
+                            status = AppStatus.Installed;
+                        }
+                        else if (statusText.Contains("A newer version"))
+                        {
+                            status = AppStatus.NeedsUpdate;
+                        }
+                        else
+                        {
+                            status = AppStatus.NotInstalled;
+                        }
+
+                        appStatuses[appName] = status;
+                    }
+                }
+            }
+
+            foreach (var appName in allApps)
+            {
+                if (!appStatuses.ContainsKey(appName))
+                {
+                    appStatuses[appName] = AppStatus.NotInstalled;
+                }
+            }
+
+            return appStatuses;
+        }
+
+        private async void InstallApp(string appName)
+        {
+            string exePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "nomad.exe");
+            Debug.WriteLine($"Executable Path: {exePath}");
+
+            Process process = new Process();
+            process.StartInfo.FileName = exePath;
+            process.StartInfo.Arguments = $"i {appName} --yes";
+            process.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(exePath);
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+
+            try
+            {
+                Name = $"Installation de {appName} en cours...";
+
+                bool isStarted = process.Start();
+                if (!isStarted)
+                {
+                    Name = $"Échec du démarrage du processus pour l'installation de {appName}.";
+                    return;
+                }
+
+                var outputTask = process.StandardOutput.ReadToEndAsync();
+                var errorTask = process.StandardError.ReadToEndAsync();
+
+                await Task.WhenAll(outputTask, errorTask);
+                process.WaitForExit();
+
+                string standardOutput = outputTask.Result;
+                string standardError = errorTask.Result;
+
+                if (process.ExitCode == 0)
+                {
+                    Name = $"Installation de {appName} terminée avec succès.";
+
+                    var app = Applications.FirstOrDefault(a => a.Name == appName);
+                    if (app != null)
+                    {
+                        app.Status = AppStatus.Installed;
+                    }
+                }
+                else
+                {
+                    Name = $"Échec de l'installation de {appName}.\nErreurs : {standardError}";
+                }
+            }
+            catch (Exception ex)
+            {
+                Name = $"Exception lors de l'installation de {appName}: {ex.Message}";
             }
         }
-        return output.ToString();
-    }
 
-    [ObservableProperty]
-    private string name;
+        private void ExecuteSearch()
+        {
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                FilteredApplications.Clear();
+                foreach (var app in Applications)
+                {
+                    FilteredApplications.Add(app);
+                }
+            }
+            else
+            {
+                var filtered = Applications.Where(a => a.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+                FilteredApplications.Clear();
+                foreach (var app in filtered)
+                {
+                    FilteredApplications.Add(app);
+                }
+            }
+        }
+
+        [ObservableProperty]
+        private string name;
+
+        partial void OnSearchTextChanged(string value)
+        {
+            ExecuteSearch();
+        }
+    }
 }
