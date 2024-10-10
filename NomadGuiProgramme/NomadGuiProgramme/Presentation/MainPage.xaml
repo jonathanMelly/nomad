@@ -8,99 +8,94 @@
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
 
-    <Page.DataContext>
-        <local:MainViewModel x:Name="ViewModels"/>
-    </Page.DataContext>
+  <Page.DataContext>
+    <local:MainViewModel x:Name="ViewModels"/>
+  </Page.DataContext>
 
-    <Page.Resources>
-        <local:FilterOption x:Key="FilterOptionToStringConverter"/>
-    </Page.Resources>
+  <Page.Resources>
+    <local:FilterOptionToStringConverter x:Key="FilterOptionToStringConverter"/>
+  </Page.Resources>
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="70*" />
-            <ColumnDefinition Width="30*" />
-        </Grid.ColumnDefinitions>
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="0" />
+      <!-- Ajusté pour utiliser une seule colonne -->
+    </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" VerticalAlignment="Stretch">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+    <Grid VerticalAlignment="Stretch">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
 
-            <!-- Zone de recherche et filtres -->
-            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="10">
-                <TextBox PlaceholderText="Rechercher"
+      <!-- Zone de recherche et filtres -->
+      <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="10">
+        <TextBox PlaceholderText="Rechercher"
                          Width="200"
                          Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          VerticalAlignment="Center" />
-                <ComboBox ItemsSource="{Binding FilterOptions}"
+
+        <ComboBox ItemsSource="{Binding FilterOptions}"
                           SelectedItem="{Binding SelectedFilter, Mode=TwoWay}"
-                          DisplayMemberPath="."
-                          Width="150"
+                          Width="200"
                           Margin="10,0,0,0"
                           VerticalAlignment="Center">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={StaticResource FilterOptionToStringConverter}}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-            </StackPanel>
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding Converter={StaticResource FilterOptionToStringConverter}}"/>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </StackPanel>
 
-            <!-- Liste des applications -->
-            <ScrollViewer Grid.Row="1">
-                <ItemsControl ItemsSource="{Binding FilteredApplications}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="local:ApplicationItem">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="2*" />
-                                    <ColumnDefinition Width="1*" />
-                                    <ColumnDefinition Width="1*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+      <!-- Liste des applications -->
+      <ScrollViewer Grid.Row="1">
+        <ItemsControl ItemsSource="{Binding FilteredApplications}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="local:ApplicationItem">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="2*" />
+                  <ColumnDefinition Width="1*" />
+                  <ColumnDefinition Width="1*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                                <!-- Nom de l'application -->
-                                <TextBlock Text="{Binding Name}"
+                <!-- Nom de l'application -->
+                <TextBlock Text="{x:Bind Name}"
                                            FontSize="18"
                                            Margin="10"
                                            Grid.Column="0"
                                            VerticalAlignment="Center" />
 
-                                <!-- Version de l'application -->
-                                <TextBlock Text="{Binding Version}"
+                <!-- Version de l'application -->
+                <TextBlock Text="{x:Bind Version}"
                                            FontSize="16"
                                            Margin="10"
                                            Grid.Column="1"
                                            VerticalAlignment="Center" />
 
-                                <!-- Statut de l'application -->
-                                <TextBlock Text="{Binding Status}"
+                <!-- Statut de l'application -->
+                <TextBlock Text="{x:Bind Status}"
                                            FontSize="14"
                                            Margin="10"
                                            Grid.Column="2"
                                            VerticalAlignment="Center" />
 
-                                <!-- Bouton d'action -->
-                                <Button Content="{Binding ButtonContent}"
+                <!-- Bouton d'action -->
+                <Button Content="{x:Bind ButtonContent}"
                                         Grid.Column="3"
                                         Margin="10"
                                         VerticalAlignment="Center"
-                                        Command="{Binding InstallCommand}"
-                                        CommandParameter="{Binding Name}"
-                                        IsEnabled="{Binding IsButtonEnabled}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </Grid>
-
-        <TextBlock Text="{Binding Name}"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center" />
-
-        <Rectangle Grid.Column="1" Fill="Gray" VerticalAlignment="Stretch" />
+                                        Command="{x:Bind InstallCommand}"
+                                        CommandParameter="{x:Bind Name}"
+                                        IsEnabled="{x:Bind IsButtonEnabled}" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
     </Grid>
+  </Grid>
 </Page>
