@@ -50,14 +50,19 @@ func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
 
 	client, err := helper.BuildAndDoHttp(downloadURL, "HEAD", def.SslIgnoreBadCert)
 
-	if strings.Compare(def.ApplicationName, "resourcehacker") == 0 && os.Getenv("GITHUB_ACTIONS") == "true" {
-		log.Warnln("ignoring ", def.ApplicationName, " as failing for unknown reason on gh agent")
-	} else {
-		if assert.NoError(t, err, "http client error url "+downloadURL) &&
-			assert.NotNil(t, client, "app", def.ApplicationName, " failed : ", "http client for url "+downloadURL+" should not be nil") {
-			assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
-		}
-	}
+	if assert.NoError(t, err, "http client error url "+downloadURL) &&
+		assert.NotNil(t, client, "app", def.ApplicationName, " failed : ", "http client for url "+downloadURL+" should not be nil") {
 
+		expectedCode := 200
+		if IsBogus(def) {
+			expectedCode = 403
+		}
+
+		assert.Equal(t, expectedCode, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
+	}
 	wg.Done()
+}
+
+func IsBogus(def *data.AppDefinition) bool {
+	return def.ApplicationName == "resourcehacker" && os.Getenv("GITHUB_ACTIONS") == "true"
 }
