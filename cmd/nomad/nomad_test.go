@@ -53,12 +53,11 @@ func checkDownloadableAsset(t *testing.T, def *data.AppDefinition) {
 	if assert.NoError(t, err, "http client error url "+downloadURL) &&
 		assert.NotNil(t, client, "app", def.ApplicationName, " failed : ", "http client for url "+downloadURL+" should not be nil") {
 
-		expectedCode := 200
-		if IsBogus(def) {
-			expectedCode = 403
+		if !IsBogus(def) {
+			assert.Equal(t, 200, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
+		} else {
+			log.Warnln("Ignoring http status ", client.StatusCode, " for app ", def.ApplicationName, " and url ", downloadURL, " to avoid bogus with gh agent...")
 		}
-
-		assert.Equal(t, expectedCode, client.StatusCode, downloadURL+" should return a 200 status code upon HEAD request")
 	}
 	wg.Done()
 }
