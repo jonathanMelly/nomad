@@ -1,0 +1,5 @@
+Version="2.11"
+VersionCheck={Url="https://www.nirsoft.net/utils/multi_monitor_tool.html",RegEx="MultiMonitorTool v{{VERSION}}"}
+DownloadUrl="https://www.nirsoft.net/utils/multimonitortool-x64.zip"
+Shortcut="MultiMonitorTool.exe"
+RestoreFiles=["MultiMonitorTool.cfg"]
