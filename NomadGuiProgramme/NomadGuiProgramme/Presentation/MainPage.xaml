@@ -8,94 +8,98 @@
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
 
-  <Page.DataContext>
-    <local:MainViewModel x:Name="ViewModels"/>
-  </Page.DataContext>
-
-  <Page.Resources>
-    <local:FilterOptionToStringConverter x:Key="FilterOptionToStringConverter"/>
-  </Page.Resources>
-
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*" />
-      <ColumnDefinition Width="0" />
-      <!-- Ajusté pour utiliser une seule colonne -->
+      <ColumnDefinition Width="70*" />
+      <ColumnDefinition Width="30*" />
     </Grid.ColumnDefinitions>
 
-    <Grid VerticalAlignment="Stretch">
+    <Grid Grid.Column="0" VerticalAlignment="Stretch">
       <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="*" />
+        <RowDefinition Height="15*" />
+        <RowDefinition Height="85*" />
       </Grid.RowDefinitions>
 
-      <!-- Zone de recherche et filtres -->
-      <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="10">
-        <TextBox PlaceholderText="Rechercher"
-                         Width="200"
-                         Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         VerticalAlignment="Center" />
+      <Rectangle Grid.Row="0" Fill="White" VerticalAlignment="Stretch" />
 
-        <ComboBox ItemsSource="{Binding FilterOptions}"
-                          SelectedItem="{Binding SelectedFilter, Mode=TwoWay}"
-                          Width="200"
-                          Margin="10,0,0,0"
-                          VerticalAlignment="Center">
-          <ComboBox.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding Converter={StaticResource FilterOptionToStringConverter}}"/>
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-      </StackPanel>
+      <Grid Grid.Row="0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="60*" />
+          <ColumnDefinition Width="20*" />
+          <ColumnDefinition Width="20*" />
+        </Grid.ColumnDefinitions>
 
-      <!-- Liste des applications -->
-      <ScrollViewer Grid.Row="1">
-        <ItemsControl ItemsSource="{Binding FilteredApplications}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="local:ApplicationItem">
-              <Grid Margin="5">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="2*" />
-                  <ColumnDefinition Width="1*" />
-                  <ColumnDefinition Width="1*" />
-                  <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+        <Rectangle Grid.Column="0" Fill="White" VerticalAlignment="Stretch" />
+        <Rectangle Grid.Column="1" Fill="PaleVioletRed" VerticalAlignment="Stretch" />
+        <Rectangle Grid.Column="2" Fill="White" VerticalAlignment="Stretch" />
 
-                <!-- Nom de l'application -->
-                <TextBlock Text="{x:Bind Name}"
-                                           FontSize="18"
-                                           Margin="10"
-                                           Grid.Column="0"
-                                           VerticalAlignment="Center" />
+        <Grid Grid.ColumnSpan="3">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80*"/>
+            <ColumnDefinition Width="20*"/>
+          </Grid.ColumnDefinitions>
 
-                <!-- Version de l'application -->
-                <TextBlock Text="{x:Bind Version}"
-                                           FontSize="16"
-                                           Margin="10"
-                                           Grid.Column="1"
-                                           VerticalAlignment="Center" />
+          <TextBox Grid.Column="0"
+                             PlaceholderText="Chercher-moi"
+                             Width="400"
+                             Height="40"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                <!-- Statut de l'application -->
-                <TextBlock Text="{x:Bind Status}"
-                                           FontSize="14"
-                                           Margin="10"
-                                           Grid.Column="2"
-                                           VerticalAlignment="Center" />
+          <Image Source="../image/OIP.jpg" x:Name="myImage" Grid.Column="1" VerticalAlignment="Center"/>
+        </Grid>
+      </Grid>
 
-                <!-- Bouton d'action -->
-                <Button Content="{x:Bind ButtonContent}"
-                                        Grid.Column="3"
-                                        Margin="10"
-                                        VerticalAlignment="Center"
-                                        Command="{x:Bind InstallCommand}"
-                                        CommandParameter="{x:Bind Name}"
-                                        IsEnabled="{x:Bind IsButtonEnabled}" />
-              </Grid>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-      </ScrollViewer>
+      <Rectangle Grid.Row="1" Fill="White" VerticalAlignment="Stretch" />
+
+      <Border Grid.Row="0" Height="8" Background="Black" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+
+      <Grid x:Name="MainGrid" Grid.Row="1">
+        <ScrollViewer>
+          <ItemsControl ItemsSource="{x:Bind ViewModel.FilteredApplications}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="local:ApplicationItem">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Text="{x:Bind Name}"
+                                               FontSize="18"
+                                               Margin="10"
+                                               Grid.Column="0"
+                                               VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding Version}" Width="130" Margin="0,0,0,0" Grid.Column="0" VerticalAlignment="Center"/>
+                  <TextBlock Text="{x:Bind Status}"
+                                               FontSize="14"
+                                               Margin="10"
+                                               Grid.Column="1"
+                                               VerticalAlignment="Center" />
+
+                  <Button Content="{x:Bind ButtonContent}"
+                                            Grid.Column="2"
+                                            Margin="10"
+                                            VerticalAlignment="Center"
+                                            Command="{x:Bind InstallCommand}"
+                                            IsEnabled="{x:Bind IsButtonEnabled}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Grid>
     </Grid>
+
+
+
+    <TextBlock Text="{x:Bind ViewModel.Name}"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center" />
+
+    <Rectangle Grid.Column="1" Fill="Gray" VerticalAlignment="Stretch" />
+
   </Grid>
 </Page>
